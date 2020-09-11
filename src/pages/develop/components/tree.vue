@@ -1,6 +1,13 @@
 <template>
-  <div class="container">
-    <a-tree show-icon :tree-data="jobs">
+  <div class="container" v-if="treeData.length > 0">
+    <a-tree
+      show-icon
+      :tree-data="treeData"
+      :selectedKeys.sync="treeCache.selectedKeys"
+      :expandedKeys.sync="treeCache.expandedKeys"
+      @expand="keys => $emit('expand',keys)"
+      @select="selectNode"
+    >
       <template slot-scope="{expanded,type,selected}" slot="dic">
         <a-icon
           :class="['tree-icon',type, selected ? 'selected':'']"
@@ -19,9 +26,30 @@
 </template>
 
 <script>
-import commonMixin from "@/mixins/common";
 export default {
-  mixins: [commonMixin],
+  props: {
+    treeData: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    treeCache: {
+      type: Object,
+      default: () => {
+        return { expandedKeys: [], selectedKeys: [] };
+      },
+    },
+  },
+  methods: {
+    selectNode(_, { node }) {
+      this.$emit("select", {
+        key: node.dataRef.key,
+        selected: node.selected,
+        dic: node.dataRef.origin.directory !== null,
+        id: node.dataRef.id,
+      });
+    },
+  },
 };
 </script>
 

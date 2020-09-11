@@ -28,11 +28,6 @@ export default {
           label: '任务配置',
           icon: 'config'
         },
-        //  {
-        //   name: 'ddd',
-        //   label: '配置项',
-        //   icon: 'config'
-        // },
         {
           name: 'C',
           label: '告警配置',
@@ -50,59 +45,184 @@ export default {
         }]
       }
     },
+    treeCaches: {
+      debug: { expandedKeys: [], selectedKeys: [], selectedTabs: [] },
+      allJob: { expandedKeys: [], selectedKeys: [], selectedTabs: [] },
+      myJob: { expandedKeys: [], selectedKeys: [], selectedTabs: [] }
+    },
     layoutConfig: {
       tab: {
-        left: {
-          name: null,
-          width: null
-        },
-        right: {
-          name: null,
-          width: null
-        },
-        bottom: {
-          name: null
-        }
-      }
+        configs: { left: [], right: [], bottom: [] },
+        actives: { left: null, right: null, bottom: null },
+      },
+      jobTab: '',
+      onlyCenter: false
     },
-    jobs: {
+    jobTrees: {
+      debug: [],
       allJob: [],
       myJob: []
-    }
+    },
+    jobList: []
   },
   getters: {
     tabs: state => state.configs.tabs,
     tab: state => state.layoutConfig.tab,
-    jobs: (state, getters) => getters.tab.left.name ? state.jobs[getters.tab.left.name] : []
+    tabConfgs: (state, getters) => getters.tab.configs,
+    tabActives: (state, getters) => getters.tab.actives,
+    tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tabActives[type]),
+
+    treeCache: (state) => state.treeCaches[state.layoutConfig.jobTab],
+    flatJobsTree: (state) => {
+      const jobsTree = state.jobTrees[state.layoutConfig.jobTab]
+      const res = []
+      if (jobsTree) {
+        flatNodes(jobsTree, res)
+      }
+      return res
+    },
+    // 用于展示tab
+    selectedJobNodes: (state, getters) => getters.treeCache?.selectedTabs.map(i => getters.flatJobsTree.find(j => j.key === i)),
+    selectedJobNode: (state, getters) => getters.selectedJobNodes.find(i => i?.key === getters.selectedJobnodeKey),
+    selectedJobnodeKey: (state, getters) => getters.treeCache.selectedKeys[0]
   },
   mutations: {
-    setTab(state, { name, type }) {
-      const tab = state.layoutConfig.tab
-      const key = `${type}`
-      const origin = tab[key]
-      const isClose = origin.name === name
-      origin.width = isClose ? null : (origin.width || { right: 28, left: 20 }[type])
-      origin.name = isClose ? null : name
-      console.log(origin)
-      saveLocalInfo(state.layoutConfig)
+    toggleOnlyCenter(state) {
+      state.layoutConfig.onlyCenter = !state.layoutConfig.onlyCenter
+      setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
     },
-    setTabResize(state, { width, type }) {
-      const origin = state.layoutConfig.tab[`${type}`]
-      origin.width = width
-      saveLocalInfo(state.layoutConfig)
-    }
   },
   actions: {
-    initLocalInfo({ state }) {
-      state.layoutConfig = getLocalInfo()
+    initLocalInfo({ state, getters, dispatch }) {
+      initLocal(STORAGE_KEY_LAYOUT_INFO, info => {
+        state.layoutConfig = info
+      })
+      initLocal(STORAGE_KEY_TREE_INFO, info => {
+        state.treeCaches = info
+      })
+      const selectedKeys = getters.treeCache?.selectedKeys
+      if (selectedKeys != null && selectedKeys[0]) {
+        const id = selectedKeys[0].split('_')[1]
+        if (id) {
+          dispatch('getJob', { id })
+        }
+      }
     },
     initJobs({ state }) {
       axios.post("/scheduleCenter/init.do", {}).then((data) => {
-        state.jobs.allJob = [getTreeData(data.allJob)]
-        state.jobs.myJob = [getTreeData(data.myJob)]
-        console.log(state.jobs)
+        const allJob = [getTreeData(data.allJob)]
+        const myJob = [getTreeData(data.myJob)]
+        state.jobTrees.allJob = allJob
+        state.jobTrees.myJob = myJob
+
+        const jobTrees = state.jobTrees
+        const treeCaches = state.treeCaches
+        setTreeCache(treeCaches, jobTrees, 'allJob')
+        setTreeCache(treeCaches, jobTrees, 'myJob')
       });
+    },
+    setTab({ state, getters, commit, dispatch }, { name, type }) {
+      if (type == 'left') {
+        state.layoutConfig.jobTab = name
+        dispatch('getJob', { id: getters.selectedJobNode?.id, check: true })
+      }
+
+      const tab = state.layoutConfig.tab
+      const tabConfigs = tab.configs[type]
+      let config = tabConfigs.find(i => i.name === name)
+      if (!config) {
+        config = { name, width: { right: 28, left: 20, bottom: 20 }[type] }
+        tabConfigs.push(config)
+      }
+      const onlyCenter = state.layoutConfig.onlyCenter
+
+      const activeTabName = tab.actives[type]
+      const isClose = !onlyCenter && activeTabName != null && activeTabName === name
+      tab.actives[type] = isClose ? null : name
+      if (onlyCenter) {
+        commit('toggleOnlyCenter')
+      }
+
+      setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
+    },
+    setTabResize({ getters }, { width, type }) {
+      getters.tabActive(type).width = width
+    },
+    expanedTreeNode({ getters, dispatch }, keys) {
+      getters.treeCache.expandedKeys = keys
+      dispatch('saveTreeCache')
+
+    },
+    selectTreeNode({ getters, dispatch }, { key, selected, dic, id }) {
+      const treeCache = getters.treeCache
+      treeCache.selectedKeys = [key]
+      if (selected) {
+        return
+      }
+      if (!treeCache.selectedTabs.includes(key)) {
+        treeCache.selectedTabs.push(key)
+      }
+      dispatch('saveTreeCache')
+      if (!dic) {
+        dispatch('getJob', { id })
+      }
+    },
+    changeSelectedTab({ getters, dispatch }, { key, id }) {
+      if (key && getters.treeCache.selectedTabs.includes(key)) {
+        getters.treeCache.selectedKeys = [key]
+        dispatch('getJob', { id, check: true })
+        dispatch('saveTreeCache')
+      }
+    },
+    closeSelectedTab({ getters, dispatch }, key) {
+      const tabs = getters.treeCache.selectedTabs
+      let index = tabs.findIndex(i => i === key)
+      if (index !== -1) {
+        tabs.splice(index, 1)
+        if (getters.selectedJobnodeKey === key) {
+          index = index < tabs.length ? index : index - 1;
+          const lastKey = tabs[index];
+          dispatch('changeSelectedTab', { key: lastKey })
+        } else {
+          dispatch('saveTreeCache')
+        }
+      }
+    },
+    saveTreeCache({ state }) {
+      setLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
+    },
+    getJob({ state }, { id, check }) {
+      if (!id) {
+        return
+      }
+      if (check) {
+        if (state.jobList.findIndex(i => i.id === id) !== -1) {
+          return
+        }
+      }
+      axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
+        const job = state.jobList.find(i => i.id === id)
+        if (job !== null) {
+          state.jobList.push(data)
+        } else {
+          Object.assign(job, data)
+        }
+      })
     }
+  }
+}
+
+// 扁平化树节点
+function flatNodes(nodes, arr) {
+  nodes.forEach(node => {
+    arr.push(node)
+    flatNodes(node.children, arr)
+  })
+}
+function setTreeCache(caches, jobTrees, type) {
+  const treeCache = caches[type]
+  if (treeCache.expandedKeys.length === 0) {
+    treeCache.expandedKeys = [jobTrees[type][0].key]
   }
 }
 
@@ -114,20 +234,20 @@ function setUpJobs(jobs) {
   jobs.forEach(job => {
     job.children = jobs.filter(i => i.parent === job.id)
   })
-  return jobs.map(job => setUpJob(job))
+  return jobs.map(job => setUpJobNode(job))
 }
 
-function setUpJob(job) {
+function setUpJobNode(job) {
   const isDic = job.directory !== null
   const type = !isDic ? 'job' : (job.directory === 0 ? 'big_dic' : 'small_dic')
   return {
-    id: job.id,
+    id: job.jobId,
     isLeaf: !job.isParent || job.children.length === 0,
     key: 'node_' + job.id,
     title: job.jobName,
     origin: job,
     type,
-    children: job.children.map(i => setUpJob(i)),
+    children: job.children.map(i => setUpJobNode(i)),
     scopedSlots: {
       icon: isDic ? 'dic' : 'job',
       title: 'title'
@@ -135,24 +255,16 @@ function setUpJob(job) {
   }
 }
 
-const STORAGE_KEY_LAYOUT_INFO = "layoutConfig"
+const STORAGE_KEY_LAYOUT_INFO = "layout"
+const STORAGE_KEY_TREE_INFO = "tree"
 const STORAGE_KEY_PREFIX = "hera_"
-
-function saveLocalInfo(info) {
-  setLocal(STORAGE_KEY_LAYOUT_INFO, info)
-}
-function getLocalInfo() {
-  const info = getLocal(STORAGE_KEY_LAYOUT_INFO)
-  return info || { tab: { left: {}, right: {}, bottom: {} } }
-}
 
 function setLocal(key, value) {
   localStorage.setItem(STORAGE_KEY_PREFIX + key, JSON.stringify(value))
 }
-function getLocal(key) {
+function initLocal(key, callback) {
   const v = localStorage.getItem(STORAGE_KEY_PREFIX + key)
   if (v != null) {
-    return JSON.parse(v)
+    callback(JSON.parse(v))
   }
-  return null;
 }

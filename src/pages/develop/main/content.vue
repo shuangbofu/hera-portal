@@ -4,22 +4,33 @@
       <slot name="left-side" />
     </div>
     <div class="center">
-      <split-pane :show="[tab.left.width,true]" @resize="v => changeTabSize(v, 'left')">
+      <split-pane
+        :show="[true, bottomTab.width]"
+        @resize="v => changeTabSize(100 - v, 'bottom')"
+        mode="horizontal"
+      >
         <template slot="left">
-          <slot name="left" />
-        </template>
-        <template slot="right">
-          <split-pane
-            :show="[true, tab.right.width]"
-            @resize="v => changeTabSize(100 - v, 'right')"
-          >
+          <split-pane :show="[leftTab.width,true]" @resize="v => changeTabSize(v, 'left')">
             <template slot="left">
-              <slot name="center" />
+              <slot name="left" />
             </template>
             <template slot="right">
-              <slot name="right" />
+              <split-pane
+                :show="[true, rightTab.width]"
+                @resize="v => changeTabSize(100 - v, 'right')"
+              >
+                <template slot="left">
+                  <slot name="center" />
+                </template>
+                <template slot="right">
+                  <slot name="right" />
+                </template>
+              </split-pane>
             </template>
           </split-pane>
+        </template>
+        <template slot="right">
+          <slot name="bottom" />
         </template>
       </split-pane>
     </div>

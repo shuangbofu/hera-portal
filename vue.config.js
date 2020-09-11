@@ -2,6 +2,7 @@ let path = require('path')
 const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const { getThemeColors, modifyVars } = require('./src/utils/themeUtil')
 const { resolveCss } = require('./src/utils/theme-color-replacer-extend')
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 module.exports = {
   devServer: {
     port: 3098,
@@ -38,6 +39,14 @@ module.exports = {
         resolveCss
       })
     )
+  },
+  chainWebpack: config => {
+    config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
+      {
+        // Languages are loaded on demand at runtime
+        languages: ['json', 'javascript', 'html', 'xml']
+      }
+    ])
   },
   chainWebpack: config => {
     // 生产环境下关闭css压缩的 colormin 项，因为此项优化与主题色替换功能冲突

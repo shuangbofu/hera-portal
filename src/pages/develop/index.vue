@@ -8,19 +8,30 @@
       <a-layout-content class="content">
         <main-content>
           <template v-slot:left-side>
-            <left-side />
+            <tabs
+              :tabs="tabs.left"
+              :active="leftTab.name"
+              @change="v => changeTab(v.name, 'left')"
+            />
           </template>
           <template v-slot:right-side>
-            <right-side />
+            <tabs
+              :tabs="tabs.right"
+              :active="rightTab.name"
+              @change="v => changeTab(v.name, 'right')"
+            />
           </template>
           <template v-slot:left>
             <content-left class="content-in" />
           </template>
           <template v-slot:center>
-            <content-main class="content-in" />
+            <content-center class="content-in" />
           </template>
           <template v-slot:right>
             <right-attached class="content-in" />
+          </template>
+          <template v-slot:bottom>
+            <footer-attached class="contnet-in" />
           </template>
         </main-content>
       </a-layout-content>
@@ -32,14 +43,14 @@
 </template>
 
 <script>
+import Tabs from "./components/tabs";
 import MainHeader from "./main/header";
 import MainFooter from "./main/footer";
 import MainContent from "./main/content";
-import LeftSide from "./side/left";
-import RightSide from "./side/right";
 import ContentLeft from "./content/left";
-import ContentMain from "./content/main";
+import ContentCenter from "./content/center";
 import RightAttached from "./content/right";
+import FooterAttached from "./content/footer";
 import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],
@@ -47,11 +58,11 @@ export default {
     MainHeader,
     MainFooter,
     MainContent,
-    LeftSide,
-    RightSide,
     ContentLeft,
-    ContentMain,
+    ContentCenter,
     RightAttached,
+    FooterAttached,
+    Tabs,
   },
   created() {
     this.initLocalInfo();
@@ -87,7 +98,7 @@ export default {
   .content {
     height: calc(100vh - 130px);
     .content-in {
-      height: calc(100vh - 130px);
+      height: 100%;
     }
     overflow: hidden;
   }

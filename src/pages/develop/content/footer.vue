@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="header">{{tabs.right.find(i=>i.name === rightTab.name).label}}</div>
-    <div></div>
+    <div class="header">{{tabs.bottom.find(i=>i.name === bottomTab.name).label}}</div>
+    {{bottomTab}},{{treeCaches}}
   </div>
 </template>
 
