@@ -1,0 +1,34 @@
+.container {
+  flex-direction: column;
+  background: @editor-bg-color;
+
+  .tab {
+    color: @title-color;
+    display: block;
+    width: 100%;
+    padding: 15px 0;
+    cursor: default;
+
+    .label {
+      width: 20px;
+      margin: 0 auto;
+      text-align: center;
+      line-height: 15px;
+      font-size: 12px;
+
+      .icon {
+        font-size: 13px;
+        margin-top: 4px;
+      }
+    }
+
+    &.active {
+      background: @active-bg-color  !important;
+      font-weight: 500;
+    }
+
+    &:hover {
+      background-color: @hover-bg-color;
+    }
+  }
+}
