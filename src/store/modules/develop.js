@@ -229,8 +229,6 @@ export default {
       return axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
         // 处理一下后端null。。
         data.script = data.script == null ? '' : data.script
-
-
         const job = state.jobList.find(i => i.id === id)
         if (job !== null) {
           state.jobList.push(data)

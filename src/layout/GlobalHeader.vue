@@ -95,6 +95,9 @@ export default {
     & > a::before {
       bottom: 0 !important;
     }
+    &.ant-menu-item-selected a {
+      font-weight: bold;
+    }
   }
   &.ant-menu-dark .ant-menu-item-selected,
   .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
@@ -102,7 +105,6 @@ export default {
     a,
     a:hover {
       color: #ffffff !important;
-      font-weight: bold;
     }
   }
 }
