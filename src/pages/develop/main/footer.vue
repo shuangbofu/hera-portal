@@ -22,6 +22,7 @@ export default {
 <style lang="less" scoped>
 .container {
   .tabs {
+    padding-left: 24px;
     height: 25px;
   }
 }

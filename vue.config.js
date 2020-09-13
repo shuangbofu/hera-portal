@@ -41,14 +41,6 @@ module.exports = {
     )
   },
   chainWebpack: config => {
-    config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
-      {
-        // Languages are loaded on demand at runtime
-        languages: ['json', 'javascript', 'html', 'xml']
-      }
-    ])
-  },
-  chainWebpack: config => {
     // 生产环境下关闭css压缩的 colormin 项，因为此项优化与主题色替换功能冲突
     if (process.env.NODE_ENV === 'production') {
       config.plugin('optimize-css')
@@ -57,6 +49,9 @@ module.exports = {
           return args
         })
     }
+    config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
+      { languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python'] }
+    ])
   },
   css: {
     loaderOptions: {

@@ -1,26 +1,22 @@
 <template>
   <div class="container">
-    <div class="header">{{tabs.bottom.find(i=>i.name === bottomTab.name).label}}</div>
-    {{bottomTab}},{{treeCaches}}
+    <attached-header type="bottom">{{bottomTab}},{{treeCaches}}</attached-header>
   </div>
 </template>
 
 <script>
 import commonMixin from "@/mixins/common";
+import AttachedHeader from './attachedHeader'
 export default {
   mixins: [commonMixin],
+    components: {
+    AttachedHeader
+  }
 };
 </script>
 
 <style lang="less" scoped>
 .container {
   background: @base-bg-color;
-  .header {
-    height: 30px;
-    line-height: 30px;
-    padding-left: 10px;
-    background: @editor-bg-color;
-    border-bottom: 1px solid @editor-border-color;
-  }
 }
 </style>

@@ -72,6 +72,7 @@ export default {
     }
   }
   .center {
+    position: relative;
     width: calc(100% - 40px);
   }
 }

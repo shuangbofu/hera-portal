@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="job">
     <div class="tabs" ref="tabs">
       <template v-for="(node, index) in selectedJobNodes">
         <div
@@ -12,29 +12,25 @@
           @click="changeSelectedTab(node)"
           @dblclick="doubleClick"
         >
-          {{node.title}}--{{node.key}}
+          {{node.title}}
           <a-icon
             theme="filled"
             class="close-icon"
             type="close-circle"
-            @click="closeSelectedTab(node.key)"
+            v-on:click.stop="closeSelectedTab(node.key)"
           />
         </div>
       </template>
     </div>
-    <job-editor
-      :style="{
-        height: `calc(100% - ${tabsHeight}px)`
-      }"
-      :theme="theme.mode === 'light' ? 'vs' : 'vs-dark'"
-      :job="job"
-      v-if="job"
-    />
+    <div :style="{
+        height: `calc(100% - ${tabsHeight}px)`,
+    }">
+      <slot />
+    </div>
   </div>
 </template>
 
 <script>
-import JobEditor from "../job/index";
 import commonMixin from "@/mixins/common";
 export default {
   data() {
@@ -43,31 +39,48 @@ export default {
     };
   },
   watch: {
-    "tabs.length": {
+    "selectedJobNodes.length": {
       handler(old, newVal) {
-        console.log(old, newVal);
+        if(newVal !== old) {
+          this.updateTabsHeight()
+        }
       },
     },
+    'leftTab.width': {
+      handler() {
+        this.updateTabsHeight()
+      }
+    },
+    'rightTab.width': {
+      handler() {
+        this.updateTabsHeight()
+      }
+    }
   },
   mixins: [commonMixin],
-  components: {
-    JobEditor,
-  },
   created() {
-    this.$nextTick(() => {
-      console.log(this.$refs.tabs.offsetHeight);
-    });
+    setTimeout(() => {
+      this.updateTabsHeight()
+    }, 500);
   },
   mounted() {
     window.addEventListener("resize", () => {
-      this.tabsHeight = this.$refs.tabs.offsetHeight;
+      this.updateTabsHeight()
     });
   },
-  computed: {},
-
+  computed: {
+  },
   methods: {
+    updateTabsHeight() {
+      this.$nextTick(() => {
+        const height =  this.$refs.tabs?.offsetHeight;
+        if(height) {
+          this.tabsHeight = height 
+          console.log(height)
+        }
+      })
+    },
     doubleClick() {
-      console.log("click");
       this.toggleOnlyCenter();
     },
   },
@@ -80,13 +93,12 @@ export default {
   width: 100%;
   word-break: break-all;
   background: @base-bg-color;
-  overflow: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+
   .tabs {
     width: calc(100% + 1px);
     margin-right: -1px;
     display: flex;
-    // width: 100%;
     flex-wrap: wrap;
     margin-right: 1px;
     .tab {
@@ -111,7 +123,7 @@ export default {
       }
       .close-icon {
         color: @text-color-second;
-        font-size: 12px;
+        font-size: 11px;
         &:hover {
           color: @text-color;
         }

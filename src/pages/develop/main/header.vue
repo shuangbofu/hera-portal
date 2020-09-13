@@ -26,9 +26,6 @@ export default {
       margin-right: 4px;
       font-weight: bold;
       padding: 4px;
-      &:hover {
-        background: @editor-button-hover-color;
-      }
     }
   }
 }

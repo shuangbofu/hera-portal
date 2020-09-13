@@ -24,6 +24,11 @@ export default {
           icon: 'info'
         },
         {
+          name: 'dependency',
+          label: "任务依赖",
+          icon: 'dependency'
+        },
+        {
           name: 'A',
           label: '任务配置',
           icon: 'config'
@@ -43,7 +48,14 @@ export default {
           label: '操作记录',
           icon: 'operation'
         }]
-      }
+      },
+      editorBottomTabs: [{
+        name: 'text',
+        label: '文本',
+      }, {
+        name: 'config',
+        label: '配置项'
+      }]
     },
     treeCaches: {
       debug: { expandedKeys: [], selectedKeys: [], selectedTabs: [] },
@@ -56,7 +68,8 @@ export default {
         actives: { left: null, right: null, bottom: null },
       },
       jobTab: '',
-      onlyCenter: false
+      onlyCenter: false,
+      editorBottom: 'text'
     },
     jobTrees: {
       debug: [],
@@ -69,8 +82,7 @@ export default {
     tabs: state => state.configs.tabs,
     tab: state => state.layoutConfig.tab,
     tabConfgs: (state, getters) => getters.tab.configs,
-    tabActives: (state, getters) => getters.tab.actives,
-    tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tabActives[type]),
+    tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
 
     treeCache: (state) => state.treeCaches[state.layoutConfig.jobTab],
     flatJobsTree: (state) => {
@@ -84,13 +96,18 @@ export default {
     // 用于展示tab
     selectedJobNodes: (state, getters) => getters.treeCache?.selectedTabs.map(i => getters.flatJobsTree.find(j => j.key === i)),
     selectedJobNode: (state, getters) => getters.selectedJobNodes.find(i => i?.key === getters.selectedJobnodeKey),
-    selectedJobnodeKey: (state, getters) => getters.treeCache.selectedKeys[0]
+    selectedJobnodeKey: (state, getters) => getters.treeCache.selectedKeys[0],
+
+    editorBottomTabs: state => state.configs.editorBottomTabs
   },
   mutations: {
     toggleOnlyCenter(state) {
       state.layoutConfig.onlyCenter = !state.layoutConfig.onlyCenter
       setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
     },
+    setEditorBottom(state, name) {
+      state.layoutConfig.editorBottom = name
+    }
   },
   actions: {
     initLocalInfo({ state, getters, dispatch }) {
@@ -154,6 +171,11 @@ export default {
 
     },
     selectTreeNode({ getters, dispatch }, { key, selected, dic, id }) {
+      console.log('selectNode', key)
+      if (dic) {
+        console.log(getters.treeCache.selectedKeys)
+        return
+      }
       const treeCache = getters.treeCache
       treeCache.selectedKeys = [key]
       if (selected) {
@@ -163,15 +185,15 @@ export default {
         treeCache.selectedTabs.push(key)
       }
       dispatch('saveTreeCache')
-      if (!dic) {
-        dispatch('getJob', { id })
-      }
+      dispatch('getJob', { id })
     },
     changeSelectedTab({ getters, dispatch }, { key, id }) {
+      console.log('changeTab', key)
       if (key && getters.treeCache.selectedTabs.includes(key)) {
-        getters.treeCache.selectedKeys = [key]
-        dispatch('getJob', { id, check: true })
-        dispatch('saveTreeCache')
+        return dispatch('getJob', { id, check: true }).then(() => {
+          getters.treeCache.selectedKeys = [key]
+          dispatch('saveTreeCache')
+        })
       }
     },
     closeSelectedTab({ getters, dispatch }, key) {
@@ -179,28 +201,36 @@ export default {
       let index = tabs.findIndex(i => i === key)
       if (index !== -1) {
         tabs.splice(index, 1)
+        console.log(getters.selectedJobnodeKey === key)
         if (getters.selectedJobnodeKey === key) {
           index = index < tabs.length ? index : index - 1;
           const lastKey = tabs[index];
-          dispatch('changeSelectedTab', { key: lastKey })
+          const lastNode = getters.selectedJobNodes.find(i => i.key === lastKey)
+          dispatch('changeSelectedTab', { key: lastKey, id: lastNode.id })
         } else {
           dispatch('saveTreeCache')
         }
+        console.log(getters.selectedJobnodeKey)
       }
     },
     saveTreeCache({ state }) {
+      console.log(state.treeCaches)
       setLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
     },
     getJob({ state }, { id, check }) {
       if (!id) {
-        return
+        return new Promise((resolve) => { resolve() })
       }
       if (check) {
         if (state.jobList.findIndex(i => i.id === id) !== -1) {
-          return
+          return new Promise((resolve) => { resolve() })
         }
       }
-      axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
+      return axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
+        // 处理一下后端null。。
+        data.script = data.script == null ? '' : data.script
+
+
         const job = state.jobList.find(i => i.id === id)
         if (job !== null) {
           state.jobList.push(data)

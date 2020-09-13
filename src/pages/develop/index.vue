@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="develop-container">
     <a-layout>
       <a-layout-header class="header">
         <main-header />
@@ -25,7 +25,9 @@
             <content-left class="content-in" />
           </template>
           <template v-slot:center>
-            <content-center class="content-in" />
+            <content-center class="content-in">
+              <job-editor />
+            </content-center>
           </template>
           <template v-slot:right>
             <right-attached class="content-in" />
@@ -43,6 +45,7 @@
 </template>
 
 <script>
+import commonMixin from "@/mixins/common";
 import Tabs from "./components/tabs";
 import MainHeader from "./main/header";
 import MainFooter from "./main/footer";
@@ -51,7 +54,8 @@ import ContentLeft from "./content/left";
 import ContentCenter from "./content/center";
 import RightAttached from "./content/right";
 import FooterAttached from "./content/footer";
-import commonMixin from "@/mixins/common";
+import JobEditor from './editor/index'
+
 export default {
   mixins: [commonMixin],
   components: {
@@ -63,6 +67,7 @@ export default {
     RightAttached,
     FooterAttached,
     Tabs,
+    JobEditor
   },
   created() {
     this.initLocalInfo();
@@ -74,7 +79,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.container {
+.develop-container {
   .header,
   .content,
   .footer {
@@ -88,12 +93,16 @@ export default {
   }
   // header和footer固定高度
   .header {
+    position: relative;
     border-bottom: 1px solid @editor-border-color;
     height: 45px;
+    overflow: hidden;
   }
   .footer {
+    position: relative;
     height: 45px;
     border-top: 1px solid @editor-border-color;
+    overflow: hidden;
   }
   .content {
     height: calc(100vh - 130px);
@@ -101,6 +110,18 @@ export default {
       height: 100%;
     }
     overflow: hidden;
+  }
+}
+</style>
+
+
+<style lang="less">
+.operation-bar {
+  .icon {
+    padding: 4px;
+    &:hover {
+      background: @editor-button-hover-color;
+    }
   }
 }
 </style>

@@ -6,35 +6,39 @@ export default {
       'jobTrees',
       'treeCaches',
       'layoutConfig',
-      'jobList'
+      'jobList',
     ]),
     ...mapGetters("develop", [
       'tabs', 'tabActive',
-      'selectedJobNodes', 'selectedJobNode', 'selectedJobnodeKey'
+      'selectedJobNodes', 'selectedJobNode', 'selectedJobnodeKey',
+      'editorBottomTabs'
     ]),
     onlyCenter() {
       return this.layoutConfig.onlyCenter
     },
-    tab() {
+    tab_() {
       return function (type) {
         return !this.onlyCenter && this.tabActive(type) || {}
       }
     },
     leftTab() {
-      return this.tab('left')
+      return this.tab_('left')
     },
     rightTab() {
-      return this.tab('right')
+      return this.tab_('right')
     },
     bottomTab() {
-      return this.tab('bottom')
+      return this.tab_('bottom')
     },
     job() {
       return this.jobList.find(i => i.id === this.selectedJobNode?.id)
     }
   },
   methods: {
-    ...mapMutations("develop", ['toggleOnlyCenter']),
+    ...mapMutations("develop", [
+      'toggleOnlyCenter',
+      'setEditorBottom'
+    ]),
     ...mapActions('develop', [
       'initLocalInfo', 'initJobs',
       'setTabResize', 'setTab',

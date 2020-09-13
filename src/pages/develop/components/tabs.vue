@@ -53,7 +53,7 @@ export default {
     .tab {
       width: inherit;
       height: 100%;
-      padding: 0 15px;
+      padding: 0 12px;
       .label {
         width: 100%;
         height: 25px;
@@ -61,7 +61,7 @@ export default {
         line-height: 25px;
         .icon {
           font-size: 13px;
-          margin-right: 4px;
+          margin-right: 5px;
         }
       }
     }
@@ -70,7 +70,7 @@ export default {
     color: @title-color;
     display: block;
     width: 100%;
-    padding: 15px 0;
+    padding: 12px 0;
     cursor: default;
 
     .label {
@@ -82,7 +82,7 @@ export default {
 
       .icon {
         font-size: 13px;
-        margin-bottom: 4px;
+        margin-bottom: 5px;
       }
     }
 
