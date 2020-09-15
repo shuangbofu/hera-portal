@@ -16,7 +16,19 @@ const map = {
   'editor-tree-active-color': ['#2F76C2', '#3467CE'],
   'editor-tree-hover-color': ['#D5D5D5', '#10293F'],
   'editor-tree-title-color': ['#0F0F0F', '#BBBBBB'],
-  'editor-button-hover-color': ['#DFDFDF', '#4C5052']
+  'editor-button-hover-color': ['#DFDFDF', '#4C5052'],
+  'editor-icon-color': ['#BDC3C6', '#5A6266'],
+  'editor-icon2-color': ['#6E6E6E', '#AFB1B3'],
+
+  'editor-origin-color': ['#f2935e', '#B85A21'],
+  'editor-yellow-color': ['#f5c66f', '#C0933A'],
+  'editor-green-color': ['#a5d28a', '#5C913C'],
+  'editor-green2-color': ['#519B50', '#60A766'],
+
+  'editor-red-color': ['#E58886', '#AB4F4D'],
+  'editor-yellow2-color': ['#F5C66F', '#BB8E33'],
+  'editor-gray-color': ['#C0C0C0', '#595959'],
+  'editor-blue-color': ['#3F93C7', '#44A0D9']
 }
 
 function getRes() {

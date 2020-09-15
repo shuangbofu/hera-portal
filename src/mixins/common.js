@@ -10,7 +10,7 @@ export default {
     ]),
     ...mapGetters("develop", [
       'tabs', 'tabActive',
-      'selectedJobNodes', 'selectedJobNode', 'selectedJobnodeKey',
+      'selectedJobNodes', 'selectedJobNode', 'selectedJobNodeKey',
       'editorBottomTabs'
     ]),
     onlyCenter() {

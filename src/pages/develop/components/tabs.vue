@@ -83,6 +83,7 @@ export default {
       .icon {
         font-size: 13px;
         margin-bottom: 5px;
+        color: @editor-icon2-color;
       }
     }
 

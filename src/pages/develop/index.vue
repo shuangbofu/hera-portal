@@ -54,7 +54,7 @@ import ContentLeft from "./content/left";
 import ContentCenter from "./content/center";
 import RightAttached from "./content/right";
 import FooterAttached from "./content/footer";
-import JobEditor from './editor/index'
+import JobEditor from "./editor/index";
 
 export default {
   mixins: [commonMixin],
@@ -67,11 +67,12 @@ export default {
     RightAttached,
     FooterAttached,
     Tabs,
-    JobEditor
+    JobEditor,
   },
   created() {
-    this.initLocalInfo();
-    this.initJobs();
+    this.initJobs().then(() => {
+      this.initLocalInfo();
+    });
   },
   computed: {},
   methods: {},
@@ -95,7 +96,7 @@ export default {
   .header {
     position: relative;
     border-bottom: 1px solid @editor-border-color;
-    height: 45px;
+    height: 50px;
     overflow: hidden;
   }
   .footer {
@@ -105,7 +106,7 @@ export default {
     overflow: hidden;
   }
   .content {
-    height: calc(100vh - 130px);
+    height: calc(100vh - 135px);
     .content-in {
       height: 100%;
     }
