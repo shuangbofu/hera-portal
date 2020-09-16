@@ -45,7 +45,7 @@ export default {
       this.$emit("select", {
         key: node.dataRef.key,
         selected: node.selected,
-        dic: node.dataRef.origin.directory !== null,
+        dic: node.dic,
         id: node.dataRef.id,
       });
     },

@@ -1,7 +1,11 @@
 <template>
   <a-layout>
-    <global-header @toggleCollpased="() => (collapsed = !collapsed)" :collapsed="collapsed" />
-    <a-layout-content class="main-content">
+    <global-header
+      @toggleCollpased="() => (collapsed = !collapsed)"
+      :collapsed="collapsed"
+      v-if="!fullscreen"
+    />
+    <a-layout-content :class="{'main-content':true,'fullscreen': fullscreen}">
       <slot />
     </a-layout-content>
   </a-layout>
@@ -20,7 +24,11 @@ export default {
     // GlobalSider,
     GlobalHeader,
   },
-  computed: {},
+  computed: {
+    fullscreen() {
+      return this.$store.state.setting.fullscreen;
+    },
+  },
 };
 </script>
 
@@ -57,5 +65,8 @@ export default {
   // padding: 15px;
   // overflow: hidden;
   overflow: auto;
+  &.fullscreen {
+    height: 100%;
+  }
 }
 </style>

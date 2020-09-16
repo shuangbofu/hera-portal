@@ -78,7 +78,7 @@ export default {
         const height = this.$refs.tabs?.offsetHeight;
         if (height) {
           this.tabsHeight = height;
-          console.log(height);
+          // console.log(height);
         }
       });
     },

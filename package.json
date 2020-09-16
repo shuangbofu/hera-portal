@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "monaco-editor": "^0.17.1",
     "monaco-editor-vue": "1.0.9",
+    "screenfull": "^5.0.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vue-splitpane": "^1.0.6",

@@ -23,12 +23,14 @@ const map = {
   'editor-origin-color': ['#f2935e', '#B85A21'],
   'editor-yellow-color': ['#f5c66f', '#C0933A'],
   'editor-green-color': ['#a5d28a', '#5C913C'],
-  'editor-green2-color': ['#519B50', '#60A766'],
+  'editor-green2-color': ['#60A766', '#519B50'],
 
   'editor-red-color': ['#E58886', '#AB4F4D'],
   'editor-yellow2-color': ['#F5C66F', '#BB8E33'],
   'editor-gray-color': ['#C0C0C0', '#595959'],
-  'editor-blue-color': ['#3F93C7', '#44A0D9']
+  'editor-blue-color': ['#3F93C7', '#44A0D9'],
+  // tooltip bg
+  'editor-bg2-color': ['#F7F7F7', '#4B4D4D']
 }
 
 function getRes() {

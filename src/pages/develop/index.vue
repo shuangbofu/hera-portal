@@ -3,9 +3,8 @@
     <a-layout>
       <a-layout-header class="header">
         <main-header />
-        <my-icon type="bpp-icon-edit-search" />
       </a-layout-header>
-      <a-layout-content class="content">
+      <a-layout-content :class="{'content':true,'fullscreen': fullscreen}">
         <main-content>
           <template v-slot:left-side>
             <tabs
@@ -94,19 +93,25 @@ export default {
   }
   // header和footer固定高度
   .header {
+    box-sizing: border-box;
     position: relative;
     border-bottom: 1px solid @editor-border-color;
-    height: 50px;
+    height: 55px;
     overflow: hidden;
   }
   .footer {
+    box-sizing: border-box;
     position: relative;
     height: 45px;
     border-top: 1px solid @editor-border-color;
     overflow: hidden;
   }
   .content {
-    height: calc(100vh - 135px);
+    box-sizing: border-box;
+    height: calc(100vh - 140px);
+    &.fullscreen {
+      height: calc(100vh - 100px);
+    }
     .content-in {
       height: 100%;
     }
@@ -120,6 +125,7 @@ export default {
 .operation-bar {
   .icon {
     padding: 4px;
+    border-radius: 2px;
     &:hover {
       background: @editor-button-hover-color;
     }

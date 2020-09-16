@@ -90,19 +90,30 @@ export default {
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
 
     treeCache: (state) => state.treeCaches[state.layoutConfig.leftTab],
-    flatJobsTrees: (state) => type => {
+
+    flatAllTreeNodes: (state) => type => {
       const jobsTree = state.jobTrees[type]
       const res = []
       if (jobsTree) {
         flatNodes(jobsTree, res)
       }
-      return res.filter(i => !i.dic)
+      return res
     },
+    flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
+    // {
+    // const jobsTree = state.jobTrees[type]
+    // const res = []
+    // if (jobsTree) {
+    //   flatNodes(jobsTree, res)
+    // }
+    // return res.filter(i => !i.dic)
+    // },
     flatJobsTree: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab),
     // 用于展示tab
     selectedJobNodes: (state, getters) => getters.treeCache?.selectedTabs.map(i => getters.flatJobsTree.find(j => j.key === i)),
     selectedJobNode: (state, getters) => getters.selectedJobNodes.find(i => i?.key === getters.selectedJobNodeKey),
     selectedJobNodeKey: state => state.layoutConfig.jobTabKeys[state.layoutConfig.leftTab],
+
 
     editorBottomTabs: state => state.configs.editorBottomTabs
   },

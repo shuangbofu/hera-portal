@@ -2,7 +2,8 @@ import config from '@/config'
 export default {
   namespaced: true,
   state: {
-    ...config
+    ...config,
+    fullscreen: false
   },
   getters: {
 
@@ -11,5 +12,8 @@ export default {
     setTheme(state, theme) {
       state.theme = theme
     },
+    toggleFullScreen(state) {
+      state.fullscreen = !state.fullscreen
+    }
   },
 }

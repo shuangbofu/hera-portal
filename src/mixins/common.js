@@ -1,7 +1,7 @@
 import { mapState, mapMutations, mapGetters, mapActions } from "vuex";
 export default {
   computed: {
-    ...mapState("setting", ["theme"]),
+    ...mapState("setting", ["theme", 'fullscreen']),
     ...mapState("develop", [
       'jobTrees',
       'treeCaches',
