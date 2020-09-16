@@ -14,7 +14,7 @@
       <my-icon
         @click="full"
         class="icon"
-        :type="`hera_icon_fullscreen${!fullscreen ? '-exit' :''}`"
+        :type="`hera_icon_fullscreen${fullscreen ? '-exit' :''}`"
       />
       <my-icon
         :class="['icon', [theme.mode]]"
@@ -22,7 +22,7 @@
         @click="$store.commit('setting/setTheme', {...theme, mode: {'light':'night','night':'light'}[theme.mode]})"
       />
     </div>
-    <div class="crumbs">hera分布式调度 > test2 > import_act_evt_log</div>
+    <div class="crumbs">hera分布式调度 > test > echoTest</div>
   </div>
 </template>
 
