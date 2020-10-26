@@ -1,50 +1,59 @@
-import axios from "@/utils/request.js";
+import { getScheduledJob, initScheduledJobs, getScheduledGroup, getAllAreas } from '@/api/develop'
 export default {
   namespaced: true,
   state: {
     configs: {
       tabs: {
-        left: [{
-          name: 'debug',
-          label: '任务调试',
-          icon: 'code'
-        }, {
-          name: 'myJob',
-          label: '我的任务',
-          icon: 'my',
-        },
-        {
-          name: 'allJob',
-          label: '全部任务',
-          icon: 'all'
-        }],
-        right: [{
-          name: 'B',
-          label: '基本信息',
-          icon: 'info'
-        },
-        {
-          name: 'dependency',
-          label: "任务依赖",
-          icon: 'dependency'
-        },
-        {
-          name: 'A',
-          label: '任务配置',
-          icon: 'config'
-        },
-        {
-          name: 'C',
-          label: '告警配置',
-          icon: 'alarm'
-        }],
+        left: [
+          //   {
+          //   name: 'debug',
+          //   label: '任务调试',
+          //   icon: 'code'
+          // }, 
+          {
+            name: 'myJob',
+            label: '我的任务',
+            icon: 'my',
+          },
+          {
+            name: 'allJob',
+            label: '全部任务',
+            icon: 'all'
+          }],
+        right: [
+          //   {
+          //   name: 'basic',
+          //   label: '基本信息',
+          //   icon: 'info'
+          // },
+          {
+            name: 'job',
+            label: '信息配置',
+            icon: 'info'
+          },
+          {
+            name: 'dependency',
+            label: "任务依赖",
+            icon: 'dependency'
+          },
+          // {
+          //   name: 'conf',
+          //   label: '任务配置',
+          //   icon: 'config'
+          // },
+          // {
+          //   name: 'alarm',
+          //   label: '告警配置',
+          //   icon: 'alarm'
+          // }
+        ],
         bottom: [{
-          name: 'B',
+          name: 'log',
           label: '运行日志',
           icon: 'runlog'
         },
         {
-          name: 'A',
+          name: 'opLog',
           label: '操作记录',
           icon: 'oplog'
         }]
@@ -73,15 +82,22 @@ export default {
         allJob: '',
         myJob: ''
       },
+      groupTabKeys: {
+        debug: '',
+        allJob: '',
+        myJob: ''
+      },
       onlyCenter: false,
-      editorBottom: 'text'
+      editorBottom: 'text',
+      confEditorWidth: '50'
     },
     jobTrees: {
       debug: [],
       allJob: [],
       myJob: []
     },
-    jobList: []
+    jobList: [],
+    areas: []
   },
   getters: {
     tabs: state => state.configs.tabs,
@@ -100,20 +116,17 @@ export default {
       return res
     },
     flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
-    // {
-    // const jobsTree = state.jobTrees[type]
-    // const res = []
-    // if (jobsTree) {
-    //   flatNodes(jobsTree, res)
-    // }
-    // return res.filter(i => !i.dic)
-    // },
+    flatGroupTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => i.dic),
+
     flatJobsTree: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab),
     // 用于展示tab
     selectedJobNodes: (state, getters) => getters.treeCache?.selectedTabs.map(i => getters.flatJobsTree.find(j => j.key === i)),
     selectedJobNode: (state, getters) => getters.selectedJobNodes.find(i => i?.key === getters.selectedJobNodeKey),
     selectedJobNodeKey: state => state.layoutConfig.jobTabKeys[state.layoutConfig.leftTab],
 
+    selectedGroupNode: (state, getters) =>
+      getters.flatGroupTrees(state.layoutConfig.leftTab)
+        .find(i => i.key === state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab]),
 
     editorBottomTabs: state => state.configs.editorBottomTabs
   },
@@ -124,21 +137,31 @@ export default {
     },
     setEditorBottom(state, name) {
       state.layoutConfig.editorBottom = name
+      this.commit('develop/saveLocalLayout')
+    },
+    setConfEditorWidth(state, value) {
+      state.layoutConfig.confEditorWidth = value
+      this.commit('develop/saveLocalLayout')
     },
     updateSelectedjobNodeKey(state, key) {
       state.layoutConfig.jobTabKeys[state.layoutConfig.leftTab] = key
+      this.commit('develop/updateSelectedGroupNodeKey', '')
+    },
+    updateSelectedGroupNodeKey(state, key) {
+      state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab] = key
     },
     saveLocalLayout(state) {
-      console.log('save layout')
+      console.log('save local[layout]')
       setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
     },
     saveTreeCache(state) {
-      console.log('save treeCaches')
+      console.log('save local[treeCaches]')
       setLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
     },
   },
   actions: {
     initLocalInfo({ state, getters, dispatch }) {
+      dispatch('initAreas')
       initLocal(STORAGE_KEY_LAYOUT_INFO, info => {
         state.layoutConfig = info
       })
@@ -153,7 +176,7 @@ export default {
 
     },
     initJobs({ state }) {
-      return axios.post("/scheduleCenter/init.do", {})
+      return initScheduledJobs()
         .then((data) => {
           const allJob = [getTreeData(data.allJob)]
           const myJob = [getTreeData(data.myJob)]
@@ -203,22 +226,23 @@ export default {
       commit('saveTreeCache')
     },
     selectTreeNode({ getters, commit, dispatch }, { key, selected, dic, id }) {
-      console.log('selectNode', key)
-      if (dic) {
-        return
-      }
-      commit('updateSelectedjobNodeKey', key)
       const treeCache = getters.treeCache
       treeCache.selectedKeys = [key]
+      if (dic) {
+        commit('updateSelectedGroupNodeKey', key)
+        dispatch('getGroup', id)
+      } else {
+        if (!treeCache.selectedTabs.includes(key)) {
+          treeCache.selectedTabs.push(key)
+        }
+        commit('updateSelectedjobNodeKey', key)
+        dispatch('getJob', { id })
+      }
       if (selected) {
         return
       }
-      if (!treeCache.selectedTabs.includes(key)) {
-        treeCache.selectedTabs.push(key)
-      }
       commit('saveTreeCache')
       commit('saveLocalLayout')
-      dispatch('getJob', { id })
     },
     changeSelectedTab({ getters, commit, dispatch }, { key, id }) {
       if (key && getters.treeCache.selectedTabs.includes(key)) {
@@ -255,28 +279,50 @@ export default {
     },
     getJob({ state, getters }, { id, check }) {
       if (!id) {
-        return new Promise((resolve) => { resolve() })
+        return new Promise((r) => { r() })
       }
       if (check) {
         if (state.jobList.findIndex(i => i.id === id) !== -1) {
-          return new Promise((resolve) => { resolve() })
+          return new Promise((r) => { r() })
         }
       }
-      return axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
-        // 处理一下后端null。。
-        data.script = data.script == null ? '' : data.script
+      getScheduledJob(id).then(data => {
         const job = state.jobList.find(i => i.id === id)
         if (job !== null) {
           state.jobList.push(data)
           leftTabs.forEach(type => {
             const node = getters.flatJobsTrees(type).find(i => i.id === data.id);
             if (node) {
-              node.origin = { ...data }
+              node.origin = {
+                ...data
+              }
             }
           })
         } else {
           Object.assign(job, data)
         }
+      })
+      // TODO 任务调度是不同的请求
+    },
+    getGroup({ getters }, id) {
+      if (!id) {
+        return new Promise((r) => { r() })
+      }
+      return getScheduledGroup(id).then(data => {
+        leftTabs.forEach(type => {
+          // TODO 
+          if (type !== 'debug') {
+            const node = getters.flatGroupTrees(type).find(i => i.id === data.id)
+            if (node) {
+              node.origin = { ...data }
+            }
+          }
+        })
+      })
+    },
+    initAreas({ state }) {
+      getAllAreas().then(data => {
+        state.areas = data
       })
     }
   }

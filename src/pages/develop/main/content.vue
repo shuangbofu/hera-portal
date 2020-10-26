@@ -6,18 +6,21 @@
     <div class="center">
       <split-pane
         :show="[true, bottomTab.width]"
-        @resize="v => changeTabSize(100 - v, 'bottom')"
+        @resize="(v) => changeTabSize(100 - v, 'bottom')"
         mode="horizontal"
       >
         <template slot="left">
-          <split-pane :show="[leftTab.width,true]" @resize="v => changeTabSize(v, 'left')">
+          <split-pane
+            :show="[leftTab.width, true]"
+            @resize="(v) => changeTabSize(v, 'left')"
+          >
             <template slot="left">
               <slot name="left" />
             </template>
             <template slot="right">
               <split-pane
                 :show="[true, rightTab.width]"
-                @resize="v => changeTabSize(100 - v, 'right')"
+                @resize="(v) => changeTabSize(100 - v, 'right')"
               >
                 <template slot="left">
                   <slot name="center" />
@@ -41,7 +44,7 @@
 </template>
 
 <script>
-import SplitPane from "./splitPane";
+import SplitPane from "@/components/splitPane";
 import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],

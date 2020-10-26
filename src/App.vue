@@ -22,8 +22,6 @@ export default {
     };
   },
   created() {
-    document.cookie =
-      "HERA_Token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzc29JZCI6IjIwIiwic3NvX25hbWUiOiJmc2IiLCJhdWQiOiIyZGZpcmUiLCJpc3MiOiJoZXJhIiwiZXhwIjoxNjAwNDE4NjA1LCJ1c2VySWQiOiIyMCIsImlhdCI6MTYwMDE1OTQwNSwidXNlcm5hbWUiOiJoZXJhIn0.ZRUh2pk3JrE0xlunb3EEqZBJLX9VAtLmbPAZ-fT1gIY";
     let theme = localStorage.getItem("theme");
     if (theme) {
       theme = JSON.parse(theme);

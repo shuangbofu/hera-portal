@@ -5,27 +5,37 @@
       :tree-data="treeData"
       :selectedKeys.sync="treeCache.selectedKeys"
       :expandedKeys.sync="treeCache.expandedKeys"
-      @expand="keys => $emit('expand',keys)"
+      @expand="(keys) => $emit('expand', keys)"
       @select="selectNode"
     >
-      <template slot-scope="{expanded,type,selected}" slot="dic">
+      <template slot-scope="{ expanded, type, selected }" slot="dic">
         <a-icon
-          :class="['tree-icon',type, selected ? 'selected':'']"
+          :class="['tree-icon', type, selected ? 'selected' : '']"
           theme="filled"
-          :type="expanded ? 'folder-open': 'folder'"
+          :type="expanded ? 'folder-open' : 'folder'"
         ></a-icon>
       </template>
-      <template slot-scope="{type,selected}" slot="job">
-        <a-icon :class="['tree-icon',type, selected ? 'selected':'']" theme="filled" type="file"></a-icon>
+      <template slot-scope="{ type, selected }" slot="job">
+        <a-icon
+          :class="['tree-icon', type, selected ? 'selected' : '']"
+          theme="filled"
+          type="file"
+        ></a-icon>
       </template>
       <template slot="title" slot-scope="data">
-        <span :class="{'title':true, selected: data.selected}">{{data.title}}</span>
+        <span
+          @contextmenu.prevent="visible = true"
+          :class="{ title: true, selected: data.selected }"
+          >{{ data.title }}</span
+        >
+        <!-- <right-menu :visible.sync="visible" /> -->
       </template>
     </a-tree>
   </div>
 </template>
 
 <script>
+// import RightMenu from "./rightMenu";
 export default {
   props: {
     treeData: {
@@ -40,12 +50,18 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      visible: false,
+    };
+  },
+  // components: { RightMenu },
   methods: {
     selectNode(_, { node }) {
       this.$emit("select", {
         key: node.dataRef.key,
         selected: node.selected,
-        dic: node.dic,
+        dic: node.dataRef.dic,
         id: node.dataRef.id,
       });
     },

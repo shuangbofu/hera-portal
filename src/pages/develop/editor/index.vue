@@ -8,49 +8,58 @@
         :theme="editorTheme"
         :language="lang"
         :options="{
-        fontSize: 13,
-        automaticLayout:true
-      }"
+          fontSize: 13,
+          automaticLayout: true,
+        }"
       />
-      <div v-else>我是配置项</div>
+      <template v-else>
+        <conf-editor :data="job.configs" :inherit="job.inheritConfig" />
+      </template>
     </div>
     <div class="footer">
       <div class="tabs">
         <div
           @click="setEditorBottom(tab.name)"
-          :class="['tab',tab.name === layoutConfig.editorBottom ? 'active' : '']"
+          :class="[
+            'tab',
+            tab.name === layoutConfig.editorBottom ? 'active' : '',
+          ]"
           v-for="tab in editorBottomTabs"
           :key="tab.name"
-        >{{tab.label}}</div>
+        >
+          {{ tab.label }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import ConfEditor from "./confEditor";
 import MonacoEditor from "monaco-editor-vue";
 import commonMixin from "@/mixins/common";
 export default {
   components: {
     MonacoEditor,
+    ConfEditor,
   },
   mixins: [commonMixin],
   computed: {
     lang() {
-      const type = this.job.runType
-      if(['Spark','Hive'].includes(type)) {
-        return 'sql'
-      } else if(type === 'Shell') {
-        return 'shell'
-      } else if(type === 'Python') {
-        return 'python'
+      const type = this.job.runType;
+      if (["Spark", "Hive"].includes(type)) {
+        return "sql";
+      } else if (type === "Shell") {
+        return "shell";
+      } else if (type === "Python") {
+        return "python";
       }
-      return 'shell'
+      return "shell";
     },
     editorTheme() {
-      return this.theme.mode === 'light' ? 'vs' : 'vs-dark'
-    }
-  }
+      return this.theme.mode === "light" ? "vs" : "vs-dark";
+    },
+  },
 };
 </script>
 

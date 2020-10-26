@@ -1,17 +1,19 @@
 <template>
   <div class="container">
-    <attached-header type="bottom">{{bottomTab}},{{treeCaches}}</attached-header>
+    <attached-header type="bottom"
+      >底部{{ bottomTab }},{{ treeCaches }}</attached-header
+    >
   </div>
 </template>
 
 <script>
 import commonMixin from "@/mixins/common";
-import AttachedHeader from './attachedHeader'
+import AttachedHeader from "./attachedHeader";
 export default {
   mixins: [commonMixin],
-    components: {
-    AttachedHeader
-  }
+  components: {
+    AttachedHeader,
+  },
 };
 </script>
 
