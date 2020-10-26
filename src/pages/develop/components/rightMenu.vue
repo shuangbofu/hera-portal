@@ -1,33 +1,34 @@
 <template>
-  <div v-show="visble" class="menu">
-    <div>testddd</div>
+  <div
+    v-show="visible"
+    class="menu"
+    :style="{
+      top: top,
+      left: left,
+    }"
+  >
+    <div>选项</div>
   </div>
 </template>
 
 <script>
 export default {
-  // data() {
-  //   return {
-  //     visible: false,
-  //   };
-  // },
-  props: ["visible"],
-  watch: {
-    visible(oldVal, newVal) {
-      if (!oldVal && newVal) {
-        const menu = document.querySelector(".menu");
-        menu.style.left = event.clientX + 20 + "px";
-        menu.style.top = event.clientY - 10 + "px";
-        document.addEventListener("click", this.foo);
-      } else if (oldVal && !newVal) {
-        this.foo();
-      }
-    },
+  data() {
+    return {
+      visible: false,
+      top: "",
+      left: "",
+    };
   },
   methods: {
+    show() {
+      this.visible = true;
+      this.left = event.clientX + 20 + "px";
+      this.top = event.clientY - 10 + "px";
+      document.addEventListener("click", this.foo);
+    },
     foo() {
-      // this.visible = false;
-      this.$emit("update:visible", false);
+      this.visible = false;
       document.removeEventListener("click", this.foo);
     },
   },
@@ -45,8 +46,9 @@ export default {
   background: #fff;
   z-index: 999;
   // box-shadow: 0 0.5em 1em 0 rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
+  // box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
   border-radius: 1px;
+  background: @editor-bg-color;
 }
 
 .menu .link {

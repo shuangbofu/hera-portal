@@ -24,18 +24,18 @@
       </template>
       <template slot="title" slot-scope="data">
         <span
-          @contextmenu.prevent="visible = true"
+          @contextmenu.prevent="$refs.rightMenu.show()"
           :class="{ title: true, selected: data.selected }"
           >{{ data.title }}</span
         >
-        <!-- <right-menu :visible.sync="visible" /> -->
       </template>
     </a-tree>
+    <right-menu ref="rightMenu" />
   </div>
 </template>
 
 <script>
-// import RightMenu from "./rightMenu";
+import RightMenu from "./rightMenu";
 export default {
   props: {
     treeData: {
@@ -52,10 +52,10 @@ export default {
   },
   data() {
     return {
-      visible: false,
+      // visible: false,
     };
   },
-  // components: { RightMenu },
+  components: { RightMenu },
   methods: {
     selectNode(_, { node }) {
       this.$emit("select", {

@@ -7,6 +7,7 @@
           :data="job"
           :active="rightTab.name"
         />
+        <template v-else-if="rightTab.name === 'dependency'"> </template>
       </div>
     </attached-header>
   </div>
@@ -29,7 +30,6 @@ export default {
 .container {
   background: @base-bg-color;
   .content {
-    padding: 10px;
     height: 100%;
     overflow: auto;
   }
