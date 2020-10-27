@@ -7,6 +7,7 @@
       :expandedKeys.sync="treeCache.expandedKeys"
       @expand="(keys) => $emit('expand', keys)"
       @select="selectNode"
+      @rightClick="rightClick"
     >
       <template slot-scope="{ expanded, type, selected }" slot="dic">
         <a-icon
@@ -24,7 +25,7 @@
       </template>
       <template slot="title" slot-scope="data">
         <span
-          @contextmenu.prevent="$refs.rightMenu.show()"
+          @contextmenu.prevent="$refs.rightMenu.show(data.dataRef.dic)"
           :class="{ title: true, selected: data.selected }"
           >{{ data.title }}</span
         >
@@ -64,6 +65,9 @@ export default {
         dic: node.dataRef.dic,
         id: node.dataRef.id,
       });
+    },
+    rightClick(o) {
+      this.selectNode(null, o);
     },
   },
 };

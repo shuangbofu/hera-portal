@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="header operation-bar">
-      {{title}}
+      {{ title }}
       <a-icon class="icon" type="minus" @click="close" />
     </div>
     <div class="content">
@@ -16,24 +16,24 @@ export default {
   props: {
     type: {
       required: true,
-      type: String
+      type: String,
     },
   },
-  mixins:[commonMixin],
+  mixins: [commonMixin],
   computed: {
     title() {
-      return this.tabs[this.type].find(i=>i.name === this.name).label
+      return this.tabs[this.type].find((i) => i.name === this.name).label;
     },
     name() {
-      return this.tabActive(this.type).name
+      return this.tabActive(this.type).name;
     },
   },
   methods: {
     close() {
-      this.changeTab(this.name, this.type)
-    }
-  }
-}
+      this.changeTab(this.name, this.type);
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>

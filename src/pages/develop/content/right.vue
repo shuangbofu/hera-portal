@@ -1,10 +1,11 @@
 <template>
   <div class="container">
-    <attached-header type="right">
-      <div class="content" v-if="job">
+    <attached-header type="right" v-if="infoData">
+      <div class="content">
         <job-info
           v-if="rightTab.name === 'job'"
-          :data="job"
+          :is-group="isGroup"
+          :data="infoData"
           :active="rightTab.name"
         />
         <template v-else-if="rightTab.name === 'dependency'"> </template>
@@ -22,6 +23,15 @@ export default {
   components: {
     AttachedHeader,
     JobInfo,
+  },
+  computed: {
+    isGroup() {
+      return this.group;
+    },
+    infoData() {
+      // 空位合并操作符
+      return this.isGroup ?? this.job;
+    },
   },
 };
 </script>

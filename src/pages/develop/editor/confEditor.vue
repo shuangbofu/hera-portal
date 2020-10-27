@@ -20,6 +20,7 @@
             :options="options"
             default-value="all"
             v-model="option"
+            @change="changeRadio"
           />
           <a-input
             size="small"
@@ -82,6 +83,7 @@ const options = [
   { label: "覆盖", value: "covered" },
   { label: "ZDT", value: "zdt" },
 ];
+let option = "all";
 function obj2Arr(obj) {
   const res = [];
   for (let key in obj) {
@@ -97,10 +99,14 @@ export default {
   data() {
     return {
       options,
-      option: "all",
+      option: "",
       filterValue: "",
       collapseActive: [1, 2],
     };
+  },
+  created() {
+    // 关闭右侧菜单是会重新create，从option中读取
+    this.option = option;
   },
   components: {
     SplitPane,
@@ -152,12 +158,15 @@ export default {
         const keys = this.filterInheritConfigArr.map((j) => j.key);
         arr = arr.filter((i) => keys.includes(i.key));
       } else if (option === "zdt") {
-        arr = arr.filter((i) => i.key.includes("${zdt"));
+        arr = arr.filter((i) => i.value.includes("${zdt"));
       }
       return arr.filter((i) => i.key.includes(this.filterValue));
     },
   },
   methods: {
+    changeRadio() {
+      option = this.option;
+    },
     resize(v) {
       this.$store.commit("develop/setConfEditorWidth", v);
     },

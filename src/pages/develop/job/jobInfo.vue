@@ -17,31 +17,11 @@
           <a-descriptions-item label="描述"
             >{{ data.description }}
           </a-descriptions-item>
-          <a-descriptions-item label="任务类型"
-            >{{ data.runType }}
-          </a-descriptions-item>
-          <a-descriptions-item label="调度类型"
-            >{{ ["定时调度", "依赖调度"][data.scheduleType] }}
-          </a-descriptions-item>
-          <a-descriptions-item label="调度">
-            <div class="dot-inner">
-              <a-badge
-                :color="data.valid ? '#87d068' : '#f50'"
-                :text="data.valid ? '开启' : '关闭'"
-              />
-            </div>
-          </a-descriptions-item>
-          <a-descriptions-item label="机器组"
-            >{{ data.hostGroupName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="区域">
-            {{ area }}
-          </a-descriptions-item>
           <a-descriptions-item label="所有人"
             >{{ data.owner }}
           </a-descriptions-item>
           <a-descriptions-item label="关注人">
-            <template v-if="data.focusUsers.length > 0">
+            <template v-if="data.focuUsers && data.focusUsers.length > 0">
               <a-tag :key="idx" v-for="(user, idx) in data.focusUsers">
                 {{ user }}
               </a-tag>
@@ -49,16 +29,38 @@
             <template v-else> 无 </template>
           </a-descriptions-item>
           <a-descriptions-item label="管理员">
-            <template v-if="data.adminUsers.length > 0">
+            <template v-if="data.adminUsers && data.adminUsers.length > 0">
               <a-tag :key="idx" v-for="(user, idx) in data.adminUsers">
                 {{ user }}
               </a-tag>
             </template>
             <template v-else> 无 </template>
           </a-descriptions-item>
+          <template v-if="!isGroup">
+            <a-descriptions-item label="任务类型"
+              >{{ data.runType }}
+            </a-descriptions-item>
+            <a-descriptions-item label="调度类型"
+              >{{ ["定时调度", "依赖调度"][data.scheduleType] }}
+            </a-descriptions-item>
+            <a-descriptions-item label="调度">
+              <div class="dot-inner">
+                <a-badge
+                  :color="data.valid ? '#87d068' : '#f50'"
+                  :text="data.valid ? '开启' : '关闭'"
+                />
+              </div>
+            </a-descriptions-item>
+            <a-descriptions-item label="机器组"
+              >{{ data.hostGroupName }}
+            </a-descriptions-item>
+            <a-descriptions-item label="区域">
+              {{ area }}
+            </a-descriptions-item>
+          </template>
         </a-descriptions>
       </a-collapse-panel>
-      <a-collapse-panel key="2" header="任务配置">
+      <a-collapse-panel key="2" header="任务配置" v-if="!isGroup">
         <!-- <a-icon
           slot="extra"
           type="setting"
@@ -96,7 +98,7 @@
           <!-- </template> -->
         </a-descriptions></a-collapse-panel
       >
-      <a-collapse-panel key="3" header="告警配置">
+      <a-collapse-panel key="3" header="告警配置" v-if="!isGroup">
         <!-- <a-icon
           slot="extra"
           type="setting"
@@ -131,7 +133,7 @@
 <script>
 // import { ConfSetting } from "./confSetting";
 export default {
-  props: ["data", "active"],
+  props: ["data", "active", "isGroup"],
   data() {
     return {
       collapseActive: [1, 2, 3],
@@ -167,6 +169,8 @@ export default {
 .container {
   // margin: 0 5%;
 }
+</style>
+<style lang="less">
 .dot-inner {
   display: flex;
   .ant-badge-status-dot {
@@ -182,8 +186,6 @@ export default {
 .ant-divider-horizontal.ant-divider-with-text-right {
   margin: 6px 0;
 }
-</style>
-<style lang="less">
 .ant-collapse {
   border: 0 !important;
 }

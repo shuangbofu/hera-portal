@@ -1,11 +1,7 @@
 <template>
   <div class="container">
-    <div class="group-container" v-if="selectedGroupNode">
-      <!-- {{ selectedGroupNode.origin }} -->
-      <conf-editor
-        :data="selectedGroupNode.origin.configs"
-        :inherit="selectedGroupNode.origin.inheritConfig"
-      />
+    <div class="group-container" v-if="group">
+      <conf-editor :data="group.configs" :inherit="group.inheritConfig" />
     </div>
     <div class="job-container" v-else>
       <div
@@ -46,7 +42,7 @@
         }"
       >
         <template v-if="job">
-          <slot />
+          <job-editor />
         </template>
         <div class="loading" v-else>正在数据加载，请稍等……</div>
       </div>
@@ -55,6 +51,7 @@
 </template>
 
 <script>
+import JobEditor from "../editor/index";
 import ConfEditor from "../editor/confEditor";
 import commonMixin from "@/mixins/common";
 export default {
@@ -84,6 +81,7 @@ export default {
   },
   components: {
     ConfEditor,
+    JobEditor,
   },
   mixins: [commonMixin],
   created() {
@@ -96,14 +94,12 @@ export default {
       this.updateTabsHeight();
     });
   },
-  computed: {},
   methods: {
     updateTabsHeight() {
       this.$nextTick(() => {
         const height = this.$refs.tabs?.offsetHeight;
         if (height) {
           this.tabsHeight = height;
-          // console.log(height);
         }
       });
     },
@@ -112,17 +108,9 @@ export default {
     },
     click(node) {
       let this_ = this;
-      // timeout = setTimeout(() => {
       this_.changeSelectedTab(node);
-      // }, 300);
-      //   console.log("单击");
-      //   // 单击事件的代码执行区域
-      //   // ...
-
-      // }, 300);
     },
     doubleClick() {
-      // clearTimeout(timeout);
       this.toggleOnlyCenter();
     },
   },

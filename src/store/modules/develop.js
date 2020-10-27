@@ -34,8 +34,21 @@ export default {
           {
             name: 'dependency',
             label: "任务依赖",
-            icon: 'dependency'
+            icon: 'dependency',
+            private: 'job'
           },
+          {
+            name: 'jobRunningList',
+            label: '正在运行',
+            icon: 'dependency',
+            private: 'group'
+          },
+          {
+            name: 'jobErrorList',
+            label: '失败记录',
+            icon: 'dependency',
+            private: 'group'
+          }
           // {
           //   name: 'conf',
           //   label: '任务配置',
@@ -100,7 +113,17 @@ export default {
     areas: []
   },
   getters: {
-    tabs: state => state.configs.tabs,
+    tabs: (state, getters) => {
+      const tabs = state.configs.tabs
+      const righTabs = tabs.right
+      const isGroup = getters.selectedGroupNodeKey
+      return {
+        ...tabs,
+        right: righTabs.filter(i => !i.private || i.private === (isGroup ? 'group' : 'job'))
+      }
+    },
+    rightTabs: (state, getters) => getters.tabs.right,
+
     tab: state => state.layoutConfig.tab,
     tabConfgs: (state, getters) => getters.tab.configs,
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
@@ -126,7 +149,8 @@ export default {
 
     selectedGroupNode: (state, getters) =>
       getters.flatGroupTrees(state.layoutConfig.leftTab)
-        .find(i => i.key === state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab]),
+        .find(i => i.key === getters.selectedGroupNodeKey),
+    selectedGroupNodeKey: state => state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab],
 
     editorBottomTabs: state => state.configs.editorBottomTabs
   },
@@ -168,12 +192,16 @@ export default {
       initLocal(STORAGE_KEY_TREE_INFO, info => {
         state.treeCaches = info
       })
-      // 初始化打开的任务
-      const id = getters.selectedJobNodeKey?.split('_')[1]
-      if (id) {
-        dispatch('getJob', { id })
+      const groupId = getters.selectedGroupNodeKey?.split('_')[2]
+      if (groupId) {
+        dispatch('getGroup', groupId)
+      } else {
+        // 初始化打开的任务
+        const id = getters.selectedJobNodeKey?.split('_')[1]
+        if (id) {
+          dispatch('getJob', { id })
+        }
       }
-
     },
     initJobs({ state }) {
       return initScheduledJobs()
@@ -240,6 +268,11 @@ export default {
       }
       if (selected) {
         return
+      }
+
+      // 如果切换时right tab不存在要设置为第一个tab
+      if (!getters.rightTabs.find(i => i.name === getters.tab.actives['right'])) {
+        dispatch('setTab', { name: getters.rightTabs[0].name, type: 'right' })
       }
       commit('saveTreeCache')
       commit('saveLocalLayout')

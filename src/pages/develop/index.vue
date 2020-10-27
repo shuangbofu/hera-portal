@@ -4,29 +4,27 @@
       <a-layout-header class="header">
         <main-header />
       </a-layout-header>
-      <a-layout-content :class="{'content':true,'fullscreen': fullscreen}">
-        <main-content>
+      <a-layout-content :class="{ content: true, fullscreen: fullscreen }">
+        <main-center>
           <template v-slot:left-side>
             <tabs
               :tabs="tabs.left"
               :active="leftTab.name"
-              @change="v => changeTab(v.name, 'left')"
+              @change="(v) => changeTab(v.name, 'left')"
             />
           </template>
           <template v-slot:right-side>
             <tabs
               :tabs="tabs.right"
               :active="rightTab.name"
-              @change="v => changeTab(v.name, 'right')"
+              @change="(v) => changeTab(v.name, 'right')"
             />
           </template>
           <template v-slot:left>
             <content-left class="content-in" />
           </template>
           <template v-slot:center>
-            <content-center class="content-in">
-              <job-editor />
-            </content-center>
+            <content-center class="content-in" />
           </template>
           <template v-slot:right>
             <right-attached class="content-in" />
@@ -34,7 +32,7 @@
           <template v-slot:bottom>
             <footer-attached class="contnet-in" />
           </template>
-        </main-content>
+        </main-center>
       </a-layout-content>
       <a-layout-footer class="footer">
         <main-footer />
@@ -46,27 +44,25 @@
 <script>
 import commonMixin from "@/mixins/common";
 import Tabs from "./components/tabs";
-import MainHeader from "./main/header";
-import MainFooter from "./main/footer";
-import MainContent from "./main/content";
+import MainHeader from "./structure/header";
+import MainFooter from "./structure/footer";
+import MainCenter from "./structure/center";
 import ContentLeft from "./content/left";
 import ContentCenter from "./content/center";
 import RightAttached from "./content/right";
 import FooterAttached from "./content/footer";
-import JobEditor from "./editor/index";
 
 export default {
   mixins: [commonMixin],
   components: {
     MainHeader,
     MainFooter,
-    MainContent,
+    MainCenter,
     ContentLeft,
     ContentCenter,
     RightAttached,
     FooterAttached,
     Tabs,
-    JobEditor,
   },
   created() {
     this.initJobs().then(() => {

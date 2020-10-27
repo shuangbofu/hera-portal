@@ -43,7 +43,19 @@ export function initScheduledJobs() {
 }
 
 export function getScheduledGroup(id) {
-  return axios.get(`/scheduleCenter/getGroupMessage.do?groupId=group_${id}`)
+  return new Promise((res, rej) => {
+    return axios.get(`/scheduleCenter/getGroupMessage.do?groupId=group_${id}`).then(data => {
+      const focusUsers = str2Arr(data.focusUser)
+      const adminUsers = str2Arr(data.uidS)
+      res({
+        ...data,
+        focusUsers,
+        adminUsers
+      })
+    }).catch(msg => {
+      rej(msg)
+    })
+  })
 }
 
 export function getAllAreas() {

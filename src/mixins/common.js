@@ -33,6 +33,9 @@ export default {
     },
     job() {
       return this.jobList.find(i => i.id === this.selectedJobNode?.id)
+    },
+    group() {
+      return this.selectedGroupNode?.origin
     }
   },
   methods: {
