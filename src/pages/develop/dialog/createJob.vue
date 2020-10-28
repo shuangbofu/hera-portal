@@ -59,7 +59,7 @@ export default {
   },
   computed: {
     oldName() {
-      return this.obj.data?.name;
+      return this.obj.data?.name.split("(")[0];
     },
     title() {
       return this.obj.title;
@@ -76,8 +76,6 @@ export default {
       this.obj = obj;
       if (this.isRename) {
         this.name = this.oldName;
-        console.log(this.obj);
-        console.log(this.oldName);
       }
       this.visible = true;
     },

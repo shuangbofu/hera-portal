@@ -21,11 +21,6 @@ export default {
             icon: 'all'
           }],
         right: [
-          //   {
-          //   name: 'basic',
-          //   label: '基本信息',
-          //   icon: 'info'
-          // },
           {
             name: 'job',
             label: '信息配置',
@@ -49,16 +44,6 @@ export default {
             icon: 'dependency',
             private: 'group'
           }
-          // {
-          //   name: 'conf',
-          //   label: '任务配置',
-          //   icon: 'config'
-          // },
-          // {
-          //   name: 'alarm',
-          //   label: '告警配置',
-          //   icon: 'alarm'
-          // }
         ],
         bottom: [{
           name: 'log',
@@ -184,10 +169,7 @@ export default {
         if (groupId) {
           dispatch('getGroup', groupId)
         } else {
-          const id = selectedKey.split('_')[1]
-          if (id) {
-            dispatch('getJob', { id })
-          }
+          dispatch('getJobByKey', { key: selectedKey })
         }
       }
     },
@@ -213,8 +195,7 @@ export default {
     setTab({ state, getters, commit, dispatch }, { name, type }) {
       if (type == 'left') {
         state.layoutConfig.leftTab = name
-        const id = getters.selectedKey?.split("_")[1]
-        dispatch('getJob', { id, check: true })
+        dispatch('getJobByKey', { key: getters.selectedKey, check: true })
       }
       const tab = state.layoutConfig.tab
       const tabConfigs = tab.configs[type]
@@ -255,7 +236,7 @@ export default {
         if (!treeCache.selectedTabs.includes(key)) {
           treeCache.selectedTabs.push(key)
         }
-        dispatch('getJob', { id })
+        dispatch('getJob', { id, check: true })
       }
       if (selected) {
         return
@@ -275,13 +256,10 @@ export default {
     switchSelectedTab({ getters, commit, dispatch }, key) {
       if (key && getters.treeCache.selectedTabs.includes(key)) {
         console.log('changeTab2' + key)
-        const id = key.split("_")[1]
-        if (id) {
-          return dispatch('getJob', { id: Number(id), check: true }).then(() => {
-            getters.treeCache.selectedKeys = [key]
-            commit('saveTreeCache')
-          })
-        }
+        return dispatch('getJobByKey', { key, check: true }).then(() => {
+          getters.treeCache.selectedKeys = [key]
+          commit('saveTreeCache')
+        })
       }
     },
     /**
@@ -348,6 +326,15 @@ export default {
       } else {
         dispatch('switchSelectedTab', key)
       }
+    },
+    /**
+     * 根据key获取任务数据
+     * @param {*} param0 
+     * @param {*} param1 
+     */
+    getJobByKey({ dispatch }, { key, check }) {
+      const id = key?.split('_')[1]
+      return dispatch('getJob', { id: id ? Number(id) : null, check })
     },
     /**
      * 获取任务数据
