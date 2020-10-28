@@ -17,7 +17,7 @@ module.exports = {
         // target: 'https://hera-daily.tuya-inc.cn:7799/',
         target: 'http://127.0.0.1:8121',
         // target: 'http://172.16.120.51:8121',
-        pathRewrite: { '^/api': '' },
+        pathRewrite: { '^/': '' },
         secure: false,
         changeOrigin: true
       }
@@ -115,6 +115,6 @@ module.exports = {
     },
   },
 
-  assetsDir: 'static_',
+  assetsDir: 'static/dist/static',
   productionSourceMap: false
 }

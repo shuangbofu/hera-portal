@@ -1,54 +1,89 @@
 <template>
   <div
-    v-show="visible"
+    v-if="visible"
     class="menu"
     :style="{
       top: top,
       left: left,
     }"
   >
-    <div>
-      <a-menu slot="overlay" size="small">
-        <template v-for="menu in menus">
-          <a-menu-item :key="menu.title" v-show="!menu.dic || (dic && menu.dic)"
-            >{{ menu.title }}
+    <a-menu slot="overlay" size="small">
+      <template v-for="menu in menus">
+        <a-sub-menu
+          class="sub-menu"
+          v-if="menu.children && menu.children.length > 0"
+          :key="menu.title"
+        >
+          <span slot="title">{{ menu.title }}</span>
+          <a-menu-item
+            class="menu-item"
+            v-for="m in menu.children"
+            :key="m.title"
+            @click="onClick(menu.title)"
+          >
+            {{ m.title }}
           </a-menu-item>
-          <a-divider :key="`${menu.title}-`" v-if="menu.divider && dic" />
-        </template>
-      </a-menu>
-    </div>
+        </a-sub-menu>
+        <a-menu-item
+          class="menu-item"
+          :key="menu.title"
+          @click="onClick(menu.title)"
+          v-else
+        >
+          {{ menu.title }}
+        </a-menu-item>
+      </template>
+    </a-menu>
   </div>
 </template>
 
+
 <script>
-const menus = [
-  { title: "新建文件夹", dic: true },
-  { title: "新建任务", dic: true, divider: true },
-  { title: "重命名" },
-  { title: "移动" },
-  { title: "删除" },
-];
+/**
+ * 两层菜单。。
+ */
+function str2Menu(arr) {
+  return arr.map((i) => {
+    let res = i;
+    if (!(i instanceof Object)) {
+      res = {
+        title: i,
+      };
+    }
+    return {
+      ...res,
+      children: str2Menu(res.children || []),
+    };
+  });
+}
 export default {
   data() {
     return {
       visible: false,
       top: "",
       left: "",
-      dic: false,
-      menus,
+      menus: [],
+      obj: {},
     };
   },
+  components: {},
   methods: {
-    show(isDic) {
-      this.dic = isDic;
+    show(menus, obj) {
+      this.menus = str2Menu(menus);
       this.visible = true;
-      this.left = event.clientX + 20 + "px";
-      this.top = event.clientY - 10 + "px";
+      this.obj = obj;
+      this.left = event.clientX + 10 + "px";
+      this.top = event.clientY + "px";
       document.addEventListener("click", this.foo);
+      // document.addEventListener("contextmenu", this.foo);
     },
     foo() {
       this.visible = false;
       document.removeEventListener("click", this.foo);
+      // document.removeEventListener("contextmenu", this.foo);
+    },
+    onClick(v) {
+      this.$emit("click", { order: v, obj: this.obj });
     },
   },
 };
@@ -67,7 +102,7 @@ export default {
   // box-shadow: 0 0.5em 1em 0 rgba(0, 0, 0, 0.2);
   // box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
   border-radius: 1px;
-  background: @editor-bg-color;
+  // background: @editor-bg-color;
   border: 1px solid @editor-border-color;
 }
 
@@ -86,24 +121,34 @@ export default {
   padding: 8px 16px;
   border-bottom: 1px solid #f9f9f9;
 }
-.ant-menu-vertical > .ant-menu-item,
-.ant-menu-vertical-left > .ant-menu-item,
-.ant-menu-vertical-right > .ant-menu-item,
-.ant-menu-inline > .ant-menu-item,
-.ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title,
-.ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title,
-.ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title,
-.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
-  height: 25px !important;
-  line-height: 25px !important;
-}
-.ant-menu-vertical .ant-menu-item:not(:last-child),
-.ant-menu-vertical-left .ant-menu-item:not(:last-child),
-.ant-menu-vertical-right .ant-menu-item:not(:last-child),
-.ant-menu-inline .ant-menu-item:not(:last-child) {
-  margin-bottom: 2px;
-}
-.ant-divider-horizontal {
-  margin: 2px 0 !important;
+</style>
+<style lang="less">
+.menu {
+  .ant-menu {
+    background: @editor-bg-color!important;
+    border-right: none !important;
+  }
+
+  .ant-divider-horizontal {
+    margin: 2px 0 !important;
+  }
+  .menu-item,
+  .sub-menu > .ant-menu-submenu-title {
+    background: @editor-bg-color!important;
+    margin: 0 !important;
+    height: 25px !important;
+    line-height: 26px !important;
+    font-size: 13px;
+    &:hover {
+      background: @editor-tree-active-color!important;
+      color: #ffffff;
+      .ant-menu-submenu-arrow {
+        &::before,
+        &::after {
+          background: #ffffff !important;
+        }
+      }
+    }
+  }
 }
 </style>

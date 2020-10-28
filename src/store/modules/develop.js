@@ -90,16 +90,6 @@ export default {
         actives: { left: null, right: null, bottom: null },
       },
       leftTab: '',
-      jobTabKeys: {
-        debug: '',
-        allJob: '',
-        myJob: ''
-      },
-      groupTabKeys: {
-        debug: '',
-        allJob: '',
-        myJob: ''
-      },
       onlyCenter: false,
       editorBottom: 'text',
       confEditorWidth: '50'
@@ -129,6 +119,9 @@ export default {
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
 
     treeCache: (state) => state.treeCaches[state.layoutConfig.leftTab],
+    selectedTabKeys: (state, getters) => getters.treeCache.selectedKeys,
+
+    selectedKey: (state, getters) => getters.treeCache?.selectedKeys[0],
 
     flatAllTreeNodes: (state) => type => {
       const jobsTree = state.jobTrees[type]
@@ -141,16 +134,17 @@ export default {
     flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
     flatGroupTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => i.dic),
 
-    flatJobsTree: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab),
-    // 用于展示tab
-    selectedJobNodes: (state, getters) => getters.treeCache?.selectedTabs.map(i => getters.flatJobsTree.find(j => j.key === i)),
-    selectedJobNode: (state, getters) => getters.selectedJobNodes.find(i => i?.key === getters.selectedJobNodeKey),
-    selectedJobNodeKey: state => state.layoutConfig.jobTabKeys[state.layoutConfig.leftTab],
+    // 任务tab的nodes
+    selectedTabNodes: (state, getters) => getters.treeCache?.selectedTabs
+      .map(i => getters.flatJobsTrees(state.layoutConfig.leftTab)
+        .find(j => j.key === i)),
 
-    selectedGroupNode: (state, getters) =>
-      getters.flatGroupTrees(state.layoutConfig.leftTab)
-        .find(i => i.key === getters.selectedGroupNodeKey),
-    selectedGroupNodeKey: state => state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab],
+    // 选中状态中的node
+    selectedTabNode: (state, getters) => {
+      return getters.flatAllTreeNodes(state.layoutConfig.leftTab)
+        .find(i => i.key === getters.selectedKey)
+    },
+    isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
 
     editorBottomTabs: state => state.configs.editorBottomTabs
   },
@@ -167,13 +161,7 @@ export default {
       state.layoutConfig.confEditorWidth = value
       this.commit('develop/saveLocalLayout')
     },
-    updateSelectedjobNodeKey(state, key) {
-      state.layoutConfig.jobTabKeys[state.layoutConfig.leftTab] = key
-      this.commit('develop/updateSelectedGroupNodeKey', '')
-    },
-    updateSelectedGroupNodeKey(state, key) {
-      state.layoutConfig.groupTabKeys[state.layoutConfig.leftTab] = key
-    },
+
     saveLocalLayout(state) {
       console.log('save local[layout]')
       setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
@@ -192,14 +180,16 @@ export default {
       initLocal(STORAGE_KEY_TREE_INFO, info => {
         state.treeCaches = info
       })
-      const groupId = getters.selectedGroupNodeKey?.split('_')[2]
-      if (groupId) {
-        dispatch('getGroup', groupId)
-      } else {
-        // 初始化打开的任务
-        const id = getters.selectedJobNodeKey?.split('_')[1]
-        if (id) {
-          dispatch('getJob', { id })
+      const selectedKey = getters.selectedKey
+      if (selectedKey) {
+        const groupId = selectedKey.split('_')[2]
+        if (groupId) {
+          dispatch('getGroup', groupId)
+        } else {
+          const id = selectedKey.split('_')[1]
+          if (id) {
+            dispatch('getJob', { id })
+          }
         }
       }
     },
@@ -253,61 +243,109 @@ export default {
       getters.treeCache.expandedKeys = keys
       commit('saveTreeCache')
     },
+    /**
+     * 选择树节点
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     selectTreeNode({ getters, commit, dispatch }, { key, selected, dic, id }) {
       const treeCache = getters.treeCache
       treeCache.selectedKeys = [key]
       if (dic) {
-        commit('updateSelectedGroupNodeKey', key)
         dispatch('getGroup', id)
       } else {
         if (!treeCache.selectedTabs.includes(key)) {
           treeCache.selectedTabs.push(key)
         }
-        commit('updateSelectedjobNodeKey', key)
         dispatch('getJob', { id })
       }
       if (selected) {
         return
       }
-
       // 如果切换时right tab不存在要设置为第一个tab
       if (!getters.rightTabs.find(i => i.name === getters.tab.actives['right'])) {
         dispatch('setTab', { name: getters.rightTabs[0].name, type: 'right' })
       }
       commit('saveTreeCache')
-      commit('saveLocalLayout')
     },
-    changeSelectedTab({ getters, commit, dispatch }, { key, id }) {
+    /**
+     * 切换标签
+     * @param {*} param0 
+     * @param {*} key 
+     */
+    switchSelectedTab({ getters, commit, dispatch }, key) {
       if (key && getters.treeCache.selectedTabs.includes(key)) {
-        console.log('changeTab', key)
-        commit('updateSelectedjobNodeKey', key)
-        commit('saveLocalLayout')
+        console.log('change2Tab', key)
+        const id = key.split("_")[1]
         return dispatch('getJob', { id, check: true }).then(() => {
           getters.treeCache.selectedKeys = [key]
           commit('saveTreeCache')
         })
       }
     },
-    closeSelectedTab({ getters, commit, dispatch }, key) {
+    /**
+     * 关闭标签
+     * @param {*} param0 
+     * @param {*} key 
+     */
+    closeTab({ getters, commit, dispatch }, key) {
       const tabs = getters.treeCache.selectedTabs
       let index = tabs.findIndex(i => i === key)
       if (index !== -1) {
         tabs.splice(index, 1)
-        if (getters.selectedJobNodeKey === key) {
+        if (getters.selectedKey === key) {
           index = index < tabs.length ? index : index - 1;
           const lastKey = tabs[index];
-          const lastNode = getters.selectedJobNodes.find(i => i.key === lastKey)
-          if (lastNode) {
-            dispatch('changeSelectedTab', { key: lastKey, id: lastNode.id })
+          if (lastKey) {
+            dispatch('switchSelectedTab', lastKey)
           } else {
             getters.treeCache.selectedKeys = []
-            commit('updateSelectedjobNodeKey', null)
             commit('saveTreeCache')
-            commit('saveLocalLayout')
           }
         } else {
           commit('saveTreeCache')
         }
+      }
+    },
+    /**
+     * 关闭所有标签
+     * @param {*} param0 
+     */
+    closeAllTabs({ commit, getters }) {
+      getters.treeCache.selectedTabs = []
+      getters.treeCache.selectedKeys = []
+      commit('saveTreeCache')
+    },
+    /**
+     * 关闭右侧所有标签
+     * @param {*} param0 
+     * @param {*} key 
+     */
+    closeAllRightTabs({ commit, getters }, key) {
+      const tabs = getters.treeCache.selectedTabs
+      let index = tabs.findIndex(i => i === key)
+      const currentIndex = tabs.findIndex(i => i === getters.selectedKey)
+      if (index < currentIndex) {
+        getters.treeCache.selectedKeys = [key]
+      }
+      if (index !== -1) {
+        index++;
+        tabs.splice(index, tabs.length - index)
+        commit('saveTreeCache')
+      }
+    },
+    /**
+     * 关闭其他标签
+     * @param {*} param0 
+     * @param {*} key 
+     */
+    closeOtherTabs({ dispatch, commit, getters }, key) {
+      const currentKey = getters.selectedKey
+      getters.treeCache.selectedTabs = [key]
+      if (key === currentKey) {
+        commit('saveTreeCache')
+      } else {
+        dispatch('switchSelectedTab', key)
       }
     },
     getJob({ state, getters }, { id, check }) {

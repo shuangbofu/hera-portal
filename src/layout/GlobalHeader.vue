@@ -2,11 +2,11 @@
   <a-layout-header :class="[headerTheme, 'admin-header']">
     <div class="admin-header-wide">
       <router-link to="/" class="logo">
-        <img style="height: 40px; margin: 0 10px;" :src="logo" />
+        <img style="height: 40px; margin: 0 10px" :src="logo" />
       </router-link>
       <div class="admin-header-menu">
         <i-menu
-          style="height: 40px; line-height: 40px; white-space: break-spaces;"
+          style="height: 40px; line-height: 40px; white-space: break-spaces"
           :theme="headerTheme"
           class="head-menu"
           mode="horizontal"
@@ -18,8 +18,13 @@
       <div :class="['admin-header-right', headerTheme]">
         <my-icon
           :class="['theme-toggle-button', [headerTheme]]"
-          :type="`hera_icon_${{'light':'moon','night':'sun'}[headerTheme]}`"
-          @click="$store.commit('setting/setTheme', {...theme, mode: {'light':'night','night':'light'}[headerTheme]})"
+          :type="`hera_icon_${{ light: 'moon', night: 'sun' }[headerTheme]}`"
+          @click="
+            $store.commit('setting/setTheme', {
+              ...theme,
+              mode: { light: 'night', night: 'light' }[headerTheme],
+            })
+          "
         />
       </div>
     </div>
@@ -82,29 +87,31 @@ export default {
 }
 </style>
 <style lang="less">
-.ant-menu-horizontal > .ant-menu-item,
-.ant-menu-horizontal > .ant-menu-submenu {
-  font-size: 12px;
-}
-
-.ant-menu {
-  border-bottom: 1px solid @editor-border-color!important;
-  .ant-menu-item {
-    border-bottom: 2px solid transparent !important;
-    padding: 0 10px !important;
-    & > a::before {
-      bottom: 0 !important;
-    }
-    &.ant-menu-item-selected a {
-      font-weight: bold;
-    }
+.admin-header-menu {
+  .ant-menu-horizontal > .ant-menu-item,
+  .ant-menu-horizontal > .ant-menu-submenu {
+    font-size: 12px;
   }
-  &.ant-menu-dark .ant-menu-item-selected,
-  .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
-    background-color: transparent !important;
-    a,
-    a:hover {
-      color: #ffffff !important;
+
+  .ant-menu {
+    border-bottom: 1px solid @editor-border-color!important;
+    .ant-menu-item {
+      border-bottom: 2px solid transparent !important;
+      padding: 0 10px !important;
+      & > a::before {
+        bottom: 0 !important;
+      }
+      &.ant-menu-item-selected a {
+        font-weight: bold;
+      }
+    }
+    &.ant-menu-dark .ant-menu-item-selected,
+    .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
+      background-color: transparent !important;
+      a,
+      a:hover {
+        color: #ffffff !important;
+      }
     }
   }
 }

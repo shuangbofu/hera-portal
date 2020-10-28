@@ -4,7 +4,7 @@
       <div class="content">
         <job-info
           v-if="rightTab.name === 'job'"
-          :is-group="isGroup"
+          :is-group="isSelectedGroup"
           :data="infoData"
           :active="rightTab.name"
         />
@@ -25,12 +25,8 @@ export default {
     JobInfo,
   },
   computed: {
-    isGroup() {
-      return this.group;
-    },
     infoData() {
-      // 空位合并操作符
-      return this.isGroup ?? this.job;
+      return this.isSelectedGroup ? this.group : this.job;
     },
   },
 };

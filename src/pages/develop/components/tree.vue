@@ -25,13 +25,13 @@
       </template>
       <template slot="title" slot-scope="data">
         <span
-          @contextmenu.prevent="$refs.rightMenu.show(data.dataRef.dic)"
+          @contextmenu.prevent="treeItemRightClick(data.dataRef)"
           :class="{ title: true, selected: data.selected }"
           >{{ data.title }}</span
         >
       </template>
     </a-tree>
-    <right-menu ref="rightMenu" />
+    <right-menu @click="menuClick" ref="rightMenu" />
   </div>
 </template>
 
@@ -52,9 +52,7 @@ export default {
     },
   },
   data() {
-    return {
-      // visible: false,
-    };
+    return {};
   },
   components: { RightMenu },
   methods: {
@@ -66,8 +64,19 @@ export default {
         id: node.dataRef.id,
       });
     },
-    rightClick(o) {
-      this.selectNode(null, o);
+    rightClick() {},
+    treeItemRightClick(data) {
+      let menus = [];
+      if (data.dic) {
+        menus.push("新建文件夹");
+        if (data.type === "small_dic") {
+          menus.push({ title: "新建任务", children: ["spark", "shell"] });
+        }
+      }
+      this.$refs.rightMenu.show(menus.concat(["重命名", "移动", "删除"]));
+    },
+    menuClick(v) {
+      console.log(v);
     },
   },
 };

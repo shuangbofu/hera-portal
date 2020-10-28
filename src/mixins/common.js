@@ -10,8 +10,8 @@ export default {
     ]),
     ...mapGetters("develop", [
       'tabs', 'tabActive',
-      'selectedJobNodes', 'selectedJobNode', 'selectedJobNodeKey',
-      'selectedGroupNode',
+      'selectedTabNode', 'selectedTabNodes', 'selectedKey', 'selectedTabKeys',
+      'isSelectedGroup',
       'editorBottomTabs'
     ]),
     onlyCenter() {
@@ -32,10 +32,10 @@ export default {
       return this.tab_('bottom')
     },
     job() {
-      return this.jobList.find(i => i.id === this.selectedJobNode?.id)
+      return this.jobList.find(i => i.id === this.selectedTabNode?.origin?.id)
     },
     group() {
-      return this.selectedGroupNode?.origin
+      return this.selectedTabNode.origin
     }
   },
   methods: {
@@ -47,7 +47,8 @@ export default {
       'initLocalInfo', 'initJobs',
       'setTabResize', 'setTab',
       'expanedTreeNode', 'selectTreeNode',
-      'changeSelectedTab', 'closeSelectedTab'
+      'switchSelectedTab',
+      'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs'
     ]),
     changeTab(name, type) {
       this.setTab({

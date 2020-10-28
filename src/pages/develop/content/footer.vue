@@ -1,8 +1,6 @@
 <template>
   <div class="container">
-    <attached-header type="bottom"
-      >底部{{ bottomTab }},{{ treeCaches }}</attached-header
-    >
+    <attached-header type="bottom"></attached-header>
   </div>
 </template>
 

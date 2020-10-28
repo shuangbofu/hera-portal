@@ -39,6 +39,9 @@ import ConfEditor from "./confEditor";
 import MonacoEditor from "monaco-editor-vue";
 import commonMixin from "@/mixins/common";
 export default {
+  data() {
+    return { test: "sdfsdfsf" };
+  },
   components: {
     MonacoEditor,
     ConfEditor,
