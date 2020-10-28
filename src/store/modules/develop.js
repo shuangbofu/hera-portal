@@ -92,7 +92,7 @@ export default {
       leftTab: '',
       onlyCenter: false,
       editorBottom: 'text',
-      confEditorWidth: '50'
+      confEditorWidth: 50
     },
     jobTrees: {
       debug: [],
@@ -105,11 +105,9 @@ export default {
   getters: {
     tabs: (state, getters) => {
       const tabs = state.configs.tabs
-      const righTabs = tabs.right
-      const isGroup = getters.selectedGroupNodeKey
       return {
         ...tabs,
-        right: righTabs.filter(i => !i.private || i.private === (isGroup ? 'group' : 'job'))
+        right: tabs.right.filter(i => !i.private || i.private === (getters.isSelectedGroup ? 'group' : 'job'))
       }
     },
     rightTabs: (state, getters) => getters.tabs.right,
@@ -119,7 +117,7 @@ export default {
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
 
     treeCache: (state) => state.treeCaches[state.layoutConfig.leftTab],
-    selectedTabKeys: (state, getters) => getters.treeCache.selectedKeys,
+    selectedTabKeys: (state, getters) => getters.treeCache.selectedTabs,
 
     selectedKey: (state, getters) => getters.treeCache?.selectedKeys[0],
 
@@ -207,16 +205,16 @@ export default {
           setTreeCache(treeCaches, jobTrees, 'myJob')
         });
     },
-    getScheduleJobs() {
-
-    },
-    getDevelopJobs() {
-
+    initAreas({ state }) {
+      getAllAreas().then(data => {
+        state.areas = data
+      })
     },
     setTab({ state, getters, commit, dispatch }, { name, type }) {
       if (type == 'left') {
         state.layoutConfig.leftTab = name
-        dispatch('getJob', { id: getters.selectedJobNode?.id, check: true })
+        const id = getters.selectedKey?.split("_")[1]
+        dispatch('getJob', { id, check: true })
       }
       const tab = state.layoutConfig.tab
       const tabConfigs = tab.configs[type]
@@ -263,7 +261,8 @@ export default {
         return
       }
       // 如果切换时right tab不存在要设置为第一个tab
-      if (!getters.rightTabs.find(i => i.name === getters.tab.actives['right'])) {
+      const rightTab = getters.tab.actives['right']
+      if (rightTab && !getters.rightTabs.find(i => i.name === rightTab)) {
         dispatch('setTab', { name: getters.rightTabs[0].name, type: 'right' })
       }
       commit('saveTreeCache')
@@ -275,12 +274,14 @@ export default {
      */
     switchSelectedTab({ getters, commit, dispatch }, key) {
       if (key && getters.treeCache.selectedTabs.includes(key)) {
-        console.log('change2Tab', key)
+        console.log('changeTab2' + key)
         const id = key.split("_")[1]
-        return dispatch('getJob', { id, check: true }).then(() => {
-          getters.treeCache.selectedKeys = [key]
-          commit('saveTreeCache')
-        })
+        if (id) {
+          return dispatch('getJob', { id: Number(id), check: true }).then(() => {
+            getters.treeCache.selectedKeys = [key]
+            commit('saveTreeCache')
+          })
+        }
       }
     },
     /**
@@ -348,6 +349,11 @@ export default {
         dispatch('switchSelectedTab', key)
       }
     },
+    /**
+     * 获取任务数据
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     getJob({ state, getters }, { id, check }) {
       if (!id) {
         return new Promise((r) => { r() })
@@ -375,6 +381,11 @@ export default {
       })
       // TODO 任务调度是不同的请求
     },
+    /**
+     * 获取文件夹数据
+     * @param {*} param0 
+     * @param {*} id 
+     */
     getGroup({ getters }, id) {
       if (!id) {
         return new Promise((r) => { r() })
@@ -391,11 +402,6 @@ export default {
         })
       })
     },
-    initAreas({ state }) {
-      getAllAreas().then(data => {
-        state.areas = data
-      })
-    }
   }
 }
 

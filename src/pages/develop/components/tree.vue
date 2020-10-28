@@ -32,11 +32,13 @@
       </template>
     </a-tree>
     <right-menu @click="menuClick" ref="rightMenu" />
+    <create-job-dialog ref="createJobDialogRef" />
   </div>
 </template>
 
 <script>
 import RightMenu from "./rightMenu";
+import CreateJobDialog from "../dialog/createJob";
 export default {
   props: {
     treeData: {
@@ -54,7 +56,7 @@ export default {
   data() {
     return {};
   },
-  components: { RightMenu },
+  components: { RightMenu, CreateJobDialog },
   methods: {
     selectNode(_, { node }) {
       this.$emit("select", {
@@ -70,13 +72,25 @@ export default {
       if (data.dic) {
         menus.push("新建文件夹");
         if (data.type === "small_dic") {
-          menus.push({ title: "新建任务", children: ["spark", "shell"] });
+          // menus.push({ title: "新建任务", children: ["spark", "shell"] });
+          menus.push("新建任务");
         }
       }
-      this.$refs.rightMenu.show(menus.concat(["重命名", "移动", "删除"]));
+      this.$refs.rightMenu.show(
+        menus.concat(["重命名", "移动", "删除"]),
+        data.origin
+      );
     },
-    menuClick(v) {
-      console.log(v);
+    menuClick({ order, obj }) {
+      const o = {
+        title: order,
+        data: obj,
+      };
+      if (order === "删除") {
+        console.log("delete");
+      } else {
+        this.$refs.createJobDialogRef.show(o);
+      }
     },
   },
 };

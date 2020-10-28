@@ -139,6 +139,7 @@ export default {
     height: 25px !important;
     line-height: 26px !important;
     font-size: 13px;
+    min-width: 180px;
     &:hover {
       background: @editor-tree-active-color!important;
       color: #ffffff;

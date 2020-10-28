@@ -37,3 +37,18 @@
   color: @disabled-color;
   pointer-events: none;
 }
+
+.ant-input-affix-wrapper:hover .ant-input:not(.ant-input-disabled) {
+  border-color: rgb(217, 217, 217);
+}
+
+.ant-input {
+  border-radius: 0;
+  box-shadow: none;
+
+  &:focus,
+  &:hover {
+    box-shadow: none;
+    border-color: rgb(217, 217, 217);
+  }
+}

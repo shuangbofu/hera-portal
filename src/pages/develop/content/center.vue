@@ -64,7 +64,7 @@ export default {
     };
   },
   watch: {
-    "selectedJobNodes.length": {
+    "selectedTabNodes.length": {
       handler(old, newVal) {
         if (newVal !== old) {
           this.updateTabsHeight();
@@ -119,7 +119,11 @@ export default {
     rightClick(node) {
       const key = node.key;
       const tabKeys = this.selectedTabKeys;
-      const menus = ["关闭", "关闭其他", "关闭右侧", "全部关闭"];
+      const menus = ["关闭", "关闭其他", "关闭右侧所有", "全部关闭"];
+      console.log(
+        tabKeys.findIndex((i) => i === key),
+        tabKeys
+      );
       if (tabKeys.findIndex((i) => i === key) + 1 === tabKeys.length) {
         menus.splice(2, 1);
       }
@@ -131,7 +135,7 @@ export default {
         this.closeTab(key);
       } else if ("全部关闭" === order) {
         this.closeAllTabs();
-      } else if ("关闭右侧" === order) {
+      } else if ("关闭右侧所有" === order) {
         this.closeAllRightTabs(key);
       } else if ("关闭其他" === order) {
         this.closeOtherTabs(key);
