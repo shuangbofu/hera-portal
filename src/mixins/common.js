@@ -44,11 +44,12 @@ export default {
       'setEditorBottom'
     ]),
     ...mapActions('develop', [
-      'initLocalInfo', 'initJobs',
-      'setTabResize', 'setTab',
-      'expanedTreeNode', 'selectTreeNode',
+      'restoreLocal', 'initJobs',
+      'resizeTab', 'setTab',
+      'setExpanedTreeNodes', 'selectTreeNode',
       'switchSelectedTab',
-      'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs'
+      'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs',
+      'createGroup', 'createJob'
     ]),
     changeTab(name, type) {
       this.setTab({
@@ -57,9 +58,7 @@ export default {
       })
     },
     changeTabSize(width, type) {
-      this.setTabResize({
-        width, type
-      })
+      this.resizeTab({ width, type })
     },
     getTab(type) {
       return this.tab[type]

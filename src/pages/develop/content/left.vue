@@ -2,44 +2,52 @@
   <div class="container">
     <attached-header type="left">
       <job-tree
+        v-for="tab in ['allJob', 'myJob', 'debug']"
+        :key="tab"
         class="tree"
-        :tree-cache="treeCaches.debug"
-        :tree-data="jobTrees.debug"
-        v-show="leftTab.name === 'debug'"
-        @expand="expanedTreeNode"
+        :tree-cache="treeCaches[tab]"
+        :tree-data="jobTrees[tab]"
+        v-show="leftTab.name === tab"
+        @expand="setExpanedTreeNodes"
         @select="selectTreeNode"
-      />
-      <job-tree
-        class="tree"
-        :tree-cache="treeCaches.myJob"
-        :tree-data="jobTrees.myJob"
-        v-show="leftTab.name === 'myJob'"
-        @expand="expanedTreeNode"
-        @select="selectTreeNode"
-      />
-      <job-tree
-        class="tree"
-        :tree-cache="treeCaches.allJob"
-        :tree-data="jobTrees.allJob"
-        v-show="leftTab.name === 'allJob'"
-        @expand="expanedTreeNode"
-        @select="selectTreeNode"
+        @menuClick="menuClick"
       />
     </attached-header>
+    <create-job-dialog @submit="submit" ref="createJobDialogRef" />
   </div>
 </template>
 
 <script>
-import AttachedHeader from './attachedHeader'
+import CreateJobDialog from "../dialog/createJob";
+import AttachedHeader from "./attachedHeader";
 import JobTree from "../components/tree";
 import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],
   components: {
     JobTree,
-    AttachedHeader
+    AttachedHeader,
+    CreateJobDialog,
   },
-  methods: {},
+  methods: {
+    menuClick(data) {
+      const { order } = data;
+      if (order === "删除") {
+        console.log("delete");
+      } else {
+        this.$refs.createJobDialogRef.show(data);
+      }
+    },
+    submit({ order, obj, result }) {
+      console.log(order, obj, result);
+      if (order === "新建文件夹") {
+        console.log(obj);
+        this.createGroup({ parentKey: obj.key, requestData: result });
+      } else if (order === "新建任务") {
+        this.createJob({ parentKey: obj.key, requestData: result });
+      }
+    },
+  },
 };
 </script>
 

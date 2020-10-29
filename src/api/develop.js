@@ -58,8 +58,28 @@ export function getScheduledGroup(id) {
   })
 }
 
+export function createJobGroup(data) {
+  return post('/scheduleCenter/addGroup.do', data)
+}
+
+export function createJob(data) {
+  return post('/scheduleCenter/addJob.do', data)
+}
+
 export function getAllAreas() {
   return axios.get('/scheduleCenter/getAllArea')
+}
+
+function post(url, data) {
+  return axios.post(url, objToParams(data), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+}
+
+function objToParams(obj) {
+  const params = new URLSearchParams()
+  for (let key in obj) {
+    params.append(key, obj[key])
+  }
+  return params
 }
 
 function str2Arr(str) {

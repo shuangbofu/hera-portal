@@ -37,7 +37,8 @@ service.interceptors.response.use(
                 message.error(res.message)
                 return Promise.reject(res.message)
             } else {
-                return res.data
+                // 兼容hera api。。
+                return res.data || res.message
             }
         }
     },

@@ -2,14 +2,10 @@
   <a-modal
     wrapClassName="create-job-dialog"
     :visible="visible"
-    @cancel="
-      visible = false;
-      jobType = 'Spark';
-      name = '';
-    "
+    @cancel="close"
     width="240px"
     :closable="false"
-    :mask="false"
+    :mask="true"
     :destroyOnClose="true"
     :centered="true"
     :footer="null"
@@ -24,22 +20,58 @@
         @pressEnter="submit"
         :placeholder="`${oldName}/`"
       >
-        <span v-if="isCreateJob" :class="['icon', jobType]" slot="prefix">
-          {{ jobType.substring(0, 1) }}
-        </span>
-      </a-input>
-      <div class="type-select" v-if="isCreateJob">
-        <div
-          :class="['type', type === jobType ? 'active' : '']"
-          v-for="type in jobTypes"
-          :key="type"
-          @click="jobType = type"
-        >
-          <span :class="['icon', type]">
-            {{ type.substring(0, 1) }}
+        <template slot="prefix">
+          <span v-if="isCreateJob" :class="['icon', jobType]">
+            {{ jobType.substring(0, 1) }}
           </span>
-          <span>{{ type }}</span>
-        </div>
+          <a-icon
+            type="folder"
+            theme="filled"
+            :class="['group-icon', groupType]"
+            v-else-if="isCreateGroup"
+          />
+          <template v-else-if="isRename">
+            <a-icon
+              v-if="obj.type.includes('dic')"
+              type="folder"
+              theme="filled"
+              :class="['group-icon', obj.type]"
+            />
+            <span v-else :class="['icon', obj.runType]">
+              {{ (obj.runType || "?").substring(0, 1) }}
+            </span>
+          </template>
+        </template>
+      </a-input>
+      <div class="type-select">
+        <template v-if="isCreateJob">
+          <div
+            :class="['type', type === jobType ? 'active' : '']"
+            v-for="type in jobTypes"
+            :key="type"
+            @click="jobType = type"
+          >
+            <span :class="['icon', type]">
+              {{ type.substring(0, 1) }}
+            </span>
+            <span>{{ type }}</span>
+          </div>
+        </template>
+        <template v-else-if="isCreateGroup">
+          <div
+            v-for="type in groupTypes"
+            :key="type.name"
+            :class="['type', type.name === groupType ? 'active' : '']"
+            @click="groupType = type.name"
+          >
+            <a-icon
+              type="folder"
+              theme="filled"
+              :class="['group-icon', type.name]"
+            />
+            {{ type.title }}
+          </div>
+        </template>
       </div>
     </div>
   </a-modal>
@@ -47,22 +79,34 @@
 
 <script>
 const jobTypes = ["Spark", "Hive", "Shell"];
+const groupTypes = [
+  {
+    name: "big_dic",
+    title: "大目录",
+  },
+  { name: "small_dic", title: "小目录" },
+];
 export default {
   data() {
     return {
       jobTypes,
+      groupTypes,
       visible: false,
       jobType: "Spark",
+      groupType: "small_dic",
       name: "",
-      obj: {},
+      data: {},
     };
   },
   computed: {
     oldName() {
-      return this.obj.data?.name.split("(")[0];
+      return this.obj?.name.split("(")[0];
+    },
+    obj() {
+      return this.data.obj;
     },
     title() {
-      return this.obj.title;
+      return this.data.order;
     },
     isCreateJob() {
       return this.title === "新建任务";
@@ -70,10 +114,13 @@ export default {
     isRename() {
       return this.title === "重命名";
     },
+    isCreateGroup() {
+      return this.title === "新建文件夹";
+    },
   },
   methods: {
-    show(obj) {
-      this.obj = obj;
+    show(data) {
+      this.data = data;
       if (this.isRename) {
         this.name = this.oldName;
       }
@@ -82,6 +129,27 @@ export default {
     submit() {
       this.visible = false;
       console.log(this.name);
+      let result = {};
+      if (this.isCreateGroup) {
+        result = {
+          directory: this.groupType === "big_dic" ? 0 : 1,
+          name: this.name,
+          parentId: this.obj.id,
+        };
+      } else if (this.isCreateJob) {
+        result = {
+          runType: this.jobType.toLowerCase(),
+          name: this.name,
+          parentId: `group_${this.obj.id}`,
+        };
+      }
+      this.$emit("submit", { ...this.data, result });
+    },
+    close() {
+      this.visible = false;
+      this.jobType = "Spark";
+      this.groupType = "small_dic";
+      this.name = "";
     },
   },
 };
@@ -90,9 +158,9 @@ export default {
 <style lang="less">
 .create-job-dialog {
   .ant-modal-content {
-    // box-shadow: none;
     border: 1px solid @editor-border-color;
-    box-shadow: 0 4px 12px @editor-bg-color!important;
+    // box-shadow: 0 4px 12px @editor-bg-color!important;
+    box-shadow: none;
     background: @editor-bg-color;
     .ant-modal-body {
       padding: 0;
@@ -160,6 +228,24 @@ export default {
       line-height: 15px;
       color: #324853;
       background-color: @editor-yellow-color;
+    }
+  }
+  .group-icon {
+    font-size: 14px;
+    margin-right: 6px;
+    &.big_dic {
+      color: @editor-tree-icon1-color;
+    }
+    &.small_dic {
+      color: @editor-tree-icon2-color;
+    }
+    &.active {
+      &.big_dic {
+        color: @editor-tree-icon3-color;
+      }
+      &.small_dic {
+        color: @editor-tree-icon4-color;
+      }
     }
   }
 }

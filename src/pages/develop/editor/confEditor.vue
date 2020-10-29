@@ -28,7 +28,7 @@
             v-model="filterValue"
             placeholder="过滤条件"
           >
-            <a-icon type="filter" slot="prefix" />
+            <!-- <a-icon type="filter" slot="prefix" /> -->
           </a-input>
         </div>
         <div class="confs">

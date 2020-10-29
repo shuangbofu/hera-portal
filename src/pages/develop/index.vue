@@ -66,7 +66,7 @@ export default {
   },
   created() {
     this.initJobs().then(() => {
-      this.initLocalInfo();
+      this.restoreLocal();
     });
   },
   computed: {},

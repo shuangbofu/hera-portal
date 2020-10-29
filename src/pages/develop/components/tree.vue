@@ -32,13 +32,11 @@
       </template>
     </a-tree>
     <right-menu @click="menuClick" ref="rightMenu" />
-    <create-job-dialog ref="createJobDialogRef" />
   </div>
 </template>
 
 <script>
 import RightMenu from "./rightMenu";
-import CreateJobDialog from "../dialog/createJob";
 export default {
   props: {
     treeData: {
@@ -56,7 +54,7 @@ export default {
   data() {
     return {};
   },
-  components: { RightMenu, CreateJobDialog },
+  components: { RightMenu },
   methods: {
     selectNode(_, { node }) {
       this.$emit("select", {
@@ -70,27 +68,19 @@ export default {
     treeItemRightClick(data) {
       let menus = [];
       if (data.dic) {
-        menus.push("新建文件夹");
         if (data.type === "small_dic") {
-          // menus.push({ title: "新建任务", children: ["spark", "shell"] });
           menus.push("新建任务");
+        } else {
+          menus.push("新建文件夹");
         }
       }
-      this.$refs.rightMenu.show(
-        menus.concat(["重命名", "移动", "删除"]),
-        data.origin
-      );
+      this.$refs.rightMenu.show(menus.concat(["重命名", "移动", "删除"]), {
+        ...data.origin,
+        key: data.key,
+      });
     },
-    menuClick({ order, obj }) {
-      const o = {
-        title: order,
-        data: obj,
-      };
-      if (order === "删除") {
-        console.log("delete");
-      } else {
-        this.$refs.createJobDialogRef.show(o);
-      }
+    menuClick(data) {
+      this.$emit("menuClick", data);
     },
   },
 };
@@ -132,7 +122,7 @@ export default {
     color: @editor-tree-icon1-color;
   }
   .title {
-    font-size: 14px;
+    font-size: 13px;
     padding: 0 6px;
     color: @editor-tree-title-color;
     &.selected {

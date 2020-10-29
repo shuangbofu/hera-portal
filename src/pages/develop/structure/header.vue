@@ -2,10 +2,15 @@
   <div class="container">
     <div class="operation-bar">
       <template v-for="(button, index) in buttons">
-        <a-tooltip :key="index" :mouseEnterDelay=".6">
-          <template slot="title">{{button.tip}}</template>
+        <a-tooltip :key="index" :mouseEnterDelay="0.6">
+          <template slot="title">{{ button.tip }}</template>
           <my-icon
-            :class="['icon', button.icon, !job && button.disabled ? 'disabled' : '']"
+            @click="buttonClick(button.icon)"
+            :class="[
+              'icon',
+              button.icon,
+              !job && button.disabled ? 'disabled' : '',
+            ]"
             :type="`hera_icon_${button.icon}`"
           />
         </a-tooltip>
@@ -14,12 +19,17 @@
       <my-icon
         @click="full"
         class="icon"
-        :type="`hera_icon_fullscreen${fullscreen ? '-exit' :''}`"
+        :type="`hera_icon_fullscreen${fullscreen ? '-exit' : ''}`"
       />
       <my-icon
         :class="['icon', [theme.mode]]"
-        :type="`hera_icon_${{'light':'moon','night':'sun'}[theme.mode]}`"
-        @click="$store.commit('setting/setTheme', {...theme, mode: {'light':'night','night':'light'}[theme.mode]})"
+        :type="`hera_icon_${{ light: 'moon', night: 'sun' }[theme.mode]}`"
+        @click="
+          $store.commit('setting/setTheme', {
+            ...theme,
+            mode: { light: 'night', night: 'light' }[theme.mode],
+          })
+        "
       />
     </div>
     <div class="crumbs">hera分布式调度 > test > echoTest</div>
@@ -51,6 +61,14 @@ export default {
     full() {
       screenfull.toggle();
       this.$store.commit("setting/toggleFullScreen");
+    },
+    buttonClick(name) {
+      console.log(name);
+      if (name === "refresh") {
+        this.$store.dispatch("develop/initJobs").then(() => {
+          this.$message.success("刷新成功！");
+        });
+      }
     },
   },
 };

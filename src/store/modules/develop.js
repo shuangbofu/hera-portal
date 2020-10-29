@@ -1,4 +1,11 @@
-import { getScheduledJob, initScheduledJobs, getScheduledGroup, getAllAreas } from '@/api/develop'
+import {
+  getScheduledJob,
+  initScheduledJobs,
+  getScheduledGroup,
+  getAllAreas,
+  createJobGroup,
+  createJob
+} from '@/api/develop'
 export default {
   namespaced: true,
   state: {
@@ -147,20 +154,24 @@ export default {
 
     saveLocalLayout(state) {
       console.log('save local[layout]')
-      setLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
+      writeToLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
     },
     saveTreeCache(state) {
       console.log('save local[treeCaches]')
-      setLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
+      writeToLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
     },
   },
   actions: {
-    initLocalInfo({ state, getters, dispatch }) {
+    /**
+     * 从浏览器本地还原数据
+     * @param {*} param0 
+     */
+    restoreLocal({ state, getters, dispatch }) {
       dispatch('initAreas')
-      initLocal(STORAGE_KEY_LAYOUT_INFO, info => {
+      readFromLocal(STORAGE_KEY_LAYOUT_INFO, info => {
         state.layoutConfig = info
       })
-      initLocal(STORAGE_KEY_TREE_INFO, info => {
+      readFromLocal(STORAGE_KEY_TREE_INFO, info => {
         state.treeCaches = info
       })
       const selectedKey = getters.selectedKey
@@ -173,20 +184,30 @@ export default {
         }
       }
     },
-    initJobs({ state }) {
+    /**
+     * 初始化（我的任务和所有任务）
+     * @param {*} param0 
+     */
+    initJobs({ state, dispatch }) {
       return initScheduledJobs()
         .then((data) => {
-          const allJob = [getTreeData(data.allJob)]
-          const myJob = [getTreeData(data.myJob)]
-          state.jobTrees.allJob = allJob
-          state.jobTrees.myJob = myJob
-
-          const jobTrees = state.jobTrees
-          const treeCaches = state.treeCaches
-          setTreeCache(treeCaches, jobTrees, 'allJob')
-          setTreeCache(treeCaches, jobTrees, 'myJob')
+          leftTabs.forEach(tab => {
+            if (tab !== 'debug') {
+              const treeData = [getTreeData(data[tab])]
+              state.jobTrees[tab] = treeData
+              const treeCahce = state.treeCaches[tab]
+              if (treeCahce.expandedKeys.length === 0) {
+                treeCahce.expandedKeys = [state.jobTrees[tab][0].key]
+              }
+              dispatch('setNodeDatas', { type: tab, datas: state.jobList })
+            }
+          })
         });
     },
+    /**
+     * 初始化区域变量
+     * @param {*} param0 
+     */
     initAreas({ state }) {
       getAllAreas().then(data => {
         state.areas = data
@@ -214,13 +235,22 @@ export default {
       }
       commit('saveLocalLayout')
     },
-    setTabResize({ getters, commit }, { width, type }) {
+    resizeTab({ getters, commit }, { width, type }) {
       getters.tabActive(type).width = width
       commit('saveLocalLayout')
     },
-    expanedTreeNode({ getters, commit }, keys) {
+    setExpanedTreeNodes({ getters, commit }, keys) {
+      console.log(keys)
       getters.treeCache.expandedKeys = keys
       commit('saveTreeCache')
+    },
+    expandTreeNode({ getters, dispatch }, key) {
+      const keys = getters.treeCache.expandedKeys
+      console.log(keys, key)
+      if (!keys.includes(key)) {
+        keys.push(key)
+        dispatch('setExpanedTreeNodes', keys)
+      }
     },
     /**
      * 选择树节点
@@ -341,7 +371,7 @@ export default {
      * @param {*} param0 
      * @param {*} param1 
      */
-    getJob({ state, getters }, { id, check }) {
+    getJob({ state, dispatch }, { id, check }) {
       if (!id) {
         return new Promise((r) => { r() })
       }
@@ -355,18 +385,25 @@ export default {
         if (job !== null) {
           state.jobList.push(data)
           leftTabs.forEach(type => {
-            const node = getters.flatJobsTrees(type).find(i => i.id === data.id);
-            if (node) {
-              node.origin = {
-                ...data
-              }
-            }
+            dispatch('setNodeData', { type, data })
           })
         } else {
           Object.assign(job, data)
         }
       })
       // TODO 任务调度是不同的请求
+    },
+    setNodeData({ getters }, { type, data }) {
+      const node = getters.flatJobsTrees(type).find(i => i.id === data.id)
+      if (node) {
+        // node.origin = { ...data }
+        Object.assign(node.origin, data)
+      }
+    },
+    setNodeDatas({ dispatch }, { type, datas }) {
+      datas.forEach(data => {
+        dispatch('setNodeData', { type, data })
+      })
     },
     /**
      * 获取文件夹数据
@@ -383,12 +420,35 @@ export default {
           if (type !== 'debug') {
             const node = getters.flatGroupTrees(type).find(i => i.id === data.id)
             if (node) {
-              node.origin = { ...data }
+              // node.origin = { ...data }
+              Object.assign(node.origin, data)
             }
           }
         })
       })
     },
+    createGroup({ dispatch }, { requestData, parentKey }) {
+      return createJobGroup(requestData).then(() => {
+        dispatch('initJobs').then(() => {
+          dispatch('expandTreeNode', parentKey)
+        })
+      })
+    },
+    createJob({ dispatch }, { requestData, parentKey }) {
+      return createJob(requestData).then(data => {
+        dispatch('initJobs').then(() => {
+          const id = Number(data)
+          const newKey = `node_${id}`
+          dispatch('expandTreeNode', parentKey)
+          dispatch('selectTreeNode', {
+            key: newKey,
+            selected: false,
+            dic: false,
+            id
+          })
+        })
+      })
+    }
   }
 }
 
@@ -401,17 +461,15 @@ function flatNodes(nodes, arr) {
     flatNodes(node.children, arr)
   })
 }
-function setTreeCache(caches, jobTrees, type) {
-  const treeCache = caches[type]
-  if (treeCache.expandedKeys.length === 0) {
-    treeCache.expandedKeys = [jobTrees[type][0].key]
-  }
-}
 
 function getTreeData(jobs) {
   return setUpJobs(jobs).find(i => i.origin.parent === 'group_0')
 }
 
+/**
+ * 转换成树结构
+ * @param {*} jobs 
+ */
 function setUpJobs(jobs) {
   jobs.forEach(job => {
     job.children = jobs.filter(i => i.parent === job.id)
@@ -419,6 +477,10 @@ function setUpJobs(jobs) {
   return jobs.map(job => setUpJobNode(job))
 }
 
+/**
+ * 递归转换树节点
+ * @param {*} job 
+ */
 function setUpJobNode(job) {
   const isDic = job.directory !== null
   const type = !isDic ? 'job' : (job.directory === 0 ? 'big_dic' : 'small_dic')
@@ -427,7 +489,11 @@ function setUpJobNode(job) {
     isLeaf: !job.isParent || job.children.length === 0,
     key: 'node_' + job.id,
     title: job.jobName,
-    origin: job,
+    origin: {
+      ...job,
+      id: job.jobId,
+      type
+    },
     type,
     dic: isDic,
     children: job.children.map(i => setUpJobNode(i)),
@@ -442,10 +508,10 @@ const STORAGE_KEY_LAYOUT_INFO = "layout"
 const STORAGE_KEY_TREE_INFO = "tree"
 const STORAGE_KEY_PREFIX = "hera_"
 
-function setLocal(key, value) {
+function writeToLocal(key, value) {
   localStorage.setItem(STORAGE_KEY_PREFIX + key, JSON.stringify(value))
 }
-function initLocal(key, callback) {
+function readFromLocal(key, callback) {
   const v = localStorage.getItem(STORAGE_KEY_PREFIX + key)
   if (v != null) {
     callback(JSON.parse(v))
