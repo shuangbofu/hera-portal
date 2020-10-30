@@ -238,6 +238,7 @@ export default {
       .conf-item {
         line-height: 26px;
         font-size: 14px;
+        color: @editor-tree-title-color;
         .key,
         .value {
           &.key {

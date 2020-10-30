@@ -127,9 +127,12 @@ export default {
       this.visible = true;
     },
     submit() {
-      this.visible = false;
-      console.log(this.name);
       let result = {};
+      if (this.name.trim() === "") {
+        this.$message.error("name不能为空！");
+        return;
+      }
+      this.visible = false;
       if (this.isCreateGroup) {
         result = {
           directory: this.groupType === "big_dic" ? 0 : 1,
@@ -158,9 +161,6 @@ export default {
 <style lang="less">
 .create-job-dialog {
   .ant-modal-content {
-    border: 1px solid @editor-border-color;
-    // box-shadow: 0 4px 12px @editor-bg-color!important;
-    box-shadow: none;
     background: @editor-bg-color;
     .ant-modal-body {
       padding: 0;

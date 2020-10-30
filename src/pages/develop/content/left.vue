@@ -42,9 +42,15 @@ export default {
       console.log(order, obj, result);
       if (order === "新建文件夹") {
         console.log(obj);
-        this.createGroup({ parentKey: obj.key, requestData: result });
+        this.createGroup({ parentKey: obj.key, requestData: result }).then(
+          () => {
+            this.$message.success("创建成功！");
+          }
+        );
       } else if (order === "新建任务") {
-        this.createJob({ parentKey: obj.key, requestData: result });
+        this.createJob({ parentKey: obj.key, requestData: result }).then(() => {
+          this.$message.success("创建成功！");
+        });
       }
     },
   },

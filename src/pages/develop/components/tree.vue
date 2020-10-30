@@ -1,6 +1,7 @@
 <template>
   <div class="container" v-if="treeData.length > 0">
     <a-tree
+      :blockNode="true"
       show-icon
       :tree-data="treeData"
       :selectedKeys.sync="treeCache.selectedKeys"
@@ -24,11 +25,9 @@
         ></a-icon>
       </template>
       <template slot="title" slot-scope="data">
-        <span
-          @contextmenu.prevent="treeItemRightClick(data.dataRef)"
-          :class="{ title: true, selected: data.selected }"
-          >{{ data.title }}</span
-        >
+        <span :class="{ title: true, selected: data.selected }">{{
+          data.title
+        }}</span>
       </template>
     </a-tree>
     <right-menu @click="menuClick" ref="rightMenu" />
@@ -64,19 +63,19 @@ export default {
         id: node.dataRef.id,
       });
     },
-    rightClick() {},
-    treeItemRightClick(data) {
+    rightClick({ node }) {
+      const dataRef = node.dataRef;
       let menus = [];
-      if (data.dic) {
-        if (data.type === "small_dic") {
+      if (dataRef.dic) {
+        if (dataRef.type === "small_dic") {
           menus.push("新建任务");
         } else {
           menus.push("新建文件夹");
         }
       }
       this.$refs.rightMenu.show(menus.concat(["重命名", "移动", "删除"]), {
-        ...data.origin,
-        key: data.key,
+        ...dataRef.origin,
+        key: dataRef.key,
       });
     },
     menuClick(data) {
@@ -88,7 +87,7 @@ export default {
 
 <style lang="less" scoped>
 .container {
-  padding: 4px 2px;
+  // padding: 4px 2px;
   .tree-icon {
     font-size: 15px;
     margin-right: 4px;
@@ -116,7 +115,7 @@ export default {
 <style lang="less">
 .ant-tree {
   li {
-    padding: 1px 0 !important;
+    padding: 0 !important;
   }
   .action {
     color: @editor-tree-icon1-color;
@@ -133,30 +132,24 @@ export default {
     font-size: 15px;
   }
 }
-.ant-tree li span.ant-tree-switcher,
-.ant-tree li span.ant-tree-iconEle {
-  width: 20px;
-  height: 20px !important;
-}
-
 .ant-tree-child-tree > li:first-child {
   padding-top: 2px;
 }
 .ant-tree-switcher-icon {
   color: @editor-tree-icon1-color;
 }
-// .ant-tree li .ant-tree-node-content-wrapper:hover {
-//   background: inherit;
-// }
 .ant-tree li .ant-tree-node-content-wrapper {
   padding: 0;
-  padding-left: 6px;
+  padding-left: 4px;
+  border-radius: 0;
   &:hover {
-    // background: inherit;
     background: @editor-tree-hover-color!important;
   }
   &.ant-tree-node-selected {
     background: @editor-tree-active-color!important;
   }
+}
+.ant-tree #treeitem:hover {
+  background: @editor-tree-hover-color!important;
 }
 </style>
