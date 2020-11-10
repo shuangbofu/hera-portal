@@ -7,7 +7,7 @@
           <div class="header"></div>
           <div class="content log-list">
             <div
-              @click="currentLogItemId = item.id"
+              @click="logRecord.current = item.id"
               :class="[
                 'log-item',
                 realCurrentLogItemId === item.id ? 'active' : '',
@@ -31,24 +31,15 @@
 <script>
 import SplitPane from "@/components/splitPane";
 import commonMixin from "@/mixins/common";
-// import MonacoEditor from "monaco-editor-vue";
 export default {
   data() {
     return {
       logs: [],
       currentLogItemId: null,
-      /**
-       * {
-       *  "offset": 0,
-       *  "pageSize":10,
-       *  "jobId": xxxxx
-       * }
-       */
     };
   },
   components: {
     SplitPane,
-    // MonacoEditor,
   },
   mixins: [commonMixin],
   watch: {
@@ -77,7 +68,6 @@ export default {
   },
   methods: {
     resize(v) {
-      // this.$store.commit("develop/setLogContainerWidth", v);
       this.setLogContainerWidth(v);
     },
   },
