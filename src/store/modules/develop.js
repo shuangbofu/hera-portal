@@ -4,8 +4,11 @@ import {
   getScheduledGroup,
   getAllAreas,
   createJobGroup,
-  createJob
+  createJob,
+  getJobLogList,
+  getLog
 } from '@/api/develop'
+import Vue from 'vue'
 export default {
   namespaced: true,
   state: {
@@ -84,7 +87,8 @@ export default {
       leftTab: '',
       onlyCenter: false,
       editorBottom: 'text',
-      confEditorWidth: 50
+      confEditorWidth: 50,
+      logContainerWidth: 20
     },
     jobTrees: {
       debug: [],
@@ -92,7 +96,8 @@ export default {
       myJob: []
     },
     jobList: [],
-    areas: []
+    areas: [],
+    logRecords: []
   },
   getters: {
     tabs: (state, getters) => {
@@ -136,7 +141,19 @@ export default {
     },
     isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
 
-    editorBottomTabs: state => state.configs.editorBottomTabs
+    editorBottomTabs: state => state.configs.editorBottomTabs,
+
+    // 日志列表
+    logRecord: (state, getters) => {
+      if (getters.isSelectedGroup) {
+        return {}
+      }
+      const id = getters.selectedTabNode?.origin?.id
+      if (!id) {
+        return {}
+      }
+      return state.logRecords.find(i => i.jobId === id)
+    }
   },
   mutations: {
     toggleOnlyCenter(state) {
@@ -151,7 +168,10 @@ export default {
       state.layoutConfig.confEditorWidth = value
       this.commit('develop/saveLocalLayout')
     },
-
+    setLogContainerWidth(state, value) {
+      state.layoutConfig.logContainerWidth = value
+      this.commit('develop/saveLocalLayout')
+    },
     saveLocalLayout(state) {
       console.log('save local[layout]')
       writeToLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
@@ -183,6 +203,41 @@ export default {
           dispatch('getJobByKey', { key: selectedKey })
         }
       }
+    },
+    /**
+     * 获取日志列表
+     * @param {*} param0 
+     * @param {*} param1 
+     */
+    getJobLogList({ state }, { pageSize, offset, jobId }) {
+      getJobLogList(pageSize, offset, jobId).then(data => {
+        const exist = state.logRecords.findIndex(i => i.jobId === jobId) !== -1
+        console.log(exist)
+        if (!exist) {
+          state.logRecords.push({
+            pageSize,
+            offset,
+            jobId,
+            list: data.rows,
+            current: data.rows[0]?.id
+          })
+          console.log(state.logRecords)
+        }
+      })
+    },
+    getLogContent({ state }, { logItemId, jobId }) {
+      getLog(logItemId, jobId).then(data => {
+        console.log(data)
+        const logRecord = state.logRecords.find(i => i.jobId === jobId)
+        if (logRecord) {
+          const index = logRecord.list.findIndex(j => j.id === logItemId)
+          const logItem = logRecord.list[index]
+          Vue.set(logItem, 'status', data.status)
+          Vue.set(logItem, 'log', data.log)
+          // logRecord.list[index] = { ...logItem, log: data.log, status: data.status }
+          // Object.assign(logRecord.list[index], { log: data.log, status: data.status })
+        }
+      })
     },
     /**
      * 初始化（我的任务和所有任务）
@@ -363,7 +418,7 @@ export default {
      * @param {*} param1 
      */
     getJobByKey({ dispatch }, { key, check }) {
-      const id = key?.split('_')[1]
+      const id = Number(key?.split('_')[1])
       return dispatch('getJob', { id: id ? Number(id) : null, check })
     },
     /**
@@ -390,6 +445,7 @@ export default {
         } else {
           Object.assign(job, data)
         }
+        dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
       })
       // TODO 任务调度是不同的请求
     },

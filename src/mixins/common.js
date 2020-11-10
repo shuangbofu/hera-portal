@@ -12,7 +12,8 @@ export default {
       'tabs', 'tabActive',
       'selectedTabNode', 'selectedTabNodes', 'selectedKey', 'selectedTabKeys',
       'isSelectedGroup',
-      'editorBottomTabs'
+      'editorBottomTabs',
+      'logRecord'
     ]),
     onlyCenter() {
       return this.layoutConfig.onlyCenter
@@ -41,7 +42,8 @@ export default {
   methods: {
     ...mapMutations("develop", [
       'toggleOnlyCenter',
-      'setEditorBottom'
+      'setEditorBottom',
+      'setLogContainerWidth'
     ]),
     ...mapActions('develop', [
       'restoreLocal', 'initJobs',
@@ -49,7 +51,9 @@ export default {
       'setExpanedTreeNodes', 'selectTreeNode',
       'switchSelectedTab',
       'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs',
-      'createGroup', 'createJob'
+      'createGroup', 'createJob',
+      // 获取日志内容
+      'getLogContent'
     ]),
     changeTab(name, type) {
       this.setTab({

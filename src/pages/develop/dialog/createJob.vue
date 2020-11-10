@@ -153,6 +153,7 @@ export default {
       this.jobType = "Spark";
       this.groupType = "small_dic";
       this.name = "";
+      console.log("close", this.name);
     },
   },
 };

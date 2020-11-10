@@ -70,6 +70,14 @@ export function getAllAreas() {
   return axios.get('/scheduleCenter/getAllArea')
 }
 
+export function getJobLogList(pageSize, offset, jobId) {
+  return axios.get(`/scheduleCenter/getJobHistory.do?pageSize=${pageSize}&offset=${offset}&jobId=${jobId}`)
+}
+
+export function getLog(logId, jobId) {
+  return axios.get(`/scheduleCenter/getLog.do?id=${logId}&jobId=${jobId}`)
+}
+
 function post(url, data) {
   return axios.post(url, objToParams(data), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
 }

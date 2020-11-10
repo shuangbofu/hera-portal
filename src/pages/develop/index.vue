@@ -30,7 +30,7 @@
             <right-attached class="content-in" />
           </template>
           <template v-slot:bottom>
-            <footer-attached class="contnet-in" />
+            <footer-attached class="content-in" />
           </template>
         </main-center>
       </a-layout-content>
