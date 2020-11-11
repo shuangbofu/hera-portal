@@ -26,6 +26,7 @@ const map = {
   'editor-green2-color': ['#60A766', '#519B50'],
 
   'editor-red-color': ['#E58886', '#AB4F4D'],
+  'editor-red2-color': ['#D6595D', '#C2544D'],
   'editor-yellow2-color': ['#F5C66F', '#BB8E33'],
   'editor-gray-color': ['#C0C0C0', '#595959'],
   'editor-blue-color': ['#3F93C7', '#44A0D9'],

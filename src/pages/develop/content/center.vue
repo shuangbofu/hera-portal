@@ -48,7 +48,7 @@
         <div class="loading" v-else>正在数据加载，请稍等……</div>
       </div>
     </div>
-    <right-menu @click="menuClick" ref="rightMenu" />
+    <right-menu ref="rightMenu" />
   </div>
 </template>
 
@@ -119,27 +119,20 @@ export default {
     rightClick(node) {
       const key = node.key;
       const tabKeys = this.selectedTabKeys;
-      const menus = ["关闭", "关闭其他", "关闭右侧所有", "全部关闭"];
-      console.log(
-        tabKeys.findIndex((i) => i === key),
-        tabKeys
-      );
+      const menuFuns = {
+        关闭: (key) => this.closeTab(key),
+        关闭其他: (key) => this.closeOtherTabs(key),
+        关闭右侧所有: (key) => this.closeAllRightTabs(key),
+        全部关闭: () => this.closeAllTabs(),
+      };
+      const menus = Object.keys(menuFuns);
       if (tabKeys.findIndex((i) => i === key) + 1 === tabKeys.length) {
         menus.splice(2, 1);
       }
-      this.$refs.rightMenu.show(menus, key);
-    },
-    menuClick({ order, obj }) {
-      const key = obj;
-      if ("关闭" === order) {
-        this.closeTab(key);
-      } else if ("全部关闭" === order) {
-        this.closeAllTabs();
-      } else if ("关闭右侧所有" === order) {
-        this.closeAllRightTabs(key);
-      } else if ("关闭其他" === order) {
-        this.closeOtherTabs(key);
+      if (tabKeys.length === 1) {
+        menus.splice(1, 2);
       }
+      this.$refs.rightMenu.show(menus, (order) => menuFuns[order](key));
     },
   },
 };

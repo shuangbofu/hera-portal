@@ -96,6 +96,7 @@ export default {
       groupType: "small_dic",
       name: "",
       data: {},
+      callback: null,
     };
   },
   computed: {
@@ -119,12 +120,13 @@ export default {
     },
   },
   methods: {
-    show(data) {
+    show(data, callback) {
       this.data = data;
       if (this.isRename) {
         this.name = this.oldName;
       }
       this.visible = true;
+      this.callback = callback;
     },
     submit() {
       let result = {};
@@ -146,7 +148,7 @@ export default {
           parentId: `group_${this.obj.id}`,
         };
       }
-      this.$emit("submit", { ...this.data, result });
+      this.callback(this.data.order, result);
     },
     close() {
       this.visible = false;

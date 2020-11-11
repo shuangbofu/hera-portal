@@ -64,14 +64,15 @@ export default {
       left: "",
       menus: [],
       obj: {},
+      callback: null,
     };
   },
   components: {},
   methods: {
-    show(menus, obj) {
+    show(menus, callback) {
       this.menus = str2Menu(menus);
       this.visible = true;
-      this.obj = obj;
+      this.callback = callback;
       this.left = event.clientX + 10 + "px";
       this.top = event.clientY + "px";
       document.addEventListener("click", this.foo);
@@ -82,8 +83,8 @@ export default {
       document.removeEventListener("click", this.foo);
       // document.removeEventListener("contextmenu", this.foo);
     },
-    onClick(v) {
-      this.$emit("click", { order: v, obj: this.obj });
+    onClick(order) {
+      this.callback(order);
     },
   },
 };

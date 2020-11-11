@@ -33,11 +33,13 @@
       />
     </div>
     <div class="crumbs">hera分布式调度 > test > echoTest</div>
+    <run-option-dialog ref="runOptionRef" />
   </div>
 </template>
 
 <script>
 import screenfull from "screenfull";
+import RunOptionDialog from "../dialog/runOption";
 const buttons = [
   { icon: "setting", tip: "设置" },
   { icon: "clean", tip: "清理浏览器缓存", divider: true },
@@ -57,6 +59,7 @@ export default {
   data() {
     return { buttons };
   },
+  components: { RunOptionDialog },
   methods: {
     full() {
       screenfull.toggle();
@@ -67,6 +70,13 @@ export default {
       if (name === "refresh") {
         this.$store.dispatch("develop/initJobs").then(() => {
           this.$message.success("刷新成功！");
+        });
+      } else if (name === "play") {
+        const jobId = this.job.id;
+        this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
+          this.$refs.runOptionRef.show(this.job.versions, (data) => {
+            this.$store.dispatch("develop/runJob", { ...data, jobId });
+          });
         });
       }
     },

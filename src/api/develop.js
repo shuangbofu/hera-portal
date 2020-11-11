@@ -75,7 +75,35 @@ export function getJobLogList(pageSize, offset, jobId) {
 }
 
 export function getLog(logId, jobId) {
-  return axios.get(`/scheduleCenter/getLog.do?id=${logId}&jobId=${jobId}`)
+  return new Promise((res, rej) => {
+    axios.get(`/scheduleCenter/getLog.do?id=${logId}&jobId=${jobId}`).then(data => {
+      if (data) {
+        //eslint-disable-next-line
+        data.log = data.log
+          .replace(/<b>HERA#<\/b>((.|\n)*?<br>)/g, '<div class="hera">$1</div>')
+          .replace(/<b>CONSOLE#<\/b>((.|\n)*?<br>)/g, '<div class="console">$1</div>')
+          .replace(/<font style="color:red">/g, '<font class="error">')
+        // .replace(/CONSOLE#/g, '【控制台】').replace(/HERA#/g, '【赫拉】 ')
+      }
+      res(data)
+    }).catch(msg => {
+      rej(msg)
+    })
+  })
+}
+
+export function getJobVersions(jobId) {
+  return new Promise((res, rej) => {
+    axios.get(`/scheduleCenter/getJobVersion.do?jobId=${jobId}`).then(data => {
+      res(data.map(i => i.id))
+    }).catch(msg => {
+      rej(msg)
+    })
+  })
+}
+
+export function runJob(actionId, triggerType) {
+  return axios.get(`/scheduleCenter/manual.do?actionId=${actionId}&triggerType=${triggerType}`)
 }
 
 function post(url, data) {

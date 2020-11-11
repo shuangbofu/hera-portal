@@ -15,16 +15,104 @@
               v-for="(item, index) in logRecord.list"
               :key="index"
             >
-              {{ item.id }}
+              <span style="font-weight: 600; margin-right: 10px">{{
+                item.actionId.substring(0, item.actionId.length - 4)
+              }}</span>
+              {{ item.operator }}{{ item.triggerType }}
+              <div :class="['status', item.status]">
+                <my-icon
+                  class="icon"
+                  :type="`hera_icon_${
+                    {
+                      failed: 'error',
+                      success: 'yes1',
+                      running: 'loading',
+                    }[item.status]
+                  }`"
+                />
+                <span class="text">{{
+                  {
+                    failed: "ERROR",
+                    success: "SUCCESS",
+                    running: "RUNNING",
+                  }[item.status]
+                }}</span>
+              </div>
             </div>
           </div>
         </div>
         <div slot="right" class="main">
-          <div class="header"></div>
-          <p class="content text" v-html="currentLogItem.log"></p>
+          <div class="header log-header">
+            <template v-if="currentLogItem.id">
+              <div class="left">
+                <div :class="['status', currentLogItem.status]">
+                  <my-icon
+                    class="icon"
+                    :type="`hera_icon_${
+                      {
+                        failed: 'error',
+                        success: 'yes1',
+                        running: 'loading',
+                      }[currentLogItem.status]
+                    }`"
+                  />
+                  <span class="text">{{
+                    {
+                      failed: "运行失败",
+                      success: "运行成功",
+                      running: "运行中",
+                    }[currentLogItem.status]
+                  }}</span>
+                </div>
+                <div class="info">
+                  <span style="font-size: 11px">
+                    【{{ currentLogItem.triggerType }}】
+                  </span>
+                  {{ currentLogItem.startTime }} -
+                  {{ currentLogItem.endTime }} -
+                  {{ currentLogItem.durations }}
+
+                  <span class="executeHost">
+                    执行机器:
+                    <span
+                      class="text"
+                      @click="copy(currentLogItem.executeHost)"
+                      >{{ currentLogItem.executeHost }}</span
+                    >
+                  </span>
+                </div>
+              </div>
+              <div class="right operation-bar">
+                <my-icon
+                  @click="visible = true"
+                  type="hera_icon_fullscreen"
+                  class="icon"
+                />
+              </div>
+            </template>
+          </div>
+          <p
+            class="content log-text"
+            v-html="currentLogItem.log"
+            ref="logTextRef"
+          ></p>
         </div>
       </split-pane>
     </div>
+    <a-modal
+      wrapClassName="full-log-dialog"
+      :visible="visible"
+      @cancel="visible = false"
+      width="80%"
+      :closable="false"
+      :mask="true"
+      :destroyOnClose="true"
+      :footer="null"
+    >
+      <div style="height: 80vh; position: relative; overflow: hidden">
+        <p class="log-text" v-html="currentLogItem.log" ref="logTextRef"></p>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -36,6 +124,8 @@ export default {
     return {
       logs: [],
       currentLogItemId: null,
+      interval: null,
+      visible: false,
     };
   },
   components: {
@@ -64,11 +154,51 @@ export default {
     },
   },
   created() {
-    console.log("create log container");
+    this.interval = setInterval(() => {
+      const item = this.currentLogItem;
+      const jobId = this.logRecord.jobId;
+      if (item.startTime == "") {
+        this.$store.dispatch("develop/getJobLogList", {
+          pageSize: 10,
+          offset: 0,
+          jobId,
+        });
+      }
+      if (item.status === "running" && this.currentLogItem.startTime !== "") {
+        console.log("fetch log");
+        this.$store
+          .dispatch("develop/getLogContent", {
+            jobId,
+            logItemId: item.id,
+          })
+          .then(() => {
+            const ref = this.$refs.logTextRef;
+            // 滚动到最底部
+            ref.scrollTop = ref.scrollHeight;
+          });
+      }
+    }, 2000);
+  },
+  destroyed() {
+    clearInterval(this.interval);
+    this.interval = null;
   },
   methods: {
     resize(v) {
       this.setLogContainerWidth(v);
+    },
+    // TODO 重复代码
+    copy(copyText) {
+      var textarea = document.createElement("textarea");
+      textarea.textContent = copyText;
+      textarea.style.position = "fixed";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const success = document.execCommand("copy");
+      if (success) {
+        this.$message.success("复制成功！");
+      }
+      document.body.removeChild(textarea);
     },
   },
 };
@@ -95,13 +225,49 @@ export default {
         height: 30px;
         border-bottom: 1px solid @editor-border-color;
         background: @editor-bg-color;
+        display: flex;
+        align-items: center;
+        &.log-header {
+          justify-content: space-between;
+          .left {
+            display: flex;
+            align-items: center;
+          }
+          .right {
+            margin-right: 10px;
+            .icon {
+              cursor: pointer;
+            }
+          }
+        }
+        .status {
+          line-height: 30px;
+          margin-right: 10px;
+        }
+        .info {
+          font-size: 13px;
+          color: @editor-icon2-color;
+          .executeHost {
+            font-weight: 500;
+            font-size: 11px;
+            margin-left: 10px;
+            .text {
+              padding: 2px 4px;
+              &:hover {
+                background: @editor-tree-hover-color;
+              }
+            }
+          }
+        }
       }
       .content {
         height: calc(100% - 30px);
         overflow: auto;
-        &.text {
-          font-size: 13px;
+
+        &.log-text {
+          font-size: 14px;
           padding: 20px 15px;
+          user-select: normal;
         }
         &.log-list {
           .log-item {
@@ -110,6 +276,14 @@ export default {
             align-items: center;
             cursor: default;
             font-size: 12px;
+            white-space: nowrap;
+            background: @base-bg-color;
+            .status {
+              background: inherit;
+              position: absolute;
+              right: 20px;
+              padding-left: 10px;
+            }
             &.active {
               background: @editor-tree-active-color;
               color: #ffffff;
@@ -117,7 +291,61 @@ export default {
           }
         }
       }
+      .status {
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+        justify-content: flex-start;
+        width: 70px;
+        .text {
+          font-size: 12px;
+          font-weight: 500;
+        }
+        .icon {
+          font-weight: bold;
+          font-size: 14px;
+          margin-right: 4px;
+        }
+        &.failed {
+          color: @editor-red2-color;
+        }
+        &.success {
+          .icon {
+            color: @editor-green2-color;
+          }
+        }
+        &.running {
+          .icon {
+            color: @editor-yellow-color;
+          }
+        }
+      }
     }
+  }
+}
+</style>
+
+<style lang="less">
+.error {
+  color: @editor-red2-color;
+}
+.hera {
+  // color: @editor-yellow2-color;
+  color: #1890ff;
+}
+.console {
+  color: @editor-green2-color;
+}
+.full-log-dialog {
+  .log-text {
+    overflow: auto;
+    height: 100%;
+    background: @base-bg-color;
+    padding: 20px 15px;
+    user-select: normal;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+      sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   }
 }
 </style>

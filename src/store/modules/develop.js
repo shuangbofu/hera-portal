@@ -6,7 +6,9 @@ import {
   createJobGroup,
   createJob,
   getJobLogList,
-  getLog
+  getLog,
+  getJobVersions,
+  runJob
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -204,12 +206,22 @@ export default {
         }
       }
     },
+    runJob({ dispatch }, { jobId, actionId, triggerType }) {
+      return runJob(actionId, triggerType).then(() => {
+        dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
+      })
+    },
+    getJobVersions({ state }, { jobId }) {
+      return getJobVersions(jobId).then(data => {
+        state.jobList.find(i => i.id === jobId).versions = data
+      })
+    },
     /**
      * 获取日志列表
      * @param {*} param0 
      * @param {*} param1 
      */
-    getJobLogList({ state }, { pageSize, offset, jobId }) {
+    getJobLogList({ state, dispatch }, { pageSize, offset, jobId }) {
       getJobLogList(pageSize, offset, jobId).then(data => {
         const exist = state.logRecords.findIndex(i => i.jobId === jobId) !== -1
         console.log(exist)
@@ -222,6 +234,12 @@ export default {
             current: data.rows[0]?.id
           })
           console.log(state.logRecords)
+        } else {
+          const logRecord = state.logRecords.find(i => i.jobId === jobId)
+          logRecord.list = data.rows
+          const logItemId = data.rows[0]?.id
+          logRecord.current = logItemId
+          dispatch('getLogContent', { logItemId, jobId })
         }
       })
     },
@@ -234,8 +252,6 @@ export default {
           const logItem = logRecord.list[index]
           Vue.set(logItem, 'status', data.status)
           Vue.set(logItem, 'log', data.log)
-          // logRecord.list[index] = { ...logItem, log: data.log, status: data.status }
-          // Object.assign(logRecord.list[index], { log: data.log, status: data.status })
         }
       })
     },

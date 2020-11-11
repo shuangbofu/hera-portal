@@ -13,7 +13,7 @@
         @menuClick="menuClick"
       />
     </attached-header>
-    <create-job-dialog @submit="submit" ref="createJobDialogRef" />
+    <create-job-dialog ref="createJobDialogRef" />
   </div>
 </template>
 
@@ -30,27 +30,32 @@ export default {
     CreateJobDialog,
   },
   methods: {
-    menuClick(data) {
-      const { order } = data;
+    menuClick(order, data) {
       if (order === "删除") {
         console.log("delete");
       } else {
-        this.$refs.createJobDialogRef.show(data);
+        this.$refs.createJobDialogRef.show(
+          { order, obj: data },
+          (order, result) => {
+            this.submit(order, data, result);
+          }
+        );
       }
     },
-    submit({ order, obj, result }) {
-      console.log(order, obj, result);
+    submit(order, data, result) {
+      console.log(order, data, result);
       if (order === "新建文件夹") {
-        console.log(obj);
-        this.createGroup({ parentKey: obj.key, requestData: result }).then(
+        this.createGroup({ parentKey: data.key, requestData: result }).then(
           () => {
             this.$message.success("创建成功！");
           }
         );
       } else if (order === "新建任务") {
-        this.createJob({ parentKey: obj.key, requestData: result }).then(() => {
-          this.$message.success("创建成功！");
-        });
+        this.createJob({ parentKey: data.key, requestData: result }).then(
+          () => {
+            this.$message.success("创建成功！");
+          }
+        );
       }
     },
   },

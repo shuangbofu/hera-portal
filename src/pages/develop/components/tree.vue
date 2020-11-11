@@ -30,7 +30,7 @@
         }}</span>
       </template>
     </a-tree>
-    <right-menu @click="menuClick" ref="rightMenu" />
+    <right-menu ref="rightMenu" />
   </div>
 </template>
 
@@ -73,13 +73,15 @@ export default {
           menus.push("新建文件夹");
         }
       }
-      this.$refs.rightMenu.show(menus.concat(["重命名", "移动", "删除"]), {
-        ...dataRef.origin,
-        key: dataRef.key,
-      });
-    },
-    menuClick(data) {
-      this.$emit("menuClick", data);
+      this.$refs.rightMenu.show(
+        menus.concat(["重命名", "移动", "删除"]),
+        (order) => {
+          this.$emit("menuClick", order, {
+            ...dataRef.origin,
+            key: dataRef.key,
+          });
+        }
+      );
     },
   },
 };
