@@ -10,10 +10,10 @@ export default {
     ]),
     ...mapGetters("develop", [
       'tabs', 'tabActive',
-      'selectedTabNode', 'selectedTabNodes', 'selectedKey', 'selectedTabKeys',
+      'selectedTabNode', 'selectedTabNodes', 'selectedKey', 'selectedTabKeys', 'selectedTabNodeCrumbs',
       'isSelectedGroup',
       'editorBottomTabs',
-      'logRecord'
+      'logRecord',
     ]),
     onlyCenter() {
       return this.layoutConfig.onlyCenter

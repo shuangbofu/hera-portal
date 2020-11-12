@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="group-container" v-if="isSelectedGroup">
-      <conf-editor :data="group" />
+      <conf-editor :data="group" v-if="group.configs" />
     </div>
     <div class="job-container" v-else>
       <div

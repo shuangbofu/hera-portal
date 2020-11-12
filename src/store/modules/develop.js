@@ -145,6 +145,14 @@ export default {
     },
     isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
 
+    selectedTabNodeCrumbs: (state, getters) => {
+      const arr = []
+      const root = getters.selectedTabNode?.id
+      const allNodes = getters.flatAllTreeNodes(state.layoutConfig.leftTab)
+      setUpCrumbs(root, allNodes, arr)
+      return arr
+    },
+
     currentJob: (state, getters) => state.jobList.find(i => i.id === getters.selectedTabNode?.origin?.id),
 
     editorBottomTabs: state => state.configs.editorBottomTabs,
@@ -548,7 +556,8 @@ export default {
             const node = getters.flatGroupTrees(type).find(i => i.id === data.id)
             if (node) {
               // node.origin = { ...data }
-              Object.assign(node.origin, data)
+              // Object.assign(node.origin, data)
+              Vue.set(node, 'origin', { ...node.origin, ...data })
             }
           }
         })
@@ -580,6 +589,16 @@ export default {
 }
 
 const leftTabs = ['allJob', 'myJob', 'debug']
+
+
+function setUpCrumbs(parentId, all, res) {
+  all.forEach(node => {
+    if (node.id === parentId) {
+      res.push(node)
+      setUpCrumbs(node.origin.parent, all, res)
+    }
+  })
+}
 
 // 扁平化树节点
 function flatNodes(nodes, arr) {

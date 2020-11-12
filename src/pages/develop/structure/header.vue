@@ -32,7 +32,15 @@
         "
       />
     </div>
-    <div class="crumbs">hera分布式调度 > test > echoTest</div>
+    <div class="crumbs">
+      <span
+        v-for="(node, index) in selectedTabNodeCrumbs"
+        :key="index"
+        class="crumbs-item"
+        >{{ node.title }}
+        <a-icon v-if="index < selectedTabNodeCrumbs.length - 1" type="right" />
+      </span>
+    </div>
     <run-option-dialog ref="runOptionRef" />
   </div>
 </template>
@@ -151,6 +159,14 @@ export default {
     font-weight: bold;
     line-height: 25px;
     margin-left: 10px;
+    .crumbs-item {
+      margin: 0 4px;
+      font-size: 10px;
+      font-weight: 400;
+      &:first-child {
+        margin-left: 0;
+      }
+    }
   }
 }
 </style>
