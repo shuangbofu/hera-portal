@@ -1,6 +1,20 @@
 <template>
   <div class="log-container" v-show="!isSelectedGroup">
-    <div class="button-list"></div>
+    <div class="button-list operation-bar">
+      <template v-if="logRecord && logRecord.current">
+        <my-icon
+          @click="
+            cancelJob({ jobId: logRecord.jobId, logItemId: currentLogItem.id })
+          "
+          type="hera_icon_stop"
+          :class="[
+            'icon',
+            'stop',
+            currentLogItem.status !== 'running' ? 'disabled' : '',
+          ]"
+        />
+      </template>
+    </div>
     <div class="log-main" v-if="logRecord">
       <split-pane :show="[width, true]" @resize="resize">
         <div slot="left" class="main">
@@ -157,7 +171,7 @@ export default {
     this.interval = setInterval(() => {
       const item = this.currentLogItem;
       const jobId = this.logRecord.jobId;
-      if (item.startTime == "") {
+      if (item.startTime == "" && item.endTime === "") {
         this.$store.dispatch("develop/getJobLogList", {
           pageSize: 10,
           offset: 0,
@@ -214,6 +228,17 @@ export default {
     height: 100%;
     border-right: 1px solid @editor-border-color;
     background: @editor-bg-color;
+    padding-top: 5px;
+    margin: 0 auto;
+    .icon {
+      width: 30px;
+      width: 22px;
+      margin: 0 4px;
+
+      &.stop {
+        color: @editor-red2-color;
+      }
+    }
   }
   .log-main {
     width: calc(100% - 30px);
@@ -268,6 +293,7 @@ export default {
           font-size: 14px;
           padding: 20px 15px;
           user-select: normal;
+          background: @editor-bg3-color;
         }
         &.log-list {
           .log-item {
@@ -281,7 +307,10 @@ export default {
             .status {
               background: inherit;
               position: absolute;
-              right: 36px;
+              // right: 30px;
+              width: 90px;
+              right: 0;
+              // margin-right: 25px;
               padding-left: 10px;
             }
             &.active {
@@ -337,10 +366,13 @@ export default {
   color: @editor-green2-color;
 }
 .full-log-dialog {
+  .ant-modal-body {
+    padding: 5px;
+  }
   .log-text {
     overflow: auto;
     height: 100%;
-    background: @base-bg-color;
+    background: @editor-bg3-color;
     padding: 20px 15px;
     user-select: normal;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",

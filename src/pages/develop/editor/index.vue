@@ -13,7 +13,7 @@
         }"
       />
       <template v-else>
-        <conf-editor :data="job.configs" :inherit="job.inheritConfig" />
+        <conf-editor :data="job" />
       </template>
     </div>
     <div class="footer">
@@ -48,18 +48,14 @@ export default {
   },
   watch: {
     "job.script": function (newVal, oldVal) {
-      // console.log(newVal, this.job.id);
-
-      // const nodeData = this.selectedTabNode?.origin;
       if (newVal !== oldVal) {
         this.setJobScriptEdited({ jobId: this.job.id, script: newVal });
       }
-      // if (newVal !== oldVal && nodeData && nodeData.script !== newVal) {
-      //   this.$set(nodeData, "edited", true);
-      // }
-      // if (nodeData.script === newVal) {
-      //   this.$set(nodeData, "edited", false);
-      // }
+    },
+    "job.selfConfigs": function (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        // this.setJobEdited({jobId: this.})
+      }
     },
   },
   mixins: [commonMixin],

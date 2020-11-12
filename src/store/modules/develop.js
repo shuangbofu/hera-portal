@@ -9,7 +9,8 @@ import {
   getLog,
   getJobVersions,
   runJob,
-  updateJob
+  updateJob,
+  cancelJob
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -215,7 +216,8 @@ export default {
     },
     updateJobScript({ dispatch, getters }, { id }) {
       const script = getters.currentJob.script
-      return dispatch('updateJob', { id, data: { script }, refresh: false }).then(() => {
+      const selfConfigs = getters.currentJob.selfConfigs
+      return dispatch('updateJob', { id, data: { script, selfConfigs }, refresh: false }).then(() => {
         return dispatch('setJobScriptEdited', { jobId: id, script: null })
       })
     },
@@ -225,20 +227,7 @@ export default {
      * @param {*} param1 
      */
     updateJob({ dispatch, state }, { id, data, refresh }) {
-      const job = state.jobList.find(i => i.id === id)
-      // 更新接口的字段如下：
-      const updateFields = [
-        "name", "rollBackTimes", "rollBackWaitTime",
-        "runType", "runPriorityLevel", "offset",
-        "description", "scheduleType", "cronExpression",
-        "dependencies", "cycle", "hostGroupId",
-        "mustEndMinute", "estimatedEndHour", "areaId",
-        "repeatRun", "selfConfigs", "script"]
-      Object.keys(job).forEach(key => {
-        if (!updateFields.includes(key)) {
-          delete job[key]
-        }
-      })
+      const job = { ...state.jobList.find(i => i.id === id) }
       return updateJob(id, { ...job, ...data }).then(() => {
         // 刷新更新后的数据
         if (refresh) {
@@ -256,16 +245,19 @@ export default {
         }
       })
     },
+    cancelJob({ dispatch }, { jobId, logItemId }) {
+      return cancelJob(jobId, logItemId).then(() => {
+        return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
+      })
+    },
     /**
      * 运行任务
      * @param {*} param0 
      * @param {*} param1 
      */
     runJob({ dispatch }, { jobId, actionId, triggerType }) {
-      return dispatch('updateJobScript', { id: jobId }).then(() => {
-        return runJob(actionId, triggerType).then(() => {
-          return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
-        })
+      return runJob(actionId, triggerType).then(() => {
+        return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
       })
     },
     /**

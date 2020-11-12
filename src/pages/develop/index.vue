@@ -125,6 +125,9 @@ export default {
     &:hover {
       background: @editor-button-hover-color;
     }
+    &.disabled {
+      color: @editor-gray-color!important;
+    }
   }
 }
 </style>

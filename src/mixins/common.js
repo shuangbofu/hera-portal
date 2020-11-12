@@ -54,7 +54,8 @@ export default {
       'createGroup', 'createJob',
       // 获取日志内容
       'getLogContent',
-      'setJobScriptEdited'
+      'setJobScriptEdited',
+      'cancelJob'
     ]),
     changeTab(name, type) {
       this.setTab({

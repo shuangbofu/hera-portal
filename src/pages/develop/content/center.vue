@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="group-container" v-if="isSelectedGroup">
-      <conf-editor :data="group.configs" :inherit="group.inheritConfig" />
+      <conf-editor :data="group" />
     </div>
     <div class="job-container" v-else>
       <div
@@ -27,7 +27,7 @@
               }}</span>
               <div>{{ node.title }}</div>
               <a-badge
-                color="#87d068"
+                color="#F5C66F"
                 class="edited-badge"
                 v-if="node.origin.edited"
               />

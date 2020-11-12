@@ -4,7 +4,7 @@
       <MonacoEditor
         slot="left"
         class="editor"
-        v-model="configText"
+        v-model="text"
         :theme="theme"
         language="ini"
         :options="{
@@ -95,7 +95,7 @@ function obj2Arr(obj) {
   return res;
 }
 export default {
-  props: ["data", "inherit"],
+  props: ["data"],
   data() {
     return {
       options,
@@ -113,6 +113,17 @@ export default {
     MonacoEditor,
   },
   computed: {
+    inhert() {
+      return this.data.inheritConfig;
+    },
+    text: {
+      get() {
+        return this.data.selfConfigs;
+      },
+      set(value) {
+        this.data.selfConfigs = value;
+      },
+    },
     width() {
       return this.$store.state.develop.layoutConfig.confEditorWidth;
     },
@@ -128,17 +139,17 @@ export default {
       return this.configArr.map((i) => i.key);
     },
     configArr() {
-      return obj2Arr(this.data);
-    },
-    configText: {
-      get() {
-        let res = "";
-        this.configArr.forEach((i) => {
-          res += i.key + " = " + i.value + "\n";
-        });
-        return res;
-      },
-      set() {},
+      const obj = {};
+      this.text.split("\n").forEach((i) => {
+        const arr = i.split("=");
+        if (arr.length > 1) {
+          const key = arr[0].trim();
+          const value = arr[1].trim();
+          obj[key] = value;
+        }
+      });
+      console.log(obj);
+      return obj2Arr(obj);
     },
     filterInheritConfigArr() {
       const option = this.option;

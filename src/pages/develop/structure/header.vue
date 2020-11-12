@@ -73,6 +73,10 @@ export default {
           this.$message.success("刷新成功！");
         });
       } else if (name === "play") {
+        if (this.selectedTabNode?.origin.edited) {
+          this.$message.error("有修改未保存!");
+          return;
+        }
         this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
           this.$refs.runOptionRef.show(this.job.versions, (data) => {
             this.$store.dispatch("develop/runJob", { ...data, jobId });

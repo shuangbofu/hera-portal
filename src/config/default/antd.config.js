@@ -17,7 +17,7 @@ const ANTD = {
 
     ,
     night: {
-      menuColors: ['#151515', '#1f1f1f', '#1e1e1e'],
+      menuColors: ['#151515', '#1f1f1f', '#1e1e1f'],
     }
   }
 

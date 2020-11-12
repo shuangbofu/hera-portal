@@ -31,7 +31,8 @@ const map = {
   'editor-gray-color': ['#C0C0C0', '#595959'],
   'editor-blue-color': ['#3F93C7', '#44A0D9'],
   // tooltip bg
-  'editor-bg2-color': ['#F7F7F7', '#4B4D4D']
+  'editor-bg2-color': ['#F7F7F7', '#4B4D4D'],
+  'editor-bg3-color': ['#FFFFFE', '#1E1E1E']
 }
 
 function getRes() {

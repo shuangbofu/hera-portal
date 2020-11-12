@@ -30,7 +30,13 @@ export function getScheduledJob(id) {
         retryTimes,
         retryWaitTime,
         priorityLevel,
-        areaId
+        areaId,
+
+        selfConfigs: obj2Str(data.configs),
+
+        rollBackTimes: retryTimes,
+        rollBackWaitTime: retryWaitTime,
+        runPriorityLevel: priorityLevel
       })
     }).catch(msg => {
       rej(msg)
@@ -47,8 +53,12 @@ export function getScheduledGroup(id) {
     return axios.get(`/scheduleCenter/getGroupMessage.do?groupId=group_${id}`).then(data => {
       const focusUsers = str2Arr(data.focusUser)
       const adminUsers = str2Arr(data.uidS)
+
       res({
         ...data,
+
+        selfConfigs: obj2Str(data.configs),
+
         focusUsers,
         adminUsers
       })
@@ -107,7 +117,27 @@ export function runJob(actionId, triggerType) {
 }
 
 export function updateJob(id, data) {
+  const job = data
+
+  // 更新接口的字段如下：
+  const updateFields = [
+    "name", "rollBackTimes", "rollBackWaitTime",
+    "runType", "runPriorityLevel", "offset",
+    "description", "scheduleType", "cronExpression",
+    "dependencies", "cycle", "hostGroupId",
+    "mustEndMinute", "estimatedEndHour", "areaId",
+    "repeatRun", "selfConfigs", "script"]
+
+  Object.keys(job).forEach(key => {
+    if (!updateFields.includes(key)) {
+      delete job[key]
+    }
+  })
   return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
+}
+
+export function cancelJob(jobId, historyId) {
+  return axios.get(`/scheduleCenter/cancelJob.do?historyId=${historyId}&jobId=${jobId}`)
 }
 
 function post(url, data) {
@@ -131,4 +161,10 @@ function str2Arr(str) {
     return []
   }
   return str.split(/\s+/)
+}
+
+function obj2Str(obj) {
+  return Object.keys(obj).map(key => {
+    return key + ' = ' + obj[key]
+  }).join('\n')
 }
