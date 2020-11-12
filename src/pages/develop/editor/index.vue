@@ -13,7 +13,7 @@
         }"
       />
       <template v-else>
-        <conf-editor :data="job" />
+        <conf-editor :data="job" v-if="job.configs" />
       </template>
     </div>
     <div class="footer">

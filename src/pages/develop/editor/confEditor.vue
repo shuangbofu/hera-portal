@@ -113,7 +113,7 @@ export default {
     MonacoEditor,
   },
   computed: {
-    inhert() {
+    inherit() {
       return this.data.inheritConfig;
     },
     text: {

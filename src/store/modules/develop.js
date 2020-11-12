@@ -147,9 +147,12 @@ export default {
 
     selectedTabNodeCrumbs: (state, getters) => {
       const arr = []
-      const root = getters.selectedTabNode?.id
-      const allNodes = getters.flatAllTreeNodes(state.layoutConfig.leftTab)
-      setUpCrumbs(root, allNodes, arr)
+      const root = getters.selectedTabNode
+      if (root) {
+        const allNodes = getters.flatAllTreeNodes(state.layoutConfig.leftTab)
+        setUpCrumbs(root, allNodes, arr)
+        arr.push(root)
+      }
       return arr
     },
 
@@ -591,13 +594,13 @@ export default {
 const leftTabs = ['allJob', 'myJob', 'debug']
 
 
-function setUpCrumbs(parentId, all, res) {
-  all.forEach(node => {
-    if (node.id === parentId) {
-      res.push(node)
-      setUpCrumbs(node.origin.parent, all, res)
-    }
-  })
+function setUpCrumbs(lastNode, all, res) {
+  const node = all.find(i => `group_${i.id}` === lastNode.origin.parent && i.dic)
+  if (node) {
+    res.push(node)
+    setUpCrumbs(node, all, res)
+  }
+  res.reverse()
 }
 
 // 扁平化树节点
