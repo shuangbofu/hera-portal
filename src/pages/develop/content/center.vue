@@ -26,6 +26,11 @@
                 getTypeLabel(node)
               }}</span>
               <div>{{ node.title }}</div>
+              <a-badge
+                color="#87d068"
+                class="edited-badge"
+                v-if="node.origin.edited"
+              />
             </div>
             <a-icon
               class="close-icon"
@@ -167,6 +172,7 @@ export default {
         border-top-width: 0 !important;
         border-left-width: 0 !important;
         .title {
+          position: relative;
           padding: 0 20px;
           font-size: 12px;
           font-weight: 500;
@@ -203,6 +209,10 @@ export default {
               color: #324853;
               background-color: @editor-yellow-color;
             }
+          }
+          .edited-badge {
+            position: absolute;
+            right: 0;
           }
         }
         &:hover {

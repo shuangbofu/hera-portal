@@ -53,7 +53,8 @@ export default {
       'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs',
       'createGroup', 'createJob',
       // 获取日志内容
-      'getLogContent'
+      'getLogContent',
+      'setJobScriptEdited'
     ]),
     changeTab(name, type) {
       this.setTab({

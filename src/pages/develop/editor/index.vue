@@ -46,6 +46,22 @@ export default {
     MonacoEditor,
     ConfEditor,
   },
+  watch: {
+    "job.script": function (newVal, oldVal) {
+      // console.log(newVal, this.job.id);
+
+      // const nodeData = this.selectedTabNode?.origin;
+      if (newVal !== oldVal) {
+        this.setJobScriptEdited({ jobId: this.job.id, script: newVal });
+      }
+      // if (newVal !== oldVal && nodeData && nodeData.script !== newVal) {
+      //   this.$set(nodeData, "edited", true);
+      // }
+      // if (nodeData.script === newVal) {
+      //   this.$set(nodeData, "edited", false);
+      // }
+    },
+  },
   mixins: [commonMixin],
   computed: {
     lang() {

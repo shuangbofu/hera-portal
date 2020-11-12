@@ -77,7 +77,7 @@ export function getJobLogList(pageSize, offset, jobId) {
 export function getLog(logId, jobId) {
   return new Promise((res, rej) => {
     axios.get(`/scheduleCenter/getLog.do?id=${logId}&jobId=${jobId}`).then(data => {
-      if (data) {
+      if (data?.log) {
         //eslint-disable-next-line
         data.log = data.log
           .replace(/<b>HERA#<\/b>((.|\n)*?<br>)/g, '<div class="hera">$1</div>')
@@ -104,6 +104,10 @@ export function getJobVersions(jobId) {
 
 export function runJob(actionId, triggerType) {
   return axios.get(`/scheduleCenter/manual.do?actionId=${actionId}&triggerType=${triggerType}`)
+}
+
+export function updateJob(id, data) {
+  return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
 }
 
 function post(url, data) {

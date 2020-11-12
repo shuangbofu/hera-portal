@@ -281,7 +281,7 @@ export default {
             .status {
               background: inherit;
               position: absolute;
-              right: 20px;
+              right: 36px;
               padding-left: 10px;
             }
             &.active {

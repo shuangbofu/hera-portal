@@ -8,7 +8,8 @@ import {
   getJobLogList,
   getLog,
   getJobVersions,
-  runJob
+  runJob,
+  updateJob
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -143,6 +144,8 @@ export default {
     },
     isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
 
+    currentJob: (state, getters) => state.jobList.find(i => i.id === getters.selectedTabNode?.origin?.id),
+
     editorBottomTabs: state => state.configs.editorBottomTabs,
 
     // 日志列表
@@ -158,6 +161,10 @@ export default {
     }
   },
   mutations: {
+    clearAllCache() {
+      removeFromLocal(STORAGE_KEY_TREE_INFO)
+      removeFromLocal(STORAGE_KEY_LAYOUT_INFO)
+    },
     toggleOnlyCenter(state) {
       state.layoutConfig.onlyCenter = !state.layoutConfig.onlyCenter
       this.commit('develop/saveLocalLayout')
@@ -206,11 +213,66 @@ export default {
         }
       }
     },
-    runJob({ dispatch }, { jobId, actionId, triggerType }) {
-      return runJob(actionId, triggerType).then(() => {
-        dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
+    updateJobScript({ dispatch, getters }, { id }) {
+      const script = getters.currentJob.script
+      return dispatch('updateJob', { id, data: { script }, refresh: false }).then(() => {
+        return dispatch('setJobScriptEdited', { jobId: id, script: null })
       })
     },
+    /**
+     * 更新任务
+     * @param {*} _ 
+     * @param {*} param1 
+     */
+    updateJob({ dispatch, state }, { id, data, refresh }) {
+      const job = state.jobList.find(i => i.id === id)
+      // 更新接口的字段如下：
+      const updateFields = [
+        "name", "rollBackTimes", "rollBackWaitTime",
+        "runType", "runPriorityLevel", "offset",
+        "description", "scheduleType", "cronExpression",
+        "dependencies", "cycle", "hostGroupId",
+        "mustEndMinute", "estimatedEndHour", "areaId",
+        "repeatRun", "selfConfigs", "script"]
+      Object.keys(job).forEach(key => {
+        if (!updateFields.includes(key)) {
+          delete job[key]
+        }
+      })
+      return updateJob(id, { ...job, ...data }).then(() => {
+        // 刷新更新后的数据
+        if (refresh) {
+          dispatch('getJob', { id, check: false })
+        }
+      })
+    },
+    setJobScriptEdited({ getters }, { jobId, script }) {
+      // 遍历（我的任务和所有任务的对应任务），如果script===null，则表示已更新
+      leftTabs.forEach(type => {
+        const node = getters.flatJobsTrees(type).find(i => i.id === jobId)
+        if (node) {
+          const edited = script == null ? false : node.origin.script !== script
+          Vue.set(node.origin, 'edited', edited)
+        }
+      })
+    },
+    /**
+     * 运行任务
+     * @param {*} param0 
+     * @param {*} param1 
+     */
+    runJob({ dispatch }, { jobId, actionId, triggerType }) {
+      return dispatch('updateJobScript', { id: jobId }).then(() => {
+        return runJob(actionId, triggerType).then(() => {
+          return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
+        })
+      })
+    },
+    /**
+     * 获取任务版本号列表
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     getJobVersions({ state }, { jobId }) {
       return getJobVersions(jobId).then(data => {
         state.jobList.find(i => i.id === jobId).versions = data
@@ -224,7 +286,6 @@ export default {
     getJobLogList({ state, dispatch }, { pageSize, offset, jobId }) {
       getJobLogList(pageSize, offset, jobId).then(data => {
         const exist = state.logRecords.findIndex(i => i.jobId === jobId) !== -1
-        console.log(exist)
         if (!exist) {
           state.logRecords.push({
             pageSize,
@@ -233,7 +294,6 @@ export default {
             list: data.rows,
             current: data.rows[0]?.id
           })
-          console.log(state.logRecords)
         } else {
           const logRecord = state.logRecords.find(i => i.jobId === jobId)
           logRecord.list = data.rows
@@ -243,9 +303,13 @@ export default {
         }
       })
     },
+    /**
+     * 获取日志内容
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     getLogContent({ state }, { logItemId, jobId }) {
       getLog(logItemId, jobId).then(data => {
-        console.log(data)
         const logRecord = state.logRecords.find(i => i.jobId === jobId)
         if (logRecord) {
           const index = logRecord.list.findIndex(j => j.id === logItemId)
@@ -293,7 +357,7 @@ export default {
       const tabConfigs = tab.configs[type]
       let config = tabConfigs.find(i => i.name === name)
       if (!config) {
-        config = { name, width: { right: 28, left: 20, bottom: 20 }[type] }
+        config = { name, width: { right: 28, left: 20, bottom: 40 }[type] }
         tabConfigs.push(config)
       }
       const onlyCenter = state.layoutConfig.onlyCenter
@@ -468,7 +532,6 @@ export default {
     setNodeData({ getters }, { type, data }) {
       const node = getters.flatJobsTrees(type).find(i => i.id === data.id)
       if (node) {
-        // node.origin = { ...data }
         Object.assign(node.origin, data)
       }
     },
@@ -588,4 +651,7 @@ function readFromLocal(key, callback) {
   if (v != null) {
     callback(JSON.parse(v))
   }
+}
+function removeFromLocal(key) {
+  localStorage.removeItem(STORAGE_KEY_PREFIX + key)
 }

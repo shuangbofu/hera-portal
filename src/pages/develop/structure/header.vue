@@ -67,17 +67,26 @@ export default {
     },
     buttonClick(name) {
       console.log(name);
+      const jobId = this.job.id;
       if (name === "refresh") {
         this.$store.dispatch("develop/initJobs").then(() => {
           this.$message.success("刷新成功！");
         });
       } else if (name === "play") {
-        const jobId = this.job.id;
         this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
           this.$refs.runOptionRef.show(this.job.versions, (data) => {
             this.$store.dispatch("develop/runJob", { ...data, jobId });
           });
         });
+      } else if (name === "save") {
+        this.$store
+          .dispatch("develop/updateJobScript", { id: jobId })
+          .then(() => {
+            this.$message.success("保存成功！");
+          });
+      } else if (name === "clean") {
+        this.$store.commit("develop/clearAllCache");
+        location.reload();
       }
     },
   },
