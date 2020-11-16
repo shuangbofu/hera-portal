@@ -55,6 +55,10 @@ module.exports = {
     config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
       { languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'] }
     ])
+    config.plugin('html').tap(args => {
+      args[0].title = '赫拉离线调度'
+      return args
+    })
   },
 
   css: {

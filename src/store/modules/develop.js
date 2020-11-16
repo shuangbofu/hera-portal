@@ -92,7 +92,10 @@ export default {
       onlyCenter: false,
       editorBottom: 'text',
       confEditorWidth: 50,
-      logContainerWidth: 20
+      logContainerWidth: 20,
+      setting: {
+        showId: false
+      }
     },
     jobTrees: {
       debug: [],
@@ -151,6 +154,7 @@ export default {
       if (root) {
         const allNodes = getters.flatAllTreeNodes(state.layoutConfig.leftTab)
         setUpCrumbs(root, allNodes, arr)
+        arr.reverse()
         arr.push(root)
       }
       return arr
@@ -170,7 +174,9 @@ export default {
         return {}
       }
       return state.logRecords.find(i => i.jobId === id)
-    }
+    },
+
+    depSetting: state => state.layoutConfig.setting
   },
   mutations: {
     clearAllCache() {
@@ -595,12 +601,13 @@ const leftTabs = ['allJob', 'myJob', 'debug']
 
 
 function setUpCrumbs(lastNode, all, res) {
+  console.log(lastNode.origin.parent)
   const node = all.find(i => `group_${i.id}` === lastNode.origin.parent && i.dic)
   if (node) {
     res.push(node)
+    console.log(node.id, node.title)
     setUpCrumbs(node, all, res)
   }
-  res.reverse()
 }
 
 // 扁平化树节点

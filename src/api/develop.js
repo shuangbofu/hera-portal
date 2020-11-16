@@ -56,6 +56,7 @@ export function getScheduledGroup(id) {
 
       res({
         ...data,
+        parent: `group_${data.parent}`,
 
         selfConfigs: obj2Str(data.configs),
 

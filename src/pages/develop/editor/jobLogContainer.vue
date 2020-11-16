@@ -171,7 +171,7 @@ export default {
     this.interval = setInterval(() => {
       const item = this.currentLogItem;
       const jobId = this.logRecord.jobId;
-      if (item.startTime == "" && item.endTime === "") {
+      if (item.endTime === "") {
         this.$store.dispatch("develop/getJobLogList", {
           pageSize: 10,
           offset: 0,
@@ -292,7 +292,7 @@ export default {
         &.log-text {
           font-size: 14px;
           padding: 20px 15px;
-          user-select: normal;
+          user-select: text;
           background: @editor-bg3-color;
         }
         &.log-list {
@@ -374,7 +374,7 @@ export default {
     height: 100%;
     background: @editor-bg3-color;
     padding: 20px 15px;
-    user-select: normal;
+    user-select: text;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
       "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
       sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";

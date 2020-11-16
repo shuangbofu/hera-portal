@@ -25,7 +25,10 @@
               <span :class="['icon', node.origin.runType]">{{
                 getTypeLabel(node)
               }}</span>
-              <div>{{ node.title }}</div>
+              <div>
+                <span v-show="depSetting.showId">[{{ node.origin.id }}] </span
+                >{{ node.title }}
+              </div>
               <a-badge
                 color="#F5C66F"
                 class="edited-badge"

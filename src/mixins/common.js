@@ -14,6 +14,8 @@ export default {
       'isSelectedGroup',
       'editorBottomTabs',
       'logRecord',
+
+      'depSetting'
     ]),
     onlyCenter() {
       return this.layoutConfig.onlyCenter

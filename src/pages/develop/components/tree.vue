@@ -25,9 +25,11 @@
         ></a-icon>
       </template>
       <template slot="title" slot-scope="data">
-        <span :class="{ title: true, selected: data.selected }">{{
-          data.title
-        }}</span>
+        <span :class="{ title: true, selected: data.selected }">
+          <span v-if="!data.dataRef.dic && depSetting.showId"
+            >[{{ data.origin.id }}] </span
+          >{{ data.title }}</span
+        >
       </template>
     </a-tree>
     <right-menu ref="rightMenu" />
@@ -54,6 +56,11 @@ export default {
     return {};
   },
   components: { RightMenu },
+  computed: {
+    depSetting() {
+      return this.$store.getters["develop/depSetting"];
+    },
+  },
   methods: {
     selectNode(_, { node }) {
       this.$emit("select", {
