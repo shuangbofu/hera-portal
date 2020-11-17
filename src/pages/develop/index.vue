@@ -122,6 +122,7 @@ export default {
   .icon {
     padding: 4px;
     border-radius: 2px;
+    cursor: initial;
     &:hover {
       background: @editor-button-hover-color;
     }

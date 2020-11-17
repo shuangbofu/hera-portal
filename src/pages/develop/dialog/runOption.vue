@@ -11,11 +11,14 @@
     :footer="null"
   >
     <div class="title">运行任务</div>
-    <a-select v-model="option.actionId" style="width: 100%" size="small">
-      <a-select-option v-for="(v, index) in versions" :key="index" :value="v">
-        {{ v }}
-      </a-select-option>
-    </a-select>
+    <h-select
+      v-model="option.actionId"
+      :options="
+        versions.map((i) => {
+          return { value: i, label: i };
+        })
+      "
+    />
     <div class="type-select">
       <div
         :class="['type', type.value === option.triggerType ? 'active' : '']"
@@ -31,6 +34,7 @@
 </template>
 
 <script>
+import HSelect from "../components/HSelect";
 const triggerTypes = [
   { value: 2, label: "手动执行" },
   { value: 3, label: "手动恢复" },
@@ -49,6 +53,7 @@ export default {
       callback: null,
     };
   },
+  components: { HSelect },
   methods: {
     close() {
       this.visible = false;

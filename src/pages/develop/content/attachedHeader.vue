@@ -1,8 +1,11 @@
 <template>
   <div class="container">
-    <div class="header operation-bar">
+    <div class="header">
       {{ title }}
-      <a-icon class="icon" type="minus" @click="close" />
+      <div class="operation-bar">
+        <slot name="header" />
+        <a-icon class="icon" type="minus" @click="close" />
+      </div>
     </div>
     <div class="content">
       <slot />

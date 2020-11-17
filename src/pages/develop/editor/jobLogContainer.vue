@@ -261,7 +261,7 @@ export default {
           .right {
             margin-right: 10px;
             .icon {
-              cursor: pointer;
+              // cursor: pointer;
             }
           }
         }
