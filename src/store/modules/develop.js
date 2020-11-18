@@ -11,7 +11,9 @@ import {
   getJobVersions,
   runJob,
   updateJob,
-  cancelJob
+  cancelJob,
+
+  focusJobOrNot, setJobValidOrNot
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -249,6 +251,24 @@ export default {
       const selfConfigs = getters.currentJob.selfConfigs
       return dispatch('updateJob', { id, data: { script, selfConfigs }, refresh: false }).then(() => {
         return dispatch('setJobScriptEdited', { jobId: id, script: null })
+      })
+    },
+    focusJobOrNot({ state }, { id, focus, user }) {
+      return focusJobOrNot(id, focus).then(() => {
+        const users = state.jobList.find(i => i.id === id).focusUsers
+        if (focus) {
+          users.push(user)
+        } else {
+          const index = users.findIndex(i => i === user)
+          if (index !== -1) {
+            users.splice(index, 1)
+          }
+        }
+      })
+    },
+    setJobValidOrNot({ state }, { id, valid }) {
+      return setJobValidOrNot(id, valid).then(() => {
+        state.jobList.find(i => i.id === id).valid = valid
       })
     },
     /**

@@ -3,15 +3,15 @@
     <div class="operation-bar">
       <template v-for="(button, index) in buttons">
         <a-tooltip :key="index" :mouseEnterDelay="0.6">
-          <template slot="title">{{ button.tip }}</template>
+          <template slot="title">{{ buttonTip(button) }}</template>
           <my-icon
             @click="buttonClick(button.icon)"
             :class="[
               'icon',
-              button.icon,
+              buttonIcon(button),
               !job && button.disabled ? 'disabled' : '',
             ]"
-            :type="`hera_icon_${button.icon}`"
+            :type="`hera_icon_${buttonIcon(button)}`"
           />
         </a-tooltip>
         <a-divider type="vertical" v-if="button.divider" :key="`d_${index}`" />
@@ -55,8 +55,21 @@ const buttons = [
   { icon: "refresh", divider: true, tip: "刷新" },
   { icon: "save", disabled: true, tip: "保存" },
   { icon: "play", disabled: true, divider: true, tip: "运行" },
-  // { icon: "config", disabled: true, tip: "配置" },
-  // { icon: "yes", disabled: true, tip: "开启任务", divider: true },
+  {
+    icon: "valid",
+    func: (res) => {
+      return !res ? "yes" : "forbidden";
+    },
+    disabled: true,
+    tip: (res) => `${res ? "关闭" : "开启"}任务`,
+  },
+  {
+    icon: "focus",
+    func: (res) => `eye-${!res ? "open" : "close"}`,
+    disabled: true,
+    tip: (res) => `${res ? "取消" : ""}关注任务`,
+    divider: true,
+  },
   { icon: "compare", disabled: true, tip: "比较代码" },
   { icon: "history", disabled: true, tip: "历史代码" },
   { icon: "rollback", disabled: true, tip: "回滚", divider: true },
@@ -99,7 +112,55 @@ export default {
       } else if (name === "clean") {
         this.$store.commit("develop/clearAllCache");
         location.reload();
+      } else if (name === "valid") {
+        const valid = !this.job.valid;
+        this.$store
+          .dispatch("develop/setJobValidOrNot", {
+            id: jobId,
+            valid,
+          })
+          .then(() => {
+            this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
+          });
+      } else if (name === "focus") {
+        const focus = !this.getRes("focus");
+        this.$store
+          .dispatch("develop/focusJobOrNot", {
+            id: jobId,
+            focus: focus,
+            user: this.getUser(),
+          })
+          .then(() => {
+            this.$message.success(`${focus ? "" : "取消"}关注成功！`);
+          });
       }
+    },
+    buttonIcon(button) {
+      if (!button.func) {
+        return button.icon;
+      }
+      return button.func(this.getRes(button.icon));
+    },
+    buttonTip(button) {
+      if (typeof button.tip === "function") {
+        return button.tip(this.getRes(button.icon));
+      }
+      return button.tip;
+    },
+    getRes(name) {
+      if (name === "valid") {
+        return this.job?.valid;
+      } else if (name === "focus") {
+        const user = this.getUser();
+        if (user) {
+          return this.job?.focusUsers?.includes(user);
+        }
+      }
+    },
+    getUser() {
+      return (localStorage.getItem("ssoName") || "")
+        .replace("用户:", "")
+        .trim();
     },
   },
 };
@@ -131,6 +192,14 @@ export default {
       &.yes {
         color: @editor-blue-color;
       }
+      &.forbidden {
+        line-height: 10px;
+        color: @editor-red2-color;
+        font-size: 16px;
+      }
+      // &.eye-open {
+      //   color: @editor-green-color!important;
+      // }
       &.refresh,
       &.compare,
       &.history {

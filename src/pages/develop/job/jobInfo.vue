@@ -21,7 +21,7 @@
             >{{ data.owner }}
           </a-descriptions-item>
           <a-descriptions-item label="关注人">
-            <template v-if="data.focuUsers && data.focusUsers.length > 0">
+            <template v-if="data.focusUsers && data.focusUsers.length > 0">
               <a-tag :key="idx" v-for="(user, idx) in data.focusUsers">
                 {{ user }}
               </a-tag>

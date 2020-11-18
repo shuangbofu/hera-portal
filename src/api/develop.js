@@ -169,6 +169,14 @@ export function getJobOperators(jobId) {
   })
 }
 
+export function focusJobOrNot(id, focus) {
+  return post(`/scheduleCenter/${!focus ? 'delMonitor' : 'addMonitor'}`, { id })
+}
+
+export function setJobValidOrNot(id, valid) {
+  return post('/scheduleCenter/updateSwitch', { id, status: valid ? 1 : 0 })
+}
+
 export function runJob(actionId, triggerType) {
   return axios.get(`/scheduleCenter/manual.do?actionId=${actionId}&triggerType=${triggerType}`)
 }
