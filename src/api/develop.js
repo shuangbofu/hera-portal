@@ -1,4 +1,6 @@
 import axios from "@/utils/request.js";
+
+const alarmTypes = ['邮件', '微信', '电话']
 export function getScheduledJob(id) {
   return new Promise((res, rej) => {
     return axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
@@ -9,15 +11,33 @@ export function getScheduledJob(id) {
       const valid = data.auto === '开启'
       const dependencyArr = str2Arr(data.dependencies)
       const repeat = data.reapeatRun > 0
-      const retryTimes = data.configs['roll.back.times']
-      const retryWaitTime = data.configs['roll.back.wait.time']
-      const priorityLevel = Number(data.configs['run.priority.level'] || -1)
+      const retryTimes = Number(data.configs['roll.back.times'] || 0)
+      const retryWaitTime = Number(data.configs['roll.back.wait.time'] || 1)
+      const priorityLevel = Number(data.configs['run.priority.level'] || 3)
+
+      const alarmLevelCode = alarmTypes.findIndex(i => i == data.alarmLevel)
+
+      const estimatedEndHourArr = data.estimatedEndHour.split(":").map(i => Number(i))
+      const cronExpressionArr = str2Arr(data.cronExpression)
+
+      if (cronExpressionArr.length === 0) {
+        for (let i = 0; i < 6; i++) {
+          cronExpressionArr.push('')
+        }
+      }
+
+      // const 
+
+      // const dependencyPeriod = {
+      //   '无': 'NONE',
+      //   '自依赖，依赖于当前任务的上一周期': 'SELF_LAST'
+      // }[data.cycle]
 
       delete data.configs['roll.back.times']
       delete data.configs['roll.back.wait.time']
       delete data.configs['run.priority.level']
 
-      const areaId = Number(data.areaId)
+      const areaIds = data.areaId.split(',').map(i => Number(i.trim())).filter(i => i !== '')
 
       res({
         ...data,
@@ -30,7 +50,10 @@ export function getScheduledJob(id) {
         retryTimes,
         retryWaitTime,
         priorityLevel,
-        areaId,
+        areaIds,
+
+        alarmLevelCode, estimatedEndHourArr, cronExpressionArr,
+        // dependencyPeriod,
 
         selfConfigs: obj2Str(data.configs),
 
@@ -52,7 +75,7 @@ export function getScheduledGroup(id) {
   return new Promise((res, rej) => {
     return axios.get(`/scheduleCenter/getGroupMessage.do?groupId=group_${id}`).then(data => {
       const focusUsers = str2Arr(data.focusUser)
-      const adminUsers = str2Arr(data.uidS)
+      const adminUsers = str2Arr(data.uIdS)
 
       res({
         ...data,
@@ -78,7 +101,26 @@ export function createJob(data) {
 }
 
 export function getAllAreas() {
-  return axios.get('/scheduleCenter/getAllArea')
+  return new Promise((res, rej) => {
+    axios.get('/scheduleCenter/getAllArea').then(data => {
+      data.forEach(area => {
+        area.name = {
+          all: '全部',
+          AY: '中国区',
+          IND: '印度区',
+          US: '美国区',
+          EU: '欧洲区',
+          UE: '美东区',
+          WE: '西欧区',
+        }[area.name] || area.name
+      })
+      res(data)
+    }).catch(msg => { rej(msg) })
+  })
+}
+
+export function getHostGroups() {
+  return axios.get('/scheduleCenter/getHostGroupIds')
 }
 
 export function getJobLogList(pageSize, offset, jobId) {
@@ -113,6 +155,14 @@ export function getJobVersions(jobId) {
   })
 }
 
+export function getJobOperators(jobId) {
+  return new Promise((res, rej) => {
+    axios.get(`/scheduleCenter/getJobOperator?jobId=${jobId}&type=JOB`).then(data => {
+      res(data.allUser.map(i => i.name))
+    }).catch(msg => rej(msg))
+  })
+}
+
 export function runJob(actionId, triggerType) {
   return axios.get(`/scheduleCenter/manual.do?actionId=${actionId}&triggerType=${triggerType}`)
 }
@@ -129,12 +179,29 @@ export function updateJob(id, data) {
     "mustEndMinute", "estimatedEndHour", "areaId",
     "repeatRun", "selfConfigs", "script"]
 
+  job.areaId = job.areaIds.join(',')
+  job.runPriorityLevel = job.priorityLevel
+  job.rollBackTimes = job.retryTimes
+  job.rollBackWaitTime = job.retryWaitTime
+  job.repeatRun = job.repeat ? 1 : 0
+
+  job.offset = job.alarmLevelCode
+  job.estimatedEndHour = job.estimatedEndHourArr.join(':')
+  job.cronExpression = job.cronExpressionArr.filter(i => i !== '').join(' ')
+  job.dependencies = job.dependencyArr.join(',')
+
+  updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
+
   Object.keys(job).forEach(key => {
     if (!updateFields.includes(key)) {
       delete job[key]
     }
   })
   return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
+}
+
+export function updatePermission(data) {
+  return post('/scheduleCenter/updatePermission', data)
 }
 
 export function cancelJob(jobId, historyId) {

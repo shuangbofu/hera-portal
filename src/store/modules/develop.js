@@ -3,6 +3,7 @@ import {
   initScheduledJobs,
   getScheduledGroup,
   getAllAreas,
+  getHostGroups,
   createJobGroup,
   createJob,
   getJobLogList,
@@ -104,6 +105,7 @@ export default {
     },
     jobList: [],
     areas: [],
+    hostGroups: [],
     logRecords: []
   },
   getters: {
@@ -135,6 +137,9 @@ export default {
     },
     flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
     flatGroupTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => i.dic),
+
+    // 当前tab下的所有任务
+    allJobs: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab).map(i => i.origin),
 
     // 任务tab的nodes
     selectedTabNodes: (state, getters) => getters.treeCache?.selectedTabs
@@ -215,6 +220,7 @@ export default {
      */
     restoreLocal({ state, getters, dispatch }) {
       dispatch('initAreas')
+      dispatch('getHostGroups')
       readFromLocal(STORAGE_KEY_LAYOUT_INFO, info => {
         state.layoutConfig = info
       })
@@ -293,7 +299,8 @@ export default {
      * @param {*} param1 
      */
     getJobLogList({ state, dispatch }, { pageSize, offset, jobId }) {
-      getJobLogList(pageSize, offset, jobId).then(data => {
+      return getJobLogList(pageSize, offset, jobId).then(data => {
+        const rowLength = data.rows.length
         const exist = state.logRecords.findIndex(i => i.jobId === jobId) !== -1
         if (!exist) {
           state.logRecords.push({
@@ -301,14 +308,31 @@ export default {
             offset,
             jobId,
             list: data.rows,
+            loadedAll: data.rows.length < pageSize,
             current: data.rows[0]?.id
           })
         } else {
           const logRecord = state.logRecords.find(i => i.jobId === jobId)
-          logRecord.list = data.rows
-          const logItemId = data.rows[0]?.id
-          logRecord.current = logItemId
-          dispatch('getLogContent', { logItemId, jobId })
+          // 定时刷新时请求后的处理
+          if (pageSize === 1 && rowLength === 1) {
+            const logItem = data.rows[0]
+            const logItemId = logItem.id
+            Object.assign(logRecord.list.find(i => i.id === logItemId), logItem)
+            // dispatch('getLogContent', { logItemId, jobId })
+          } else if (offset === 0) {
+            logRecord.list = data.rows
+            const logItemId = data.rows[0]?.id
+            logRecord.current = logItemId
+            logRecord.loadedAll = false
+            dispatch('getLogContent', { logItemId, jobId })
+          } else if (offset > logRecord.offset) {
+            if (rowLength > 0) {
+              logRecord.list = logRecord.list.concat(data.rows)
+              logRecord.offset = offset
+              logRecord.pageSize = pageSize
+              logRecord.loadedAll = rowLength < pageSize
+            }
+          }
         }
       })
     },
@@ -355,6 +379,11 @@ export default {
     initAreas({ state }) {
       getAllAreas().then(data => {
         state.areas = data
+      })
+    },
+    getHostGroups({ state }) {
+      getHostGroups().then(data => {
+        state.hostGroups = data
       })
     },
     setTab({ state, getters, commit, dispatch }, { name, type }) {

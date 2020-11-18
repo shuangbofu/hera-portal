@@ -55,7 +55,7 @@
               >{{ data.hostGroupName }}
             </a-descriptions-item>
             <a-descriptions-item label="区域">
-              {{ area }}
+              {{ areas }}
             </a-descriptions-item>
           </template>
         </a-descriptions>
@@ -146,10 +146,10 @@ export default {
   },
   computed: {
     areas() {
-      return this.$store.state.develop.areas;
-    },
-    area() {
-      return this.areas.find((i) => i.id === this.data.areaId)?.name;
+      return this.$store.state.develop.areas
+        .filter((i) => this.data.areaIds.includes(i.id))
+        .map((i) => i.name)
+        .join(",");
     },
   },
   methods: {

@@ -43,7 +43,8 @@ export default {
   methods: {
     openConfSetting() {
       this.$refs.confSettingRef.show(this.job, (res) => {
-        console.log("callback", res);
+        Object.assign(this.job, res);
+        this.$message.success("更新成功！");
       });
     },
   },

@@ -53,6 +53,14 @@
                 }}</span>
               </div>
             </div>
+            <div
+              class="see-more"
+              @click="loadMoreLogs"
+              v-if="!logRecord.loadedAll && logRecord.list.length > 0"
+            >
+              查看更多
+            </div>
+            <div v-else class="loaded-all">全部加载完毕</div>
           </div>
         </div>
         <div slot="right" class="main">
@@ -172,9 +180,11 @@ export default {
       const item = this.currentLogItem;
       const jobId = this.logRecord.jobId;
       if (item.endTime === "") {
+        const offset = this.logRecord.list.findIndex((i) => i.id === item.id);
+        console.log(offset);
         this.$store.dispatch("develop/getJobLogList", {
-          pageSize: 10,
-          offset: 0,
+          pageSize: 1,
+          offset,
           jobId,
         });
       }
@@ -200,6 +210,15 @@ export default {
   methods: {
     resize(v) {
       this.setLogContainerWidth(v);
+    },
+    loadMoreLogs() {
+      const jobId = this.logRecord.jobId;
+      const offset = this.logRecord.offset + this.logRecord.pageSize;
+      this.$store.dispatch("develop/getJobLogList", {
+        pageSize: this.logRecord.pageSize,
+        offset,
+        jobId,
+      });
     },
     // TODO 重复代码
     copy(copyText) {
@@ -296,7 +315,10 @@ export default {
           background: @editor-bg3-color;
         }
         &.log-list {
+          overflow: auto;
+          position: relative;
           .log-item {
+            position: relative;
             padding: 2px 10px;
             display: flex;
             align-items: center;
@@ -317,6 +339,19 @@ export default {
               background: @editor-tree-active-color;
               color: #ffffff;
             }
+          }
+          .see-more {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            &:hover {
+              background: @editor-tree-hover-color;
+            }
+          }
+          .loaded-all {
+            font-size: 12px;
+            text-align: center;
           }
         }
       }
