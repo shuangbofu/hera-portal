@@ -117,7 +117,6 @@ export default {
       }
     },
     rightTabs: (state, getters) => getters.tabs.right,
-
     tab: state => state.layoutConfig.tab,
     tabConfgs: (state, getters) => getters.tab.configs,
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
@@ -127,6 +126,9 @@ export default {
 
     selectedKey: (state, getters) => getters.treeCache?.selectedKeys[0],
 
+    /**
+     * 树节点展开之后的所有节点（且根据left tab获得不同数据）
+     */
     flatAllTreeNodes: (state) => type => {
       const jobsTree = state.jobTrees[type]
       const res = []
@@ -137,16 +139,19 @@ export default {
     },
     flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
     flatGroupTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => i.dic),
-
-    // 当前tab下的所有任务
+    /**
+     * 当前tab下的所有任务
+     */
     allJobs: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab).map(i => i.origin),
-
-    // 任务tab的nodes
+    /**
+     * 任务tab的nodes
+     */
     selectedTabNodes: (state, getters) => getters.treeCache?.selectedTabs
       .map(i => getters.flatJobsTrees(state.layoutConfig.leftTab)
         .find(j => j.key === i)),
-
-    // 选中状态中的node
+    /**
+     * 选中状态中的node
+     */
     selectedTabNode: (state, getters) => {
       return getters.flatAllTreeNodes(state.layoutConfig.leftTab)
         .find(i => i.key === getters.selectedKey)
@@ -169,7 +174,9 @@ export default {
 
     editorBottomTabs: state => state.configs.editorBottomTabs,
 
-    // 日志列表
+    /**
+     * 日志列表
+     */
     logRecord: (state, getters) => {
       if (getters.isSelectedGroup) {
         return {}
@@ -278,8 +285,13 @@ export default {
      * @param {*} param0 
      * @param {*} param1 
      */
-    runJob({ dispatch }, { jobId, actionId, triggerType }) {
+    runJob({ dispatch, getters }, { jobId, actionId, triggerType }) {
       return runJob(actionId, triggerType).then(() => {
+        // 如果没有打开bottom，获取日志时打开
+        const tabActive = getters.tab.actives['bottom']
+        if (tabActive == null) {
+          dispatch('setTab', { name: 'log', type: 'bottom' })
+        }
         return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
       })
     },
@@ -318,7 +330,6 @@ export default {
             const logItem = data.rows[0]
             const logItemId = logItem.id
             Object.assign(logRecord.list.find(i => i.id === logItemId), logItem)
-            // dispatch('getLogContent', { logItemId, jobId })
           } else if (offset === 0) {
             logRecord.list = data.rows
             const logItemId = data.rows[0]?.id

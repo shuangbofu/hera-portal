@@ -132,10 +132,16 @@ export function getLog(logId, jobId) {
     axios.get(`/scheduleCenter/getLog.do?id=${logId}&jobId=${jobId}`).then(data => {
       if (data?.log) {
         //eslint-disable-next-line
-        data.log = data.log
-          .replace(/<b>HERA#<\/b>((.|\n)*?<br>)/g, '<div class="hera">$1</div>')
-          .replace(/<b>CONSOLE#<\/b>((.|\n)*?<br>)/g, '<div class="console">$1</div>')
-          .replace(/<font style="color:red">/g, '<font class="error">')
+        data.log =
+          `<div style="font-weight: bold">
+          日志提示：
+           <span class="error"  style="margin-right: 10px">错误日志</span>
+           <span class="hera" style="margin-right: 10px">赫拉日志</span>
+           <span class="console" >控制台日志</span>
+        </div><br>` + data.log
+            .replace(/<b>HERA#<\/b>((.|\n)*?<br>)/g, '<div class="hera">$1</div>')
+            .replace(/<b>CONSOLE#<\/b>((.|\n)*?<br>)/g, '<div class="console">$1</div>')
+            .replace(/<font style="color:red">/g, '<font class="error">')
         // .replace(/CONSOLE#/g, '【控制台】').replace(/HERA#/g, '【赫拉】 ')
       }
       res(data)

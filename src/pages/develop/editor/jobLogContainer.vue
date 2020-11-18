@@ -341,16 +341,15 @@ export default {
             }
           }
           .see-more {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 10px;
             cursor: pointer;
             &:hover {
               background: @editor-tree-hover-color;
             }
           }
-          .loaded-all {
+          .loaded-all,
+          .see-more {
             font-size: 12px;
+            margin: 10px 0;
             text-align: center;
           }
         }

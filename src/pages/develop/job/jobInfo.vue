@@ -191,10 +191,14 @@ export default {
 }
 .ant-collapse-content {
   background: @base-bg-color !important;
+  font-size: 11px !important;
 }
 .ant-collapse-header {
   padding: 6px 12px !important;
   padding-left: 40px !important;
   background: @base-bg-color !important;
+}
+.ant-descriptions-row .ant-descriptions-item span {
+  font-size: 13px;
 }
 </style>
