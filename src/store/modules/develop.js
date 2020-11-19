@@ -9,11 +9,15 @@ import {
   getJobLogList,
   getLog,
   getJobVersions,
-  runJob,
+
   updateJob,
+
+  runJob,
   cancelJob,
 
-  focusJobOrNot, setJobValidOrNot
+  focusJobOrNot, setJobValidOrNot,
+
+  updateGroup
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -97,7 +101,8 @@ export default {
       confEditorWidth: 50,
       logContainerWidth: 20,
       setting: {
-        showId: false
+        showId: true,
+        showTabs: true
       }
     },
     jobTrees: {
@@ -246,11 +251,42 @@ export default {
         }
       }
     },
+    updateGroupConfigs({ dispatch, getters }, { groupId, selfConfigs }) {
+      console.log(groupId, selfConfigs)
+      console.log(dispatch, getters)
+      return updateGroup(groupId, { selfConfigs })
+    },
+    updateGroup({ dispatch }, { id, data, refresh }) {
+      return updateGroup(id, { ...data }).then(() => {
+        if (refresh) {
+          dispatch('getGroup', id)
+        }
+      })
+    },
+    /**
+     * 更新任务脚本和配置
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     updateJobScript({ dispatch, getters }, { id }) {
       const script = getters.currentJob.script
       const selfConfigs = getters.currentJob.selfConfigs
       return dispatch('updateJob', { id, data: { script, selfConfigs }, refresh: false }).then(() => {
         return dispatch('setJobScriptEdited', { jobId: id, script: null })
+      })
+    },
+    /**
+     * 更新任务
+     * @param {*} _ 
+     * @param {*} param1 
+     */
+    updateJob({ dispatch, state }, { id, data, refresh }) {
+      const job = { ...state.jobList.find(i => i.id === id) }
+      return updateJob(id, { ...job, ...data }).then(() => {
+        // 刷新更新后的数据
+        if (refresh) {
+          dispatch('getJob', { id, check: false })
+        }
       })
     },
     focusJobOrNot({ state }, { id, focus, user }) {
@@ -269,20 +305,6 @@ export default {
     setJobValidOrNot({ state }, { id, valid }) {
       return setJobValidOrNot(id, valid).then(() => {
         state.jobList.find(i => i.id === id).valid = valid
-      })
-    },
-    /**
-     * 更新任务
-     * @param {*} _ 
-     * @param {*} param1 
-     */
-    updateJob({ dispatch, state }, { id, data, refresh }) {
-      const job = { ...state.jobList.find(i => i.id === id) }
-      return updateJob(id, { ...job, ...data }).then(() => {
-        // 刷新更新后的数据
-        if (refresh) {
-          dispatch('getJob', { id, check: false })
-        }
       })
     },
     setJobScriptEdited({ getters }, { jobId, script }) {
@@ -355,7 +377,9 @@ export default {
             const logItemId = data.rows[0]?.id
             logRecord.current = logItemId
             logRecord.loadedAll = false
-            dispatch('getLogContent', { logItemId, jobId })
+            if (logItemId) {
+              dispatch('getLogContent', { logItemId, jobId })
+            }
           } else if (offset > logRecord.offset) {
             if (rowLength > 0) {
               logRecord.list = logRecord.list.concat(data.rows)
@@ -661,11 +685,11 @@ const leftTabs = ['allJob', 'myJob', 'debug']
 
 
 function setUpCrumbs(lastNode, all, res) {
-  console.log(lastNode.origin.parent)
+  // console.log(lastNode.origin.parent)
   const node = all.find(i => `group_${i.id}` === lastNode.origin.parent && i.dic)
   if (node) {
     res.push(node)
-    console.log(node.id, node.title)
+    // console.log(node.id, node.title)
     setUpCrumbs(node, all, res)
   }
 }

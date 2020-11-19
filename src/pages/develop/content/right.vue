@@ -3,7 +3,7 @@
     <attached-header type="right" v-if="infoData">
       <template v-slot:header>
         <a-icon
-          v-if="rightTab.name === 'job' && !isSelectedGroup"
+          v-if="rightTab.name === 'job'"
           class="icon"
           type="setting"
           @click="openConfSetting"
@@ -42,10 +42,13 @@ export default {
   },
   methods: {
     openConfSetting() {
-      this.$refs.confSettingRef.show(this.job, (res) => {
-        Object.assign(this.job, res);
-        this.$message.success("更新成功！");
-      });
+      this.$refs.confSettingRef.show(
+        { infoData: this.infoData, isGroup: this.isSelectedGroup },
+        (res) => {
+          Object.assign(this.infoData, res);
+          this.$message.success("更新成功！");
+        }
+      );
     },
   },
 };

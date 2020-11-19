@@ -148,7 +148,6 @@ export default {
           obj[key] = value;
         }
       });
-      console.log(obj);
       return obj2Arr(obj);
     },
     filterInheritConfigArr() {

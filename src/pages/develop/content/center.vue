@@ -7,7 +7,9 @@
       <div
         class="tabs"
         ref="tabs"
-        v-if="selectedTabNodes && selectedTabNodes.length > 0"
+        v-if="
+          selectedTabNodes && selectedTabNodes.length > 0 && depSetting.showTabs
+        "
       >
         <template v-for="(node, index) in selectedTabNodes">
           <div

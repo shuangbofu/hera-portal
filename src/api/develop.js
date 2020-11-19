@@ -67,6 +67,39 @@ export function getScheduledJob(id) {
   })
 }
 
+export function updateJob(id, data) {
+  const job = data
+
+  // 更新接口的字段如下：
+  const updateFields = [
+    "name", "rollBackTimes", "rollBackWaitTime",
+    "runType", "runPriorityLevel", "offset",
+    "description", "scheduleType", "cronExpression",
+    "dependencies", "cycle", "hostGroupId",
+    "mustEndMinute", "estimatedEndHour", "areaId",
+    "repeatRun", "selfConfigs", "script"]
+
+  job.areaId = job.areaIds.join(',')
+  job.runPriorityLevel = job.priorityLevel
+  job.rollBackTimes = job.retryTimes
+  job.rollBackWaitTime = job.retryWaitTime
+  job.repeatRun = job.repeat ? 1 : 0
+
+  job.offset = job.alarmLevelCode
+  job.estimatedEndHour = job.estimatedEndHourArr.join(':')
+  job.cronExpression = job.cronExpressionArr.filter(i => i !== '').join(' ')
+  job.dependencies = job.dependencyArr.join(',')
+
+  updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
+
+  Object.keys(job).forEach(key => {
+    if (!updateFields.includes(key)) {
+      delete job[key]
+    }
+  })
+  return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
+}
+
 export function initScheduledJobs() {
   return axios.post("/scheduleCenter/init.do", {})
 }
@@ -75,7 +108,7 @@ export function getScheduledGroup(id) {
   return new Promise((res, rej) => {
     return axios.get(`/scheduleCenter/getGroupMessage.do?groupId=group_${id}`).then(data => {
       const focusUsers = str2Arr(data.focusUser)
-      const adminUsers = str2Arr(data.uIdS)
+      const adminUsers = str2Arr(data.uidS)
 
       res({
         ...data,
@@ -90,6 +123,23 @@ export function getScheduledGroup(id) {
       rej(msg)
     })
   })
+}
+
+export function updateGroup(id, data) {
+  const groupId = `group_${id}`
+  const updateFields = ['name',
+    'description',
+    'selfConfigs',
+    'resource']
+
+  updatePermission({ uIdS: JSON.stringify(data.adminUsers), id: groupId, type: 'GROUP' })
+
+  Object.keys(data).forEach(key => {
+    if (!updateFields.includes(key)) {
+      delete data[key]
+    }
+  })
+  return post('/scheduleCenter/updateGroupMessage.do', { groupId, ...data })
 }
 
 export function createJobGroup(data) {
@@ -161,13 +211,16 @@ export function getJobVersions(jobId) {
   })
 }
 
-export function getJobOperators(jobId) {
+export function getJobOperators(id, isGroup) {
+  const finalId = isGroup ? `group_${id}` : id;
+  const type = isGroup ? 'GROUP' : 'JOB'
   return new Promise((res, rej) => {
-    axios.get(`/scheduleCenter/getJobOperator?jobId=${jobId}&type=JOB`).then(data => {
+    axios.get(`/scheduleCenter/getJobOperator?jobId=${finalId}&type=${type}`).then(data => {
       res(data.allUser.map(i => i.name))
     }).catch(msg => rej(msg))
   })
 }
+
 
 export function focusJobOrNot(id, focus) {
   return post(`/scheduleCenter/${!focus ? 'delMonitor' : 'addMonitor'}`, { id })
@@ -179,39 +232,6 @@ export function setJobValidOrNot(id, valid) {
 
 export function runJob(actionId, triggerType) {
   return axios.get(`/scheduleCenter/manual.do?actionId=${actionId}&triggerType=${triggerType}`)
-}
-
-export function updateJob(id, data) {
-  const job = data
-
-  // 更新接口的字段如下：
-  const updateFields = [
-    "name", "rollBackTimes", "rollBackWaitTime",
-    "runType", "runPriorityLevel", "offset",
-    "description", "scheduleType", "cronExpression",
-    "dependencies", "cycle", "hostGroupId",
-    "mustEndMinute", "estimatedEndHour", "areaId",
-    "repeatRun", "selfConfigs", "script"]
-
-  job.areaId = job.areaIds.join(',')
-  job.runPriorityLevel = job.priorityLevel
-  job.rollBackTimes = job.retryTimes
-  job.rollBackWaitTime = job.retryWaitTime
-  job.repeatRun = job.repeat ? 1 : 0
-
-  job.offset = job.alarmLevelCode
-  job.estimatedEndHour = job.estimatedEndHourArr.join(':')
-  job.cronExpression = job.cronExpressionArr.filter(i => i !== '').join(' ')
-  job.dependencies = job.dependencyArr.join(',')
-
-  updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
-
-  Object.keys(job).forEach(key => {
-    if (!updateFields.includes(key)) {
-      delete job[key]
-    }
-  })
-  return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
 }
 
 export function updatePermission(data) {

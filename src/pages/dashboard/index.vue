@@ -1,5 +1,5 @@
 <template>
-  <div>dashboard</div>
+  <div>仪表盘</div>
 </template>
 
 <script>

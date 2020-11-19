@@ -56,7 +56,11 @@
             <div
               class="see-more"
               @click="loadMoreLogs"
-              v-if="!logRecord.loadedAll && logRecord.list.length > 0"
+              v-if="
+                !logRecord.loadedAll &&
+                logRecord.list &&
+                logRecord.list.length > 0
+              "
             >
               查看更多
             </div>

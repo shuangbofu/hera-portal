@@ -19,6 +19,7 @@
         v-model="name"
         @pressEnter="submit"
         :placeholder="`${oldName}/`"
+        ref="nameInput"
       >
         <template slot="prefix">
           <span v-if="isCreateJob" :class="['icon', jobType]">
@@ -127,6 +128,9 @@ export default {
       }
       this.visible = true;
       this.callback = callback;
+      this.$nextTick(() => {
+        this.$refs.nameInput.focus();
+      });
     },
     submit() {
       let result = {};

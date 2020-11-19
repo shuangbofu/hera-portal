@@ -5,7 +5,7 @@
         <a-tooltip :key="index" :mouseEnterDelay="0.6">
           <template slot="title">{{ buttonTip(button) }}</template>
           <my-icon
-            @click="buttonClick(button.icon)"
+            @click="buttonClick(button)"
             :class="[
               'icon',
               buttonIcon(button),
@@ -42,18 +42,20 @@
       </span>
     </div>
     <run-option-dialog ref="runOptionRef" />
+    <setting ref="settingRef" />
   </div>
 </template>
 
 <script>
 import screenfull from "screenfull";
 import RunOptionDialog from "../dialog/runOption";
+import Setting from "../dialog/Setting";
 const buttons = [
   { icon: "setting", tip: "设置" },
   { icon: "clean", tip: "清理浏览器缓存", divider: true },
   { icon: "search", tip: "查找任务" },
   { icon: "refresh", divider: true, tip: "刷新" },
-  { icon: "save", disabled: true, tip: "保存" },
+  { icon: "save", disabled: false, tip: "保存" },
   { icon: "play", disabled: true, divider: true, tip: "运行" },
   {
     icon: "valid",
@@ -80,59 +82,81 @@ export default {
   data() {
     return { buttons };
   },
-  components: { RunOptionDialog },
+  components: { RunOptionDialog, Setting },
   methods: {
     full() {
       screenfull.toggle();
       this.$store.commit("setting/toggleFullScreen");
     },
-    buttonClick(name) {
+    buttonClick(button) {
+      const name = button.icon;
       console.log(name);
-      const jobId = this.job.id;
-      if (name === "refresh") {
-        this.$store.dispatch("develop/initJobs").then(() => {
-          this.$message.success("刷新成功！");
-        });
-      } else if (name === "play") {
-        if (this.selectedTabNode?.origin.edited) {
-          this.$message.error("有修改未保存!");
-          return;
+      if (this.isSelectedGroup) {
+        console.log(this.group);
+        if (name === "save") {
+          console.log("保存‘");
+          this.$store
+            .dispatch("develop/updateGroupConfigs", {
+              groupId: this.group.id,
+              selfConfigs: this.group.selfConfigs,
+            })
+            .then(() => {
+              this.$message.success("保存成功！");
+            });
+        } else if (name === "focus") {
+          console.log("关注");
         }
-        this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
-          this.$refs.runOptionRef.show(this.job.versions, (data) => {
-            this.$store.dispatch("develop/runJob", { ...data, jobId });
+      } else {
+        const jobId = this.job.id;
+        if (name === "refresh") {
+          this.$store.dispatch("develop/initJobs").then(() => {
+            this.$message.success("刷新成功！");
           });
-        });
-      } else if (name === "save") {
-        this.$store
-          .dispatch("develop/updateJobScript", { id: jobId })
-          .then(() => {
-            this.$message.success("保存成功！");
+        } else if (name === "play") {
+          if (this.selectedTabNode?.origin.edited) {
+            this.$message.warn("有修改未保存!");
+            return;
+          }
+          this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
+            this.$refs.runOptionRef.show(this.job.versions, (data) => {
+              this.$store.dispatch("develop/runJob", { ...data, jobId });
+            });
           });
-      } else if (name === "clean") {
-        this.$store.commit("develop/clearAllCache");
-        location.reload();
-      } else if (name === "valid") {
-        const valid = !this.job.valid;
-        this.$store
-          .dispatch("develop/setJobValidOrNot", {
-            id: jobId,
-            valid,
-          })
-          .then(() => {
-            this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
-          });
-      } else if (name === "focus") {
-        const focus = !this.getRes("focus");
-        this.$store
-          .dispatch("develop/focusJobOrNot", {
-            id: jobId,
-            focus: focus,
-            user: this.getUser(),
-          })
-          .then(() => {
-            this.$message.success(`${focus ? "" : "取消"}关注成功！`);
-          });
+        } else if (name === "save") {
+          this.$store
+            .dispatch("develop/updateJobScript", { id: jobId })
+            .then(() => {
+              this.$message.success("保存成功！");
+            });
+        } else if (name === "clean") {
+          this.$store.commit("develop/clearAllCache");
+          location.reload();
+        } else if (name === "valid") {
+          const valid = !this.job.valid;
+          this.$store
+            .dispatch("develop/setJobValidOrNot", {
+              id: jobId,
+              valid,
+            })
+            .then(() => {
+              this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
+            });
+        } else if (name === "focus") {
+          const focus = !this.getRes("focus");
+          this.$store
+            .dispatch("develop/focusJobOrNot", {
+              id: jobId,
+              focus: focus,
+              user: this.getUser(),
+            })
+            .then(() => {
+              this.$message.success(`${focus ? "" : "取消"}关注成功！`);
+            });
+        } else if (name === "setting") {
+          this.$refs.settingRef.show();
+        } else {
+          this.$message.warn(this.buttonTip(button) + "暂不支持，待开发！");
+        }
       }
     },
     buttonIcon(button) {
@@ -153,7 +177,9 @@ export default {
       } else if (name === "focus") {
         const user = this.getUser();
         if (user) {
-          return this.job?.focusUsers?.includes(user);
+          // 区分文件夹和任务
+          const data = this.isSelectedGroup ? this.group : this.job;
+          return data?.focusUsers?.includes(user);
         }
       }
     },
