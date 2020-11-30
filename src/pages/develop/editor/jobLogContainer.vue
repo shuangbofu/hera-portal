@@ -190,20 +190,24 @@ export default {
           pageSize: 1,
           offset,
           jobId,
+        }).then(() => {
+          // this.getLog(item,jobId)
+          if (item.status === "running" && this.currentLogItem.startTime !== "") {
+          console.log("fetch log");
+          this.$store
+            .dispatch("develop/getLogContent", {
+              jobId,
+              logItemId: item.id,
+            })
+            .then(() => {
+              const ref = this.$refs.logTextRef;
+              // 滚动到最底部
+              if(ref) {
+                ref.scrollTop = ref.scrollHeight;
+              }
+            });
+        }
         });
-      }
-      if (item.status === "running" && this.currentLogItem.startTime !== "") {
-        console.log("fetch log");
-        this.$store
-          .dispatch("develop/getLogContent", {
-            jobId,
-            logItemId: item.id,
-          })
-          .then(() => {
-            const ref = this.$refs.logTextRef;
-            // 滚动到最底部
-            ref.scrollTop = ref.scrollHeight;
-          });
       }
     }, 2000);
   },

@@ -9,13 +9,14 @@
           >{{ filterValue }}</span
         >
         <a-icon class="icon" type="search" @click="search" />
+        <!-- <a-icon class="icon" type="setting" @click="search" /> -->
         <div v-show="filterVisible" class="tree-filter operation-bar">
           <a-input
             size="small"
             style="margin: 0 5px"
             v-model="filterValue"
             ref="filterInput"
-            placeholder="输入ID/名称过滤"
+            placeholder="输入ID/名称过滤, 多个空格分隔"
           ></a-input>
           <a-icon
             class="icon"
@@ -29,7 +30,7 @@
         v-for="tab in ['allJob', 'myJob', 'debug']"
         :key="tab"
         class="tree"
-        :tree-cache="treeCaches[tab]"
+        :tree-cache="treeCache(tab)"
         :tree-data="treeData(tab)"
         v-show="leftTab.name === tab"
         @expand="setExpanedTreeNodes"
@@ -64,7 +65,7 @@ function nodesAfterFilter(nodes, value, consumer) {
         ...i,
         children: nodesAfterFilter(i.children, value, consumer),
       };
-      if (line.children.length > 0 || consumer(i, value)) {
+      if (consumer(line, value) || line.children.length > 0) {
         res.push(line);
       }
     }
@@ -86,24 +87,60 @@ export default {
     CreateJobDialog,
   },
   computed: {
-    treeData() {
+    treeDataTuple() {
       return function (tab) {
         const treeData = this.jobTrees[tab];
-        if (this.filterValue.trim() !== "") {
-          const filterData = nodesAfterFilter(
-            treeData,
-            this.filterValue,
-            (i, value) => {
-              return (
-                i.title.includes(value) || i.origin.id.toString() === value
-              );
+        const expandedNodes = []
+        const filterData = nodesAfterFilter(
+          treeData,
+          this.filterValue,
+          (i, value) => {
+            value = value.trim()
+            // 忽略空文件夹
+            if(this.depSetting.hideEmptyFolder && i.dic){
+              return i.children.filter(i=>!i.dic).length > 0
             }
-          );
-          return filterData;
-        }
-        return treeData;
+              // 值为空
+            if(value === '') {
+              return true;
+            }
+            // 多个ID名称(空格分隔)
+            const f = value => {
+              let ret = i.title.includes(value) || i.origin.id.toString() === value
+              if(i.children.filter(i=>i.searched).length > 0 || ret) {
+                i.searched = true
+                if(!i.isLeaf) {
+                  expandedNodes.push(i)
+                }
+              }
+              return ret
+            }
+            if(value.includes(' ')) {
+              const valueArr = value.split(' ')
+              if(valueArr) {
+                return valueArr.map(value => f(value)).filter(i=>i).length > 0
+              }
+            }
+            // 名称/单个ID
+            return f(value)
+          }
+        );
+        return {filterData, expandedNodes}
       };
     },
+    treeData() {
+      return function (tab) {
+        return this.treeDataTuple(tab).filterData
+      }
+    },
+    treeCache() {
+      return function(tab) {
+        const treeCache = this.treeCaches[tab]
+        const expandedKeys = this.treeDataTuple(tab).expandedNodes.map(i=>i.key)
+        // 查询后展开的结点
+        return expandedKeys.length>0 ? {...treeCache, expandedKeys} : treeCache
+      }
+    }
   },
   methods: {
     search() {
@@ -154,7 +191,7 @@ export default {
     top: 29px;
     right: -1px;
     height: 35px;
-    width: 200px;
+    width: 220px;
     border-radius: 1px;
     border: 1px solid @editor-border-color;
     background: @editor-bg-color;

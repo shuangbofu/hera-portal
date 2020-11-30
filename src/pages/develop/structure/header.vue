@@ -107,7 +107,7 @@ export default {
           console.log("关注");
         }
       } else {
-        const jobId = this.job.id;
+        const jobId = this.job?.id;
         if (name === "refresh") {
           this.$store.dispatch("develop/initJobs").then(() => {
             this.$message.success("刷新成功！");

@@ -9,7 +9,7 @@ export function getScheduledJob(id) {
       const focusUsers = str2Arr(data.focusUser)
       const adminUsers = str2Arr(data.uidS)
       const valid = data.auto === '开启'
-      const dependencyArr = str2Arr(data.dependencies)
+      const dependencyArr = str2Arr(data.dependencies, ',').map(i => Number(i))
       const repeat = data.reapeatRun > 0
       const retryTimes = Number(data.configs['roll.back.times'] || 0)
       const retryWaitTime = Number(data.configs['roll.back.wait.time'] || 1)
@@ -254,7 +254,10 @@ function objToParams(obj) {
   return params
 }
 
-function str2Arr(str) {
+function str2Arr(str, split) {
+  if (!split) {
+    split = /\s+/
+  }
   if (str === '' || !str) {
     return []
   }
@@ -262,7 +265,7 @@ function str2Arr(str) {
   if (str === '') {
     return []
   }
-  return str.split(/\s+/)
+  return str.split(split)
 }
 
 function obj2Str(obj) {

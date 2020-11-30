@@ -92,17 +92,18 @@ export default {
     },
     layoutConfig: {
       tab: {
-        configs: { left: [], right: [], bottom: [] },
-        actives: { left: null, right: null, bottom: null },
+        configs: { left: [{ name: "myJob", width: 20 }], right: [], bottom: [] },
+        actives: { left: 'myJob', right: null, bottom: null },
       },
-      leftTab: '',
+      leftTab: 'myJob',
       onlyCenter: false,
       editorBottom: 'text',
       confEditorWidth: 50,
       logContainerWidth: 20,
       setting: {
         showId: true,
-        showTabs: true
+        showTabs: true,
+        hideEmptyFolder: true
       }
     },
     jobTrees: {
@@ -461,6 +462,7 @@ export default {
       if (onlyCenter) {
         commit('toggleOnlyCenter')
       }
+      console.log(tab.actives)
       commit('saveLocalLayout')
     },
     resizeTab({ getters, commit }, { width, type }) {

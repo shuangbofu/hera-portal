@@ -25,6 +25,12 @@
             开启多标签显示切换
           </a-checkbox>
         </div>
+        <div class="form-line">
+          <!-- <div class="title">显示任务ID</div> -->
+          <a-checkbox v-model="setting.hideEmptyFolder">
+            不显示空文件夹
+          </a-checkbox>
+        </div>
       </div>
     </div>
   </a-modal>

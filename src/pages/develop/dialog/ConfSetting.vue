@@ -13,7 +13,7 @@
     <div
       class="container"
       v-if="infoData.id"
-      :style="isGroup ? 'height: 25vh;' : 'height: 80vh;'"
+      :style="isGroup ? 'height: 30vh;' : 'height: 80vh;'"
     >
       <div class="divider-box" title="基础信息">
         <div class="content">
@@ -204,7 +204,7 @@
           </div>
         </div>
       </template>
-      <div style="width: 100%; position: absolute; bottom: 20px; right: 20px">
+      <div style="width: 100%; bottom: 20px; right: 20px">
         <div class="button active" style="float: right" @click="submit">
           确认
         </div>
