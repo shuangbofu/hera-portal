@@ -33,11 +33,15 @@ service.interceptors.response.use(
             if (response.config.responseType === 'blob') {
                 return response.data
             }
+            // 兼容hera api。。
             if (!res.success) {
-                message.error(res.message)
-                return Promise.reject(res.message)
+                let msg = res.message
+                if (res.data) {
+                    msg += res.data
+                }
+                message.error(msg)
+                return Promise.reject(msg)
             } else {
-                // 兼容hera api。。
                 return res.data || res.message
             }
         }

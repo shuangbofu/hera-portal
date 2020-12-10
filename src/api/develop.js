@@ -18,16 +18,16 @@ export function getScheduledJob(id) {
       const alarmLevelCode = alarmTypes.findIndex(i => i == data.alarmLevel)
 
       const estimatedEndHourArr = data.estimatedEndHour.split(":").map(i => Number(i))
-      const cronExpressionArr = str2Arr(data.cronExpression)
 
-      if (cronExpressionArr.length === 0) {
-        for (let i = 0; i < 6; i++) {
-          cronExpressionArr.push('')
+      let cronExpressionArr = str2Arr(data.cronExpression)
+      if (data.scheduleType === 0) {
+        if (cronExpressionArr.length === 0) {
+          cronExpressionArr = ['0', '0', '3', '*', '*', '?']
         }
       }
-
-      // const 
-
+      if (!data.description) {
+        data.description = ''
+      }
       // const dependencyPeriod = {
       //   '无': 'NONE',
       //   '自依赖，依赖于当前任务的上一周期': 'SELF_LAST'
@@ -228,6 +228,18 @@ export function focusJobOrNot(id, focus) {
 
 export function setJobValidOrNot(id, valid) {
   return post('/scheduleCenter/updateSwitch', { id, status: valid ? 1 : 0 })
+}
+
+export function generateVersion(jobId) {
+  return post('/scheduleCenter/generateVersion', { jobId })
+}
+
+export function deleteJobOrGroup(id, type) {
+  const isJob = type === 'job'
+  return post('/scheduleCenter/deleteJob.do', {
+    id: !isJob ? `group_${id}` : id,
+    type: isJob ? 'JOB' : 'GROUP'
+  })
 }
 
 export function runJob(actionId, triggerType) {

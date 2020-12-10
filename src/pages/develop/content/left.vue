@@ -96,14 +96,12 @@ export default {
           this.filterValue,
           (i, value) => {
             value = value.trim()
-            // 忽略空文件夹
-            if(this.depSetting.hideEmptyFolder && i.dic){
-              return i.children.filter(i=>!i.dic).length > 0
-            }
-              // 值为空
+
+            // 值为空
             if(value === '') {
-              return true;
+              return this.ignoreEmpty(i);
             }
+
             // 多个ID名称(空格分隔)
             const f = value => {
               let ret = i.title.includes(value) || i.origin.id.toString() === value
@@ -113,8 +111,11 @@ export default {
                   expandedNodes.push(i)
                 }
               }
+              // 忽略空文件夹
+              this.ignoreEmpty(i)
               return ret
             }
+
             if(value.includes(' ')) {
               const valueArr = value.split(' ')
               if(valueArr) {
@@ -143,6 +144,15 @@ export default {
     }
   },
   methods: {
+    ignoreEmpty(i) {
+      if(
+        this.depSetting.hideEmptyFolder && i.dic 
+        // && i.isLeaf
+      ){ 
+        return i.children.filter(i=>!i.dic).length > 0 
+      }
+      return true;
+    },
     search() {
       this.filterVisible = true;
       this.$nextTick(() => {
@@ -151,7 +161,9 @@ export default {
     },
     menuClick(order, data) {
       if (order === "删除") {
-        console.log("delete");
+        this.$store.dispatch('develop/deleteJobOrGroup', data).then(() => {
+          this.$message.success('删除成功')
+        })
       } else {
         this.$refs.createJobDialogRef.show(
           { order, obj: data },

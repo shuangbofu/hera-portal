@@ -14,6 +14,7 @@
             style="font-size: 10px"
           />
         </div>
+        <a-input size="small" v-model="filterValue" />
       </div>
       <div v-else>
         <a-icon
@@ -31,7 +32,7 @@
     <div style="position: relative">
       <div :class="['select-options']" v-show="optionVisible">
         <div
-          v-for="(option, index) in realOptions"
+          v-for="(option, index) in filterOptions"
           :key="index"
           :class="['option', isActive(option) ? 'active' : '']"
           @click="chooseOption(option)"
@@ -53,6 +54,7 @@ export default {
   data() {
     return {
       optionVisible: false,
+      filterValue: ''
     };
   },
   model: {
@@ -80,6 +82,13 @@ export default {
         return typeof i === "object" ? i : { value: i, label: i };
       });
     },
+    filterOptions() {
+      const value = this.filterValue
+      if(value.trim().length === 0) {
+        return this.realOptions
+      }
+      return this.realOptions.filter(i=>i.label.includes(value) || i.value.toString().includes(value))
+    }
   },
   created() {
     window.addEventListener("click", this.clickOther);
@@ -165,6 +174,12 @@ export default {
     .caret {
       margin-top: 1px;
       line-height: 20px;
+    }
+    input {
+      border: none;
+      height: 18px;
+      font-size: 10px;
+      padding: 2px;
     }
   }
   .select-options {

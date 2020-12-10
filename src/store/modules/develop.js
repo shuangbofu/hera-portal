@@ -17,7 +17,9 @@ import {
 
   focusJobOrNot, setJobValidOrNot,
 
-  updateGroup
+  updateGroup,
+
+  deleteJobOrGroup
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -95,7 +97,6 @@ export default {
         configs: { left: [{ name: "myJob", width: 20 }], right: [], bottom: [] },
         actives: { left: 'myJob', right: null, bottom: null },
       },
-      leftTab: 'myJob',
       onlyCenter: false,
       editorBottom: 'text',
       confEditorWidth: 50,
@@ -129,7 +130,9 @@ export default {
     tabConfgs: (state, getters) => getters.tab.configs,
     tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
 
-    treeCache: (state) => state.treeCaches[state.layoutConfig.leftTab],
+    leftTab: (state, getters) => getters.tab.actives['left'],
+
+    treeCache: (state, getters) => state.treeCaches[getters.leftTab],
     selectedTabKeys: (state, getters) => getters.treeCache.selectedTabs,
 
     selectedKey: (state, getters) => getters.treeCache?.selectedKeys[0],
@@ -150,18 +153,18 @@ export default {
     /**
      * 当前tab下的所有任务
      */
-    allJobs: (state, getters) => getters.flatJobsTrees(state.layoutConfig.leftTab).map(i => i.origin),
+    allJobs: (state, getters) => getters.flatJobsTrees(getters.leftTab).map(i => i.origin),
     /**
      * 任务tab的nodes
      */
     selectedTabNodes: (state, getters) => getters.treeCache?.selectedTabs
-      .map(i => getters.flatJobsTrees(state.layoutConfig.leftTab)
+      .map(i => getters.flatJobsTrees(getters.leftTab)
         .find(j => j.key === i)),
     /**
      * 选中状态中的node
      */
     selectedTabNode: (state, getters) => {
-      return getters.flatAllTreeNodes(state.layoutConfig.leftTab)
+      return getters.flatAllTreeNodes(getters.leftTab)
         .find(i => i.key === getters.selectedKey)
     },
     isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
@@ -170,7 +173,7 @@ export default {
       const arr = []
       const root = getters.selectedTabNode
       if (root) {
-        const allNodes = getters.flatAllTreeNodes(state.layoutConfig.leftTab)
+        const allNodes = getters.flatAllTreeNodes(getters.leftTab)
         setUpCrumbs(root, allNodes, arr)
         arr.reverse()
         arr.push(root)
@@ -252,9 +255,7 @@ export default {
         }
       }
     },
-    updateGroupConfigs({ dispatch, getters }, { groupId, selfConfigs }) {
-      console.log(groupId, selfConfigs)
-      console.log(dispatch, getters)
+    updateGroupConfigs(_, { groupId, selfConfigs }) {
       return updateGroup(groupId, { selfConfigs })
     },
     updateGroup({ dispatch }, { id, data, refresh }) {
@@ -443,10 +444,6 @@ export default {
       })
     },
     setTab({ state, getters, commit, dispatch }, { name, type }) {
-      if (type == 'left') {
-        state.layoutConfig.leftTab = name
-        dispatch('getJobByKey', { key: getters.selectedKey, check: true })
-      }
       const tab = state.layoutConfig.tab
       const tabConfigs = tab.configs[type]
       let config = tabConfigs.find(i => i.name === name)
@@ -462,7 +459,9 @@ export default {
       if (onlyCenter) {
         commit('toggleOnlyCenter')
       }
-      console.log(tab.actives)
+      if (type == 'left') {
+        dispatch('getJobByKey', { key: getters.selectedKey, check: true })
+      }
       commit('saveLocalLayout')
     },
     resizeTab({ getters, commit }, { width, type }) {
@@ -507,6 +506,54 @@ export default {
         dispatch('setTab', { name: getters.rightTabs[0].name, type: 'right' })
       }
       commit('saveTreeCache')
+    },
+    /**
+     * 删除任务/组
+     * @param {*} param0 
+     * @param {*} data 
+     */
+    deleteJobOrGroup({ dispatch, state, commit, getters }, data) {
+      return deleteJobOrGroup(data.id, data.type).then(() => {
+        leftTabs.forEach(type => {
+          const parentNode = getters.flatAllTreeNodes(type).find(i => i.key === `node_${data.parent}`)
+          if (parentNode) {
+            const index = parentNode.children.findIndex(i => i.key === data.key)
+            if (index !== -1) {
+              parentNode.children.splice(index, 1)
+            }
+            const treeCache = state.treeCaches[type]
+            if (data.type === 'job') {
+              dispatch('closeTab', data.key)
+            } else {
+              const flatAllTreeNodes = getters.flatAllTreeNodes(type)
+              const selfNode = flatAllTreeNodes.find(i => i.key === `node_${data.id}`)
+              const tabs = treeCache.selectedTabs
+              const selectedKeys = treeCache.selectedKeys
+              if (selfNode) {
+                selfNode.children.forEach(n => {
+                  const idx = tabs.findIndex(i => i === n.key)
+                  if (idx !== -1) {
+                    tabs.splice(idx, 1)
+                  }
+                  if (selectedKeys.includes(n.key)) {
+                    treeCache.selectedKeys = []
+                  }
+                })
+              }
+              if (tabs.length > 0) {
+                if (type === getters.leftTab) {
+                  const tabKey = tabs[0]
+                  const tabNode = flatAllTreeNodes.find(i => i.key === tabKey)
+                  if (tabNode) {
+                    dispatch('selectTreeNode', { key: tabs[0], selected: false, dic: false, id: tabNode.id })
+                  }
+                }
+              }
+            }
+          }
+          commit('saveTreeCache')
+        })
+      })
     },
     /**
      * 切换标签
@@ -612,7 +659,7 @@ export default {
       }
       getScheduledJob(id).then(data => {
         const job = state.jobList.find(i => i.id === id)
-        if (job !== null) {
+        if (!job) {
           state.jobList.push(data)
           leftTabs.forEach(type => {
             dispatch('setNodeData', { type, data })

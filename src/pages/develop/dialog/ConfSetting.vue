@@ -102,6 +102,7 @@
                   size="small"
                   style="font-size: 10px; margin-right: 2px; width: 38.3px"
                   :key="index"
+                  :disabled="index === 0"
                   v-model="job.cronExpressionArr[index]"
                 ></a-input>
               </template>
@@ -266,7 +267,7 @@ export default {
         .dispatch(`develop/update${this.isGroup ? "Group" : "Job"}`, {
           id: this.infoData.id,
           data: this.infoData,
-          refresh: false,
+          refresh: true,
         })
         .then(() => {
           this.visible = false;

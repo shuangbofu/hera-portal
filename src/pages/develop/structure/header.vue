@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="operation-bar">
+    <div class="operation-bar header-icons">
       <template v-for="(button, index) in buttons">
         <a-tooltip :key="index" :mouseEnterDelay="0.6">
           <template slot="title">{{ buttonTip(button) }}</template>
@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { generateVersion } from "@/api/develop";
 import screenfull from "screenfull";
 import RunOptionDialog from "../dialog/runOption";
 import Setting from "../dialog/Setting";
@@ -56,6 +57,7 @@ const buttons = [
   { icon: "search", tip: "查找任务" },
   { icon: "refresh", divider: true, tip: "刷新" },
   { icon: "save", disabled: false, tip: "保存" },
+  { icon: 'infinite', disabled: true, tip: '生成版本'},
   { icon: "play", disabled: true, divider: true, tip: "运行" },
   {
     icon: "valid",
@@ -112,6 +114,10 @@ export default {
           this.$store.dispatch("develop/initJobs").then(() => {
             this.$message.success("刷新成功！");
           });
+        } else if(name === 'infinite') {
+          generateVersion(jobId).then(() => {
+            this.$message.success('生成版本成功！')
+          })
         } else if (name === "play") {
           if (this.selectedTabNode?.origin.edited) {
             this.$message.warn("有修改未保存!");
@@ -194,7 +200,7 @@ export default {
 
 <style lang="less" scoped>
 .container {
-  .operation-bar {
+  .header-icons {
     padding: 4px 0;
     height: 30px;
     display: flex;
@@ -257,7 +263,7 @@ export default {
     .crumbs-item {
       margin: 0 4px;
       font-size: 10px;
-      font-weight: 400;
+      font-weight: 500;
       &:first-child {
         margin-left: 0;
       }
