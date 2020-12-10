@@ -6,14 +6,17 @@
         class="editor"
         v-model="job.script"
         :theme="editorTheme"
-        :language="lang"
+        :language="job.lang"
         :options="{
           fontSize: 13,
           automaticLayout: true,
         }"
       />
-      <template v-else>
+      <template v-else-if="layoutConfig.editorBottom === 'config'">
         <conf-editor :data="job" v-if="job.configs" />
+      </template>
+      <template v-else>
+        <sql-preview :data="job" @preview="v => previewJobScript({actionId: v, jobId: job.id})"/>
       </template>
     </div>
     <div class="footer">
@@ -35,6 +38,7 @@
 </template>
 
 <script>
+import SqlPreview from './sqlPreview'
 import ConfEditor from "./confEditor";
 import MonacoEditor from "monaco-editor-vue";
 import commonMixin from "@/mixins/common";
@@ -45,6 +49,7 @@ export default {
   components: {
     MonacoEditor,
     ConfEditor,
+    SqlPreview
   },
   watch: {
     "job.script": function (newVal, oldVal) {
@@ -60,17 +65,17 @@ export default {
   },
   mixins: [commonMixin],
   computed: {
-    lang() {
-      const type = this.job.runType;
-      if (["Spark", "Hive"].includes(type)) {
-        return "sql";
-      } else if (type === "Shell") {
-        return "shell";
-      } else if (type === "Python") {
-        return "python";
-      }
-      return "shell";
-    },
+    // lang() {
+    //   const type = this.job.runType;
+    //   if (["Spark", "Hive"].includes(type)) {
+    //     return "sql";
+    //   } else if (type === "Shell") {
+    //     return "shell";
+    //   } else if (type === "Python") {
+    //     return "python";
+    //   }
+    //   return "shell";
+    // },
     editorTheme() {
       return this.theme.mode === "light" ? "vs" : "vs-dark";
     },

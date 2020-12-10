@@ -87,6 +87,7 @@
               <h-select
                 style="width: 240px"
                 :multiple="true"
+                :filterable="true"
                 v-model="job.dependencyArr"
                 :options="
                   allJobs.map((i) => {

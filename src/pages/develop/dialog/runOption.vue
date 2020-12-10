@@ -13,10 +13,7 @@
     <div class="title">运行任务</div>
     <h-select
       v-model="option.actionId"
-      :options="
-        versions.map((i) => {
-          return { value: i, label: i };
-        })
+      :options="versions
       "
     />
     <div class="type-select">

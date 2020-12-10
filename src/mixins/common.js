@@ -57,7 +57,8 @@ export default {
       // 获取日志内容
       'getLogContent',
       'setJobScriptEdited',
-      'cancelJob'
+      'cancelJob',
+      'previewJobScript'
     ]),
     changeTab(name, type) {
       this.setTab({

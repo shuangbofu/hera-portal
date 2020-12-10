@@ -19,7 +19,8 @@ import {
 
   updateGroup,
 
-  deleteJobOrGroup
+  deleteJobOrGroup,
+  previewJobScript
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -85,6 +86,9 @@ export default {
       }, {
         name: 'config',
         label: '配置项'
+      }, {
+        name: 'preview',
+        label: '预览'
       }]
     },
     treeCaches: {
@@ -620,6 +624,12 @@ export default {
         commit('saveTreeCache')
       }
     },
+    previewJobScript({ state }, { jobId, actionId }) {
+      return previewJobScript(actionId).then(data => {
+        const job = state.jobList.find(i => i.id === jobId)
+        Vue.set(job, 'previewScript', data)
+      })
+    },
     /**
      * 关闭其他标签
      * @param {*} param0 
@@ -668,6 +678,7 @@ export default {
           Object.assign(job, data)
         }
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
+        dispatch('getJobVersions', { jobId: id })
       })
       // TODO 任务调度是不同的请求
     },

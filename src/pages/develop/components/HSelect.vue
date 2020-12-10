@@ -14,7 +14,7 @@
             style="font-size: 10px"
           />
         </div>
-        <a-input size="small" v-model="filterValue" />
+        <a-input v-if="filterable" size="small" v-model="filterValue" />
       </div>
       <div v-else>
         <a-icon
@@ -68,6 +68,11 @@ export default {
       require: false,
       type: Boolean,
     },
+    filterable: {
+      require: false,
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     selectedOptions() {

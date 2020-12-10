@@ -116,17 +116,17 @@ export default {
           });
         } else if(name === 'infinite') {
           generateVersion(jobId).then(() => {
-            this.$message.success('生成版本成功！')
+            this.$store.dispatch('develop/getJobVersions',{jobId}).then(() => {
+              this.$message.success('生成版本成功！')
+            })
           })
         } else if (name === "play") {
           if (this.selectedTabNode?.origin.edited) {
             this.$message.warn("有修改未保存!");
             return;
           }
-          this.$store.dispatch("develop/getJobVersions", { jobId }).then(() => {
-            this.$refs.runOptionRef.show(this.job.versions, (data) => {
-              this.$store.dispatch("develop/runJob", { ...data, jobId });
-            });
+          this.$refs.runOptionRef.show(this.job.versions, (data) => {
+            this.$store.dispatch("develop/runJob", { ...data, jobId });
           });
         } else if (name === "save") {
           this.$store

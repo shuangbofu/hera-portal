@@ -6,6 +6,7 @@ export function getScheduledJob(id) {
     return axios.get(`/scheduleCenter/getJobMessage.do?jobId=${id}`).then(data => {
       // 处理一下数据格式（script null等。。）
       const script = data.script == null ? '' : data.script
+      const description = data.description == null ? '' : data.description
       const focusUsers = str2Arr(data.focusUser)
       const adminUsers = str2Arr(data.uidS)
       const valid = data.auto === '开启'
@@ -25,9 +26,6 @@ export function getScheduledJob(id) {
           cronExpressionArr = ['0', '0', '3', '*', '*', '?']
         }
       }
-      if (!data.description) {
-        data.description = ''
-      }
       // const dependencyPeriod = {
       //   '无': 'NONE',
       //   '自依赖，依赖于当前任务的上一周期': 'SELF_LAST'
@@ -39,9 +37,20 @@ export function getScheduledJob(id) {
 
       const areaIds = data.areaId.split(',').map(i => Number(i.trim())).filter(i => i !== '')
 
+      let lang = 'shell'
+      const type = data.runType;
+      if (["Spark", "Hive"].includes(type)) {
+        lang = "sql";
+      } else if (type === "Shell") {
+        lang = "shell";
+      } else if (type === "Python") {
+        lang = "python";
+      }
+
       res({
         ...data,
         script,
+        description,
         focusUsers,
         adminUsers,
         valid,
@@ -51,6 +60,8 @@ export function getScheduledJob(id) {
         retryWaitTime,
         priorityLevel,
         areaIds,
+        versions: [],
+        lang,
 
         alarmLevelCode, estimatedEndHourArr, cronExpressionArr,
         // dependencyPeriod,
@@ -87,7 +98,7 @@ export function updateJob(id, data) {
 
   job.offset = job.alarmLevelCode
   job.estimatedEndHour = job.estimatedEndHourArr.join(':')
-  job.cronExpression = job.cronExpressionArr.filter(i => i !== '').join(' ')
+  job.cronExpression = job.cronExpressionArr.map(i => i !== '' ? '*' : i).join(' ')
   job.dependencies = job.dependencyArr.join(',')
 
   updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
@@ -209,6 +220,10 @@ export function getJobVersions(jobId) {
       rej(msg)
     })
   })
+}
+
+export function previewJobScript(actionId) {
+  return axios.get(`/scheduleCenter/previewJob.do?actionId=${actionId}`)
 }
 
 export function getJobOperators(id, isGroup) {
