@@ -98,7 +98,7 @@ export function updateJob(id, data) {
 
   job.offset = job.alarmLevelCode
   job.estimatedEndHour = job.estimatedEndHourArr.join(':')
-  job.cronExpression = job.cronExpressionArr.map(i => i !== '' ? '*' : i).join(' ')
+  job.cronExpression = job.cronExpressionArr.map(i => i === '' ? '*' : i).join(' ')
   job.dependencies = job.dependencyArr.join(',')
 
   updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })

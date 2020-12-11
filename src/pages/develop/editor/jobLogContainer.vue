@@ -164,6 +164,12 @@ export default {
         this.getLogContent({ logItemId: newVal, jobId: this.logRecord?.jobId });
       }
     },
+    'currentLogItem.status'(newVal, oldVal) {
+      if((['success','failed'].includes(newVal)) && oldVal === 'running') {
+        console.log('final fetch log')
+        this.getLog(this.currentLogItem,this.logRecord.jobId)
+      }
+    }
   },
   computed: {
     width() {
@@ -191,22 +197,9 @@ export default {
           offset,
           jobId,
         }).then(() => {
-          // this.getLog(item,jobId)
           if (item.status === "running" && this.currentLogItem.startTime !== "") {
-          console.log("fetch log");
-          this.$store
-            .dispatch("develop/getLogContent", {
-              jobId,
-              logItemId: item.id,
-            })
-            .then(() => {
-              const ref = this.$refs.logTextRef;
-              // 滚动到最底部
-              if(ref) {
-                ref.scrollTop = ref.scrollHeight;
-              }
-            });
-        }
+            this.getLog(item,jobId)
+          }
         });
       }
     }, 2000);
@@ -216,6 +209,21 @@ export default {
     this.interval = null;
   },
   methods: {
+    getLog(item, jobId) {
+      console.log("fetch log");
+      this.$store
+      .dispatch("develop/getLogContent", {
+        jobId,
+        logItemId: item.id,
+      })
+      .then(() => {
+        const ref = this.$refs.logTextRef;
+        // 滚动到最底部
+        if(ref) {
+          ref.scrollTop = ref.scrollHeight;
+        }
+      });
+    },
     resize(v) {
       this.setLogContainerWidth(v);
     },
