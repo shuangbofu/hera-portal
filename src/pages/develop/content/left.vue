@@ -3,26 +3,26 @@
     <attached-header type="left">
       <template v-slot:header>
         <span
-          v-if="!filterVisible"
+          v-if="!filterObj.visible"
           style="margin-right: 5px; cursor: pointer"
           @click="search"
-          >{{ filterValue }}</span
+          >{{ filterObj.value }}</span
         >
         <a-icon class="icon" type="search" @click="search" />
-        <!-- <a-icon class="icon" type="setting" @click="search" /> -->
-        <div v-show="filterVisible" class="tree-filter operation-bar">
+        <div v-show="filterObj.visible" class="tree-filter operation-bar">
           <a-input
             size="small"
             style="margin: 0 5px"
-            v-model="filterValue"
+            v-model="filterObj.text"
+            @pressEnter="startFilter"
             ref="filterInput"
-            placeholder="输入ID/名称过滤, 多个空格分隔"
+            placeholder="ID/名称回车过滤,多个空格分隔"
           ></a-input>
           <a-icon
             class="icon"
             type="close"
             style="margin-right: 5px"
-            @click="filterVisible = false"
+            @click="filterObj.visible = false"
           />
         </div>
       </template>
@@ -33,7 +33,7 @@
         :tree-cache="treeCache(tab)"
         :tree-data="treeData(tab)"
         v-show="leftTab.name === tab"
-        @expand="setExpanedTreeNodes"
+        @expand="obj => changeFilteredExpanedTreeNodes(tab, obj)"
         @select="selectTreeNode"
         @menuClick="menuClick"
       />
@@ -72,19 +72,29 @@ function nodesAfterFilter(nodes, value, consumer) {
   });
   return res;
 }
-
+let filterCopy = {visible: false, value: '',text: '',excludeNodes:[]}
 export default {
   mixins: [commonMixin],
   data() {
     return {
-      filterVisible: false,
-      filterValue: "",
+      filterObj: {visible: false, value: '',text: '',excludeNodes:[]}
     };
+  },
+  watch: {
+    filterObj: {
+      handler(newVal) {
+        Object.assign(filterCopy, newVal)
+      },
+      deep: true
+    }
   },
   components: {
     JobTree,
     AttachedHeader,
     CreateJobDialog,
+  },
+  created() {
+    this.filterObj = {...filterCopy}
   },
   computed: {
     treeDataTuple() {
@@ -93,7 +103,7 @@ export default {
         const expandedNodes = []
         const filterData = nodesAfterFilter(
           treeData,
-          this.filterValue,
+          this.filterObj.value,
           (i, value) => {
             value = value.trim()
 
@@ -137,24 +147,44 @@ export default {
     treeCache() {
       return function(tab) {
         const treeCache = this.treeCaches[tab]
+        // 过滤之后所有满足条件展开的(父)结点
         const expandedKeys = this.treeDataTuple(tab).expandedNodes.map(i=>i.key)
+        // 过滤之后关闭过的结点
+        const excludeExpandedKeys = this.filterObj.excludeNodes
+        const filterExpanedKeys = expandedKeys.filter(i=>excludeExpandedKeys.length === 0 || !excludeExpandedKeys.includes(i))
         // 查询后展开的结点
-        return expandedKeys.length>0 ? {...treeCache, expandedKeys} : treeCache
+        return expandedKeys.length>0 ? {...treeCache, expandedKeys: filterExpanedKeys} : treeCache
       }
     }
   },
   methods: {
-    ignoreEmpty(i) {
-      if(
-        this.depSetting.hideEmptyFolder && i.dic 
-        // && i.isLeaf
-      ){ 
-        return i.children.filter(i=>!i.dic).length > 0 
+    changeFilteredExpanedTreeNodes(tab, {expanded, node}) {
+      // 过滤之前展开的结点
+      const originKeys = [...this.treeCaches[tab].expandedKeys]
+      // 记录滤之后结点的展开/闭合
+      const excludes = this.filterObj.excludeNodes
+      const expandedkey = node.dataRef.key
+      if(!expanded) {
+        excludes.push(expandedkey)
+      } else {
+        const index = excludes.findIndex(i=>expandedkey===i)
+        if(index !== -1) {
+          excludes.splice(index, 1)
+        }
       }
-      return true;
+      this.setExpanedTreeNodes(originKeys)
+    },
+    startFilter() {
+      this.filterObj.value = this.filterObj.text
+      this.filterObj.excludeNodes = []
+    },
+    ignoreEmpty(i) {
+      return (this.depSetting.hideEmptyFolder && i.dic)
+      ? i.children.filter(i=>!i.dic).length > 0  
+      : true
     },
     search() {
-      this.filterVisible = true;
+      this.filterObj.visible = true;
       this.$nextTick(() => {
         this.$refs.filterInput.focus();
       });
@@ -174,7 +204,6 @@ export default {
       }
     },
     submit(order, data, result) {
-      console.log(order, data, result);
       if (order === "新建文件夹") {
         this.createGroup({ parentKey: data.key, requestData: result }).then(
           () => {

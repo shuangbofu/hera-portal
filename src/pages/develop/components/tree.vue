@@ -6,7 +6,7 @@
       :tree-data="treeData"
       :selectedKeys.sync="treeCache.selectedKeys"
       :expandedKeys.sync="treeCache.expandedKeys"
-      @expand="(keys) => $emit('expand', keys)"
+      @expand="(keys, {expanded, node}) => $emit('expand', {keys, expanded, node})"
       @select="selectNode"
       @rightClick="rightClick"
     >
