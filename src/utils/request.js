@@ -26,6 +26,14 @@ service.interceptors.response.use(
         }
 
         const res = response.data
+        // 兼容hera 原始登陆跳转。。
+        if (response?.headers['content-type'] === 'text/html;charset=UTF-8') {
+            message.error('未登录...')
+            setTimeout(() => {
+                window.location.href = '/login'
+            }, 500)
+            return;
+        }
         if (!response.status === 200) {
             message.error(res.message || 'Error')
             return null;

@@ -53,7 +53,7 @@ export default {
       'setExpanedTreeNodes', 'selectTreeNode',
       'switchSelectedTab',
       'closeTab', 'closeAllTabs', 'closeAllRightTabs', 'closeOtherTabs',
-      'createGroup', 'createJob',
+      'createGroup', 'createJob', 'copyJob',
       // 获取日志内容
       'getLogContent',
       'setJobScriptEdited',

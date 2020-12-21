@@ -79,6 +79,8 @@ export default {
         } else {
           menus.push("新建文件夹");
         }
+      } else {
+        menus.push('复制')
       }
       this.$refs.rightMenu.show(
         menus.concat(["重命名", "移动", "删除"]),

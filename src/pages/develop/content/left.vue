@@ -192,7 +192,7 @@ export default {
     menuClick(order, data) {
       if (order === "删除") {
         this.$store.dispatch('develop/deleteJobOrGroup', data).then(() => {
-          this.$message.success('删除成功')
+          this.$message.success('删除成功! ')
         })
       } else {
         this.$refs.createJobDialogRef.show(
@@ -204,6 +204,7 @@ export default {
       }
     },
     submit(order, data, result) {
+      console.log(order)
       if (order === "新建文件夹") {
         this.createGroup({ parentKey: data.key, requestData: result }).then(
           () => {
@@ -216,6 +217,10 @@ export default {
             this.$message.success("创建成功！");
           }
         );
+      } else if(order === '复制') {
+        this.copyJob({parentKey:data.parent, jobId: data.id, name: result.name}).then(() => {
+          this.$message.success('复制成功! ')
+        })
       }
     },
   },

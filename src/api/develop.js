@@ -269,6 +269,18 @@ export function cancelJob(jobId, historyId) {
   return axios.get(`/scheduleCenter/cancelJob.do?historyId=${historyId}&jobId=${jobId}`)
 }
 
+export function copyJob(jobId, name) {
+  return post(`/scheduleCenter/copyJob.do`, { copyJobId: jobId, name })
+}
+
+
+
+
+
+
+
+// common 
+
 function post(url, data) {
   return axios.post(url, objToParams(data), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
 }

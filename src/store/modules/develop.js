@@ -20,7 +20,9 @@ import {
   updateGroup,
 
   deleteJobOrGroup,
-  previewJobScript
+  previewJobScript,
+
+  copyJob
 } from '@/api/develop'
 import Vue from 'vue'
 export default {
@@ -422,13 +424,15 @@ export default {
         .then((data) => {
           leftTabs.forEach(tab => {
             if (tab !== 'debug') {
-              const treeData = [getTreeData(data[tab])]
-              state.jobTrees[tab] = treeData
-              const treeCahce = state.treeCaches[tab]
-              if (treeCahce.expandedKeys.length === 0) {
-                treeCahce.expandedKeys = [state.jobTrees[tab][0].key]
+              const treeData = getTreeData(data[tab])
+              if (treeData) {
+                state.jobTrees[tab] = [treeData]
+                const treeCahce = state.treeCaches[tab]
+                if (treeCahce.expandedKeys.length === 0) {
+                  treeCahce.expandedKeys = [state.jobTrees[tab][0].key]
+                }
+                dispatch('setNodeDatas', { type: tab, datas: state.jobList })
               }
-              dispatch('setNodeDatas', { type: tab, datas: state.jobList })
             }
           })
         });
@@ -725,16 +729,24 @@ export default {
     },
     createJob({ dispatch }, { requestData, parentKey }) {
       return createJob(requestData).then(data => {
-        dispatch('initJobs').then(() => {
-          const id = Number(data)
-          const newKey = `node_${id}`
-          dispatch('expandTreeNode', parentKey)
-          dispatch('selectTreeNode', {
-            key: newKey,
-            selected: false,
-            dic: false,
-            id
-          })
+        const id = Number(data)
+        dispatch('afterCreateJob', { id, parentKey })
+      })
+    },
+    copyJob({ dispatch }, { jobId, name, parentKey }) {
+      return copyJob(jobId, name).then(() => {
+        dispatch('afterCreateJob', { id: jobId, parentKey })
+      })
+    },
+    afterCreateJob({ dispatch }, { id, parentKey }) {
+      dispatch('initJobs').then(() => {
+        const newKey = `node_${id}`
+        dispatch('expandTreeNode', parentKey)
+        dispatch('selectTreeNode', {
+          key: newKey,
+          selected: false,
+          dic: false,
+          id
         })
       })
     }

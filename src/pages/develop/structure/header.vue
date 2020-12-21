@@ -93,75 +93,84 @@ export default {
     buttonClick(button) {
       const name = button.icon;
       console.log(name);
-      if (this.isSelectedGroup) {
-        console.log(this.group);
-        if (name === "save") {
-          console.log("保存‘");
-          this.$store
-            .dispatch("develop/updateGroupConfigs", {
-              groupId: this.group.id,
-              selfConfigs: this.group.selfConfigs,
-            })
-            .then(() => {
-              this.$message.success("保存成功！");
-            });
-        } else if (name === "focus") {
-          console.log("关注");
-        }
-      } else {
-        const jobId = this.job?.id;
-        if (name === "refresh") {
-          this.$store.dispatch("develop/initJobs").then(() => {
+
+      if (name === "refresh") {
+        this.$store.dispatch("develop/initJobs").then(() => {
+          if(this.isSelectedGroup) {
+            this.$store.dispatch('develop/getGroup', this.group.id)
             this.$message.success("刷新成功！");
-          });
-        } else if(name === 'infinite') {
-          generateVersion(jobId).then(() => {
-            this.$store.dispatch('develop/getJobVersions',{jobId}).then(() => {
-              this.$message.success('生成版本成功！')
-            })
-          })
-        } else if (name === "play") {
-          if (this.selectedTabNode?.origin.edited) {
-            this.$message.warn("有修改未保存!");
-            return;
+          } else {
+            this.$message.success("刷新成功！");
           }
-          this.$refs.runOptionRef.show(this.job.versions, (data) => {
-            this.$store.dispatch("develop/runJob", { ...data, jobId });
-          });
-        } else if (name === "save") {
-          this.$store
-            .dispatch("develop/updateJobScript", { id: jobId })
-            .then(() => {
-              this.$message.success("保存成功！");
-            });
-        } else if (name === "clean") {
-          this.$store.commit("develop/clearAllCache");
-          location.reload();
-        } else if (name === "valid") {
-          const valid = !this.job.valid;
-          this.$store
-            .dispatch("develop/setJobValidOrNot", {
-              id: jobId,
-              valid,
-            })
-            .then(() => {
-              this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
-            });
-        } else if (name === "focus") {
-          const focus = !this.getRes("focus");
-          this.$store
-            .dispatch("develop/focusJobOrNot", {
-              id: jobId,
-              focus: focus,
-              user: this.getUser(),
-            })
-            .then(() => {
-              this.$message.success(`${focus ? "" : "取消"}关注成功！`);
-            });
-        } else if (name === "setting") {
-          this.$refs.settingRef.show();
+        });
+      } else if (name === "clean") {
+        this.$store.commit("develop/clearAllCache");
+        location.reload();
+      } else if (name === "setting") {
+        this.$refs.settingRef.show();
+      } else if(name === 'search') {
+        this.$message.warn("搜索暂不支持，待开发！");
+      } else {
+        if (this.isSelectedGroup) {
+          if (name === "save") {
+            console.log("保存‘");
+            this.$store
+              .dispatch("develop/updateGroupConfigs", {
+                groupId: this.group.id,
+                selfConfigs: this.group.selfConfigs,
+              })
+              .then(() => {
+                this.$message.success("保存成功！");
+              });
+          } else if (name === "focus") {
+            console.log("关注");
+          }
         } else {
-          this.$message.warn(this.buttonTip(button) + "暂不支持，待开发！");
+          const jobId = this.job?.id;
+          if(name === 'infinite') {
+            generateVersion(jobId).then(() => {
+              this.$store.dispatch('develop/getJobVersions',{jobId}).then(() => {
+                this.$message.success('生成版本成功！')
+              })
+            })
+          } else if (name === "play") {
+            if (this.selectedTabNode?.origin.edited) {
+              this.$message.warn("有修改未保存!");
+              return;
+            }
+            this.$refs.runOptionRef.show(this.job.versions, (data) => {
+              this.$store.dispatch("develop/runJob", { ...data, jobId });
+            });
+          } else if (name === "save") {
+            this.$store
+              .dispatch("develop/updateJobScript", { id: jobId })
+              .then(() => {
+                this.$message.success("保存成功！");
+              });
+          }  else if (name === "valid") {
+            const valid = !this.job.valid;
+            this.$store
+              .dispatch("develop/setJobValidOrNot", {
+                id: jobId,
+                valid,
+              })
+              .then(() => {
+                this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
+              });
+          } else if (name === "focus") {
+            const focus = !this.getRes("focus");
+            this.$store
+              .dispatch("develop/focusJobOrNot", {
+                id: jobId,
+                focus: focus,
+                user: this.getUser(),
+              })
+              .then(() => {
+                this.$message.success(`${focus ? "" : "取消"}关注成功！`);
+              });
+          } else {
+            this.$message.warn(this.buttonTip(button) + "暂不支持，待开发！");
+          }
         }
       }
     },

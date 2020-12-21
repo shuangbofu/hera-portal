@@ -119,6 +119,9 @@ export default {
     isCreateGroup() {
       return this.title === "新建文件夹";
     },
+    isCopy() {
+      return this.title === '复制'
+    }
   },
   methods: {
     show(data, callback) {
@@ -151,8 +154,13 @@ export default {
           name: this.name,
           parentId: `group_${this.obj.id}`,
         };
+      } else if(this.isCopy) {
+        result = {
+          name: this.name
+        }
       }
       this.callback(this.data.order, result);
+      close()
     },
     close() {
       this.visible = false;
