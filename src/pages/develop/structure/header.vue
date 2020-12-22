@@ -42,6 +42,7 @@
       </span>
     </div>
     <run-option-dialog ref="runOptionRef" />
+    <publish-option-dialog ref="publishOptionRef" />
     <setting ref="settingRef" />
   </div>
 </template>
@@ -50,6 +51,7 @@
 import { generateVersion } from "@/api/develop";
 import screenfull from "screenfull";
 import RunOptionDialog from "../dialog/runOption";
+import PublishOptionDialog from '../dialog/publishOption'
 import Setting from "../dialog/Setting";
 const buttons = [
   { icon: "setting", tip: "设置" },
@@ -58,7 +60,8 @@ const buttons = [
   { icon: "refresh", divider: true, tip: "刷新" },
   { icon: "save", disabled: false, tip: "保存" },
   { icon: 'infinite', disabled: true, tip: '生成版本'},
-  { icon: "play", disabled: true, divider: true, tip: "运行" },
+  { icon: "play", disabled: true, divider: false, tip: "运行" },
+  { icon: 'publish', disabled: true, divider: true, tip: '发布'},
   {
     icon: "valid",
     func: (res) => {
@@ -84,7 +87,7 @@ export default {
   data() {
     return { buttons };
   },
-  components: { RunOptionDialog, Setting },
+  components: { RunOptionDialog, Setting,PublishOptionDialog },
   methods: {
     full() {
       screenfull.toggle();
@@ -138,9 +141,18 @@ export default {
               this.$message.warn("有修改未保存!");
               return;
             }
-            this.$refs.runOptionRef.show(this.job.versions, (data) => {
-              this.$store.dispatch("develop/runJob", { ...data, jobId });
+            this.$refs.runOptionRef.show(this.job.versions, (option) => {
+              this.$store.dispatch("develop/runJob", { ...option, jobId });
             });
+          } else if(name === 'publish') {
+            this.$refs.publishOptionRef.show(option => {
+              this.$store.dispatch('develop/publishJob',{
+                  ...option,
+                  jobId, 
+                  script: this.job.script, 
+                  configs: this.job.configs
+                })
+            })
           } else if (name === "save") {
             this.$store
               .dispatch("develop/updateJobScript", { id: jobId })

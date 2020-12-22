@@ -17,6 +17,7 @@
           :active="rightTab.name"
         />
         <template v-else-if="rightTab.name === 'dependency'"> </template>
+        <job-publish v-else-if="rightTab.name === 'publish'" :data="infoData" />
       </div>
     </attached-header>
     <conf-setting ref="confSettingRef" />
@@ -27,6 +28,7 @@
 import JobInfo from "../job/jobInfo";
 import AttachedHeader from "./attachedHeader";
 import ConfSetting from "../dialog/ConfSetting";
+import JobPublish from '../job/jobPublish'
 import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],
@@ -34,6 +36,7 @@ export default {
     AttachedHeader,
     JobInfo,
     ConfSetting,
+    JobPublish
   },
   computed: {
     infoData() {

@@ -24,6 +24,12 @@ import {
 
   copyJob
 } from '@/api/develop'
+
+import {
+  getJobPublishes,
+  createJobPublish
+} from '@/api/job/publish'
+
 import Vue from 'vue'
 export default {
   namespaced: true,
@@ -56,6 +62,12 @@ export default {
             name: 'dependency',
             label: "任务依赖",
             icon: 'dependency',
+            private: 'job'
+          },
+          {
+            name: 'publish',
+            label: '任务发布',
+            icon: 'job',
             private: 'job'
           },
           {
@@ -343,6 +355,19 @@ export default {
           dispatch('setTab', { name: 'log', type: 'bottom' })
         }
         return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
+      })
+    },
+    publishJob(_, { jobId, description, configs, script }) {
+      createJobPublish({ jobId, description, configs, script })
+    },
+    /**
+     * 获取任务发布记录
+     * @param {*} param0 
+     * @param {*} param1 
+     */
+    getJobPublishes({ state }, { jobId, pageSize, pageNum }) {
+      return getJobPublishes(jobId, pageSize, pageNum).then(data => {
+        state.jobList.find(i => i.id === jobId).publishes = data.list
       })
     },
     /**
@@ -683,6 +708,7 @@ export default {
         }
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
         dispatch('getJobVersions', { jobId: id })
+        dispatch('getJobPublishes', { jobId: id })
       })
       // TODO 任务调度是不同的请求
     },

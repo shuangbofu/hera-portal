@@ -160,7 +160,7 @@ export default {
         }
       }
       this.callback(this.data.order, result);
-      close()
+      this.close()
     },
     close() {
       this.visible = false;
