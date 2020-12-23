@@ -26,10 +26,10 @@ export function getScheduledJob(id) {
           cronExpressionArr = ['0', '0', '3', '*', '*', '?']
         }
       }
-      // const dependencyPeriod = {
-      //   '无': 'NONE',
-      //   '自依赖，依赖于当前任务的上一周期': 'SELF_LAST'
-      // }[data.cycle]
+      const dependencyPeriod = {
+        '无': 'NONE',
+        '自依赖，依赖于当前任务的上一周期': 'SELF_LAST'
+      }[data.cycle]
 
       delete data.configs['roll.back.times']
       delete data.configs['roll.back.wait.time']
@@ -64,7 +64,7 @@ export function getScheduledJob(id) {
         lang,
 
         alarmLevelCode, estimatedEndHourArr, cronExpressionArr,
-        // dependencyPeriod,
+        dependencyPeriod,
 
         selfConfigs: obj2Str(data.configs),
 
@@ -100,6 +100,7 @@ export function updateJob(id, data) {
   job.estimatedEndHour = job.estimatedEndHourArr.join(':')
   job.cronExpression = job.cronExpressionArr.map(i => i === '' ? '*' : i).join(' ')
   job.dependencies = job.dependencyArr.join(',')
+  job.cycle = job.dependencyPeriod
 
   updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
 
