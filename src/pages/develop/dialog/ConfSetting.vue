@@ -112,8 +112,14 @@
               <div class="title">依赖周期：</div>
               <h-select
                 style="width: 240px"
-                v-model="job.cycle"
-                :options="['无', '自依赖，依赖于当前任务的上一周期']"
+                v-model="job.dependencyPeriod"
+                :options="[
+                  { value: 'NONE', label: '无' },
+                  {
+                    value: 'SELF_LAST',
+                    label: '自依赖，依赖于当前任务的上一周期',
+                  },
+                ]"
               />
             </div>
             <div class="form-line">
@@ -228,7 +234,7 @@ export default {
       // job: {},
       visible: false,
       callback: null,
-      allUser: [],
+      allUser: []
     };
   },
   components: { HSelect },
@@ -244,13 +250,13 @@ export default {
     },
     allJobs() {
       return this.$store.getters["develop/allJobs"];
-    },
+    }
   },
   methods: {
     show({ infoData, isGroup }, callback) {
       this.infoData = infoData;
       this.isGroup = isGroup;
-      getJobOperators(infoData.id, isGroup).then((data) => {
+      getJobOperators(infoData.id, isGroup).then(data => {
         this.allUser = data;
         this.infoData = JSON.parse(JSON.stringify(infoData));
         this.infoDataBackup = JSON.parse(JSON.stringify(infoData));
@@ -268,14 +274,14 @@ export default {
         .dispatch(`develop/update${this.isGroup ? "Group" : "Job"}`, {
           id: this.infoData.id,
           data: this.infoData,
-          refresh: true,
+          refresh: true
         })
         .then(() => {
           this.visible = false;
           this.callback(this.infoData);
         });
-    },
-  },
+    }
+  }
 };
 </script>
 
