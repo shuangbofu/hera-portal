@@ -247,8 +247,7 @@ export default {
       &.yes {
         color: @editor-blue-color;
       }
-      &.forbidden,
-      &.publish {
+      &.forbidden {
         line-height: 10px;
         color: @editor-red2-color;
         font-size: 16px;

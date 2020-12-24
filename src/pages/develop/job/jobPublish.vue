@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="publish-list">
+    <div class="publish-list" v-if="data.publishes.length > 0">
       <div
         v-for="(pub, index) in data.publishes"
         :key="index"
@@ -32,6 +32,7 @@
         </div>
       </div>
     </div>
+    <div v-else style="text-align: center; padding-top: 20px">没有发布</div>
     <code-compare ref="codeCompareRef" />
   </div>
 </template>
@@ -94,6 +95,7 @@ export default {
 
 <style lang="less" scoped>
 .container {
+  height: 100%;
   .publish-list {
     .publish-item {
       padding: 10px 15px;

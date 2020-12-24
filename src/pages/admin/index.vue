@@ -34,7 +34,7 @@ const tabs = [
     name: "job",
     label: "任务管理",
     children: [
-      { name: "publish", label: "发布", icon: "publish3" },
+      { name: "publish", label: "发布", icon: "publish" },
       { name: "search", label: "搜索" }
     ]
   },
@@ -87,22 +87,6 @@ export default {
     height: 392px;
     background-color: @base-bg-color;
     border: 1px solid @editor-border-color;
-    .tab {
-      padding: 2px 12px;
-      line-height: 30px;
-      font-size: 14px;
-      cursor: default;
-      user-select: none;
-      .icon {
-        margin: 0 10px;
-      }
-      &:hover {
-        background-color: @hover-bg-color;
-      }
-      &.active {
-        border-left: 2px solid @primary-color!important;
-      }
-    }
   }
   .main-content {
     width: calc(100% - 150px);

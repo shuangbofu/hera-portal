@@ -80,7 +80,7 @@ export default {
   .tab {
     padding: 2px 25px;
     line-height: 35px;
-    font-size: 15px;
+    font-size: 14px;
     user-select: none;
     white-space: nowrap;
     cursor: default;

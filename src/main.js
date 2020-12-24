@@ -9,7 +9,7 @@ import splitPane from 'vue-splitpane'
 import { Icon } from 'ant-design-vue';
 
 const MyIcon = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2056046_4ks06sii6eg.js'
+  scriptUrl: '//at.alicdn.com/t/font_2056046_ern7783ud4m.js'
 });
 
 Vue.component('split-pane', splitPane);
