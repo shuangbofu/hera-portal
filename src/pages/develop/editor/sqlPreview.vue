@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <div class="header">
-      <div style="font-weight: 500;">预览任务版本</div>
+      <div style="font-weight: 500">预览任务版本</div>
       <h-select
-        style="width: 200px; margin: 2px 5px;"
+        style="width: 200px; margin: 2px 5px"
         v-model="data.previewActionId"
         :options="data.versions"
         @change="submit"
@@ -21,46 +21,42 @@
           automaticLayout: true,
         }"
       />
-      <div class="mask" v-if="notPreview">
-        选择后显示
-      </div>
+      <div class="mask" v-if="notPreview">选择后显示</div>
     </div>
   </div>
 </template>
 
 <script>
-import HSelect from '../components/HSelect'
+import HSelect from "@/components/HSelect";
 import MonacoEditor from "monaco-editor-vue";
 export default {
-  props: ['data'],
+  props: ["data"],
   computed: {
     previewScript: {
       get() {
-        return this.data.previewScript || this.data.script
+        return this.data.previewScript || this.data.script;
       },
-      set() {
-        
-      }
+      set() {}
     },
     notPreview() {
-      return !this.data.previewScript
+      return !this.data.previewScript;
     },
     theme() {
       return this.$store.state.setting.theme.mode === "light"
         ? "vs"
         : "vs-dark";
-    },
+    }
   },
   methods: {
     submit(value) {
-      this.$emit('preview',value)
+      this.$emit("preview", value);
     }
   },
   components: {
     MonacoEditor,
     HSelect
   }
-}
+};
 </script>
 
 <style lang="less" scoped>
@@ -73,10 +69,10 @@ export default {
     display: flex;
     align-items: center;
     padding: 0 10px;
-    font-size: 10px;;
+    font-size: 10px;
   }
   .sql-container {
-    height: calc(100% - 30px)
+    height: calc(100% - 30px);
   }
   .mask {
     position: absolute;
@@ -84,9 +80,8 @@ export default {
     width: 100%;
     height: 100%;
     background: @editor-border-color;
-    opacity:0.4;
+    opacity: 0.4;
     text-align: center;
   }
 }
-
 </style>

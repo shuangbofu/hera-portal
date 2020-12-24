@@ -3,12 +3,12 @@
     <div
       v-for="t in tabs"
       :key="t.name"
-      :class="{'tab':true,'active': active === t.name}"
+      :class="{ tab: true, active: active === t.name }"
       @click="change(t)"
     >
       <div class="label">
         <my-icon class="icon" :type="`hera_icon_${t.icon}`" />
-        {{t.label}}
+        {{ t.label }}
       </div>
     </div>
   </div>
@@ -20,22 +20,22 @@ export default {
     active: {
       required: true,
       type: String,
-      default: "",
+      default: ""
     },
     tabs: {
       type: Array,
-      requried: true,
+      requried: true
     },
     mode: {
       type: String,
-      default: "vertical",
-    },
+      default: "vertical"
+    }
   },
   methods: {
     change(t) {
       this.$emit("change", t);
-    },
-  },
+    }
+  }
 };
 </script>
 

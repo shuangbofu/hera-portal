@@ -11,11 +11,7 @@
     :footer="null"
   >
     <div class="title">运行任务</div>
-    <h-select
-      v-model="option.actionId"
-      :options="versions
-      "
-    />
+    <h-select v-model="option.actionId" :options="versions" />
     <div class="type-select">
       <div
         :class="['type', type.value === option.triggerType ? 'active' : '']"
@@ -31,11 +27,11 @@
 </template>
 
 <script>
-import HSelect from "../components/HSelect";
+import HSelect from "@/components/HSelect";
 const triggerTypes = [
   { value: 2, label: "手动执行" },
   { value: 3, label: "手动恢复" },
-  { value: 6, label: "超级恢复" },
+  { value: 6, label: "超级恢复" }
 ];
 export default {
   data() {
@@ -44,10 +40,10 @@ export default {
       versions: [],
       option: {
         actionId: "",
-        triggerType: 2,
+        triggerType: 2
       },
       visible: false,
-      callback: null,
+      callback: null
     };
   },
   components: { HSelect },
@@ -57,7 +53,7 @@ export default {
       this.callback = null;
       this.option = {
         actionId: "",
-        triggerType: 2,
+        triggerType: 2
       };
     },
     show(versions, callback) {
@@ -69,8 +65,8 @@ export default {
     submit() {
       this.callback(this.option);
       this.visible = false;
-    },
-  },
+    }
+  }
 };
 </script>
 

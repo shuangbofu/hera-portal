@@ -26,8 +26,11 @@ import {
 } from '@/api/develop'
 
 import {
-  getJobPublishes,
-  createJobPublish
+  // getJobPublishes,
+  getJobPublishList,
+
+  createJobPublish,
+  cancelJobPublish
 } from '@/api/job/publish'
 
 import Vue from 'vue'
@@ -67,7 +70,7 @@ export default {
           {
             name: 'publish',
             label: '任务发布',
-            icon: 'job',
+            icon: 'publish',
             private: 'job'
           },
           {
@@ -357,17 +360,28 @@ export default {
         return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
       })
     },
-    publishJob(_, { jobId, description, configs, script }) {
-      createJobPublish({ jobId, description, configs, script })
+    createJobPublish({ dispatch }, { jobId, description, configs, script }) {
+      createJobPublish({ jobId, description, configs, script }).then(() => {
+        dispatch('getJobPublishList', { jobId })
+      })
+    },
+    cancelJobPublish({ dispatch }, { pubId, jobId }) {
+      return cancelJobPublish(pubId).then(() => {
+        dispatch('getJobPublishList', { jobId })
+      })
     },
     /**
      * 获取任务发布记录
      * @param {*} param0 
      * @param {*} param1 
      */
-    getJobPublishes({ state }, { jobId, pageSize, pageNum }) {
-      return getJobPublishes(jobId, pageSize, pageNum).then(data => {
-        state.jobList.find(i => i.id === jobId).publishes = data.list
+    getJobPublishList({ state }, { jobId }) {
+      // return getJobPublishes(jobId, pageSize, pageNum).then(data => {
+      //   state.jobList.find(i => i.id === jobId).publishes = data.list
+      // })
+      return getJobPublishList(jobId).then(data => {
+        const job = state.jobList.find(i => i.id === jobId)
+        Vue.set(job, 'publishes', data)
       })
     },
     /**
@@ -708,7 +722,7 @@ export default {
         }
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
         dispatch('getJobVersions', { jobId: id })
-        dispatch('getJobPublishes', { jobId: id })
+        dispatch('getJobPublishList', { jobId: id })
       })
       // TODO 任务调度是不同的请求
     },

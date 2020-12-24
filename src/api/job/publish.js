@@ -1,14 +1,60 @@
 import axios from "@/utils/request.js";
 
-export function getJobPublishes(jobId, pageSize, pageNum) {
+export function getJobPublishes(pageSize, pageNum, filter) {
   pageSize = pageSize || 10
   pageNum = pageNum || 1
-
-  return axios.post('/jobPublish/page', {
-    pageSize, pageNum, filter: { jobId }
+  return newPormise(axios.post('/jobPublish/page', {
+    pageSize, pageNum, filter: { ...filter }
+  }), data => {
+    return { ...data, list: addStateInfo(data.list) }
   })
+}
+
+export function getLastJobPublish(jobId) {
+  return newPormise(axios.get(`/jobPublish/last?jobId=${jobId}`), data => addStateInfo(data))
+}
+
+export function getJobPublishList(jobId) {
+  return newPormise(axios.get(`/jobPublish/list?jobId=${jobId}`), data => addStateInfo(data))
 }
 
 export function createJobPublish({ jobId, description, configs, script }) {
   return axios.post('/jobPublish', { jobId, description, configs, script })
 }
+
+export function cancelJobPublish(id) {
+  return axios.post('/jobPublish/cancel', { description: '', id })
+}
+
+export function passjobPublish(id) {
+  return axios.post(`/jobPublish/pass/${id}`)
+}
+
+function newPormise(promise, trans) {
+  return new Promise((res, rej) => promise.then(data => res(trans(data))).catch(msg => rej(msg)))
+}
+
+function addStateInfo(obj) {
+  if (Array.isArray(obj)) {
+    const list = obj;
+    return list.map(i => addStateInfo(i))
+  } else {
+    return {
+      ...obj,
+      stateInfo: stateInfoMap[obj.state],
+      selfConfigs: getSelfConfigs(obj.configs)
+    }
+  }
+}
+function getSelfConfigs(configs) {
+  return Object.keys(configs)
+    .map(key => key + " = " + configs[key])
+    .join("\n");
+}
+
+const stateInfoMap = {
+  padding: { color: "#ffb800", text: "待审批" },
+  success: { color: "#87d068", text: "成功" },
+  cancelled: { color: "#909399", text: "已取消" },
+  rejected: { color: "#f50", text: "已拒绝" }
+};

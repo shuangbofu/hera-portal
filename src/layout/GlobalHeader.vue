@@ -41,11 +41,11 @@ export default {
   props: ["collapsed"],
   data() {
     return {
-      menuData,
+      menuData
     };
   },
   components: {
-    IMenu,
+    IMenu
   },
   computed: {
     headerTheme() {
@@ -58,18 +58,18 @@ export default {
         return lightLogo;
       }
       return nightLogo;
-    },
+    }
   },
   beforeCreate() {
-    menuData = this.$router.options.routes.find((item) => item.path === "/")
+    menuData = this.$router.options.routes.find(item => item.path === "/")
       .children;
   },
   methods: {
     toggleCollpased() {
       this.$emit("toggleCollpased");
     },
-    onSelect() {},
-  },
+    onSelect() {}
+  }
 };
 </script>
 

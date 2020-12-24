@@ -28,6 +28,12 @@ const routes = [
         name: '系统管控',
         icon: 'setting',
         component: () => import('@/pages/admin/index'),
+        // children: [{
+        //   path: '/admin/publish',
+        //   name: '任务发布',
+        //   icon: 'publish',
+        //   component: () => import('@/pages/admin/publish/index')
+        // }]
       }
     ]
   }

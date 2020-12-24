@@ -1,5 +1,5 @@
 <template>
-   <a-modal
+  <a-modal
     wrapClassName="option-dialog"
     :visible="visible"
     @cancel="close"
@@ -11,29 +11,40 @@
     :footer="null"
   >
     <div class="title">发布任务</div>
-    <a-textarea size="small" v-model="option.description" @pressEnter="submit">
+    <a-textarea
+      placeholder="发布描述"
+      size="small"
+      v-model="option.description"
+      @pressEnter="submit"
+    >
     </a-textarea>
-   </a-modal>
+  </a-modal>
 </template>
 
 <script>
 export default {
-  data() {return {callback:null,visible: false, option:{description: ''}}},
+  data() {
+    return { callback: null, visible: false, option: { description: "" } };
+  },
   methods: {
     close() {
-      this.option = {}
-      this.visible = false
+      this.option = {};
+      this.visible = false;
     },
     show(callback) {
       this.visible = true;
       this.callback = callback;
     },
     submit() {
-      this.callback(this.option)
-      this.close()
-    },
+      if (this.option.description.trim() === "") {
+        this.$message.error("不能为空");
+        return;
+      }
+      this.callback(this.option);
+      this.close();
+    }
   }
-}
+};
 </script>
 
 <style lang="less">
@@ -51,5 +62,4 @@ export default {
     background: @editor-bg-color;
   }
 }
-
 </style>

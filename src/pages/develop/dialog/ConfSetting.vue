@@ -223,7 +223,7 @@
 </template>
 
 <script>
-import HSelect from "../components/HSelect";
+import HSelect from "@/components/HSelect";
 import { getJobOperators } from "@/api/develop";
 export default {
   data() {
