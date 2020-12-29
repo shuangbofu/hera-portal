@@ -113,6 +113,13 @@ export default {
         if (from === to) {
           return;
         }
+        if (info.from.dic && info.to.type === "small_dic") {
+          this.$message.error("小目录中不允许有目录");
+          return;
+        } else if (!info.from.dic && info.to.type === "big_dic") {
+          this.$message.error("大目录中不允许有任务");
+          return;
+        }
         moveNode(id, from, to).then(() => {
           this.$store.dispatch("develop/initJobs").then(() => {
             this.$message.success("移动成功！");
