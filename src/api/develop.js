@@ -274,7 +274,13 @@ export function copyJob(jobId, name) {
   return post(`/scheduleCenter/copyJob.do`, { copyJobId: jobId, name })
 }
 
+export function moveNode(id, from, to) {
+  return axios.get(`/scheduleCenter/moveNode?id=${id}&parent=${to}&lastParent=${from}`)
+}
 
+export function updateResource(fileFrom) {
+  return post('/uploadResource/upload.do', { fileFrom, file_id: 0 })
+}
 
 
 
