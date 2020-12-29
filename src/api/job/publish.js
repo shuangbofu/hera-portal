@@ -26,8 +26,12 @@ export function cancelJobPublish(id) {
   return axios.post('/jobPublish/cancel', { description: '', id })
 }
 
-export function passjobPublish(id) {
+export function passJobPublish(id) {
   return axios.post(`/jobPublish/pass/${id}`)
+}
+
+export function retryJobPublish(id) {
+  return axios.post(`/jobPublish/retry/${id}`)
 }
 
 function newPormise(promise, trans) {

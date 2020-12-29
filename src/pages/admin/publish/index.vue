@@ -68,6 +68,10 @@
           <a-divider type="vertical" />
           <a @click="reject(row)">拒绝</a>
         </template>
+        <template v-if-else="row.state === 'error'">
+          <a-divider type="vertical" />
+          <a @click="retry(row)">重试</a>
+        </template>
         <template
           v-if="row.state === 'padding' && filter.mode === 'application'"
         >
@@ -87,7 +91,8 @@ import { parseTime } from "@/utils/date";
 import {
   getJobPublishes,
   // getLastJobPublish,
-  passjobPublish,
+  passJobPublish,
+  retryJobPublish,
   cancelJobPublish
 } from "@/api/job/publish";
 const stateOptions = [
@@ -216,8 +221,14 @@ export default {
       );
     },
     pass(pub) {
-      passjobPublish(pub.id).then(() => {
+      passJobPublish(pub.id).then(() => {
         this.$message.success("通过成功!");
+        this.init();
+      });
+    },
+    retry(pub) {
+      retryJobPublish(pub.is).then(() => {
+        this.$message.success("重试成功!");
         this.init();
       });
     },
