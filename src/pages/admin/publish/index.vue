@@ -68,7 +68,7 @@
           <a-divider type="vertical" />
           <a @click="reject(row)">拒绝</a>
         </template>
-        <template v-if-else="row.state === 'error'">
+        <template v-else-if="row.state === 'error'">
           <a-divider type="vertical" />
           <a @click="retry(row)">重试</a>
         </template>
@@ -100,6 +100,7 @@ const stateOptions = [
   { value: "success", label: "成功" },
   { value: "cancelled", label: "已取消" },
   { value: "rejected", label: "已拒绝" },
+  { value: "error", label: "失败" },
   { value: "", label: "所有状态" }
 ];
 const columns = [

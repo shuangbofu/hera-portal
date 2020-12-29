@@ -60,5 +60,6 @@ const stateInfoMap = {
   padding: { color: "#ffb800", text: "待审批" },
   success: { color: "#87d068", text: "成功" },
   cancelled: { color: "#909399", text: "已取消" },
-  rejected: { color: "#f50", text: "已拒绝" }
+  rejected: { color: "#f50", text: "已拒绝" },
+  error: { color: '#f50', text: '失败' }
 };

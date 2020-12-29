@@ -1,6 +1,9 @@
 <template>
   <div class="container">
-    <div class="publish-list" v-if="data.publishes.length > 0">
+    <div
+      class="publish-list"
+      v-if="data.publishes && data.publishes.length > 0"
+    >
       <div
         v-for="(pub, index) in data.publishes"
         :key="index"

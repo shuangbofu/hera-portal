@@ -43,6 +43,7 @@
     </div>
     <run-option-dialog ref="runOptionRef" />
     <publish-option-dialog ref="publishOptionRef" />
+    <upload-option-dialog ref="uploadOptionRef" />
     <setting ref="settingRef" />
   </div>
 </template>
@@ -52,6 +53,7 @@ import { generateVersion } from "@/api/develop";
 import screenfull from "screenfull";
 import RunOptionDialog from "../dialog/runOption";
 import PublishOptionDialog from "../dialog/publishOption";
+import UploadOptionDialog from "../dialog/uploadOption";
 import Setting from "../dialog/Setting";
 const buttons = [
   { icon: "setting", tip: "设置" },
@@ -61,7 +63,8 @@ const buttons = [
   { icon: "save", disabled: false, tip: "保存" },
   { icon: "infinite", disabled: true, tip: "生成版本" },
   { icon: "play", disabled: true, divider: false, tip: "运行" },
-  { icon: "publish", disabled: true, divider: true, tip: "发布" },
+  { icon: "publish", disabled: true, divider: false, tip: "发布" },
+  { icon: "upload", disabled: false, divider: true, tip: "上传资源" },
   {
     icon: "valid",
     func: res => {
@@ -87,7 +90,12 @@ export default {
   data() {
     return { buttons };
   },
-  components: { RunOptionDialog, Setting, PublishOptionDialog },
+  components: {
+    RunOptionDialog,
+    Setting,
+    PublishOptionDialog,
+    UploadOptionDialog
+  },
   methods: {
     full() {
       screenfull.toggle();
@@ -96,7 +104,6 @@ export default {
     buttonClick(button) {
       const name = button.icon;
       console.log(name);
-
       if (name === "refresh") {
         this.$store.dispatch("develop/initJobs").then(() => {
           if (this.isSelectedGroup) {
@@ -113,6 +120,8 @@ export default {
         this.$refs.settingRef.show();
       } else if (name === "search") {
         this.$message.warn("搜索暂不支持，待开发！");
+      } else if (name === "upload") {
+        this.$refs.uploadOptionRef.show();
       } else {
         if (this.isSelectedGroup) {
           if (name === "save") {
@@ -250,6 +259,9 @@ export default {
       &.forbidden {
         line-height: 10px;
         color: @editor-red2-color;
+        font-size: 16px;
+      }
+      &.upload {
         font-size: 16px;
       }
       // &.eye-open {
