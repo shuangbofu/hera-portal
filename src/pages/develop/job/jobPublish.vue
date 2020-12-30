@@ -9,6 +9,16 @@
         :key="index"
         class="publish-item"
       >
+        <span
+          style="
+            background-color: #87d068;
+            font-size: 5px;
+            color: #fff;
+            padding: 2px 4px;
+          "
+          v-if="pub.current"
+          >最新发布</span
+        >
         {{ pub.description }}
         <a-tag>{{ pub.username }}</a-tag>
         <a-badge :color="pub.stateInfo.color" :text="pub.stateInfo.text" />
@@ -23,7 +33,7 @@
               (!lastestPublish && lastestPublish)
             "
             @click="lastestCodeCompare(pub)"
-            >对比最新发布</a
+            >对比发布</a
           >
           <a
             class="link"
@@ -78,8 +88,8 @@ export default {
     lastestCodeCompare(pub) {
       this.$refs.codeCompareRef.show(
         pub.jobRunType,
-        getCodeInfo(pub),
-        getCodeInfo(this.lastestPublish || pub.lastVersion)
+        getCodeInfo(this.lastestPublish || pub.lastVersion),
+        getCodeInfo(pub)
       );
     },
     cancel(pub) {

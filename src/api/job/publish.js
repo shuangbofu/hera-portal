@@ -30,6 +30,10 @@ export function passJobPublish(id) {
   return axios.post(`/jobPublish/pass/${id}`)
 }
 
+export function rollbackPublish(id) {
+  return axios.post(`/jobPublish/rollback/${id}`)
+}
+
 export function retryJobPublish(id) {
   return axios.post(`/jobPublish/retry/${id}`)
 }
@@ -61,5 +65,6 @@ const stateInfoMap = {
   success: { color: "#87d068", text: "成功" },
   cancelled: { color: "#909399", text: "已取消" },
   rejected: { color: "#f50", text: "已拒绝" },
-  error: { color: '#f50', text: '失败' }
+  error: { color: '#f50', text: '失败' },
+  rolledBack: { color: '#909399', text: '已回滚' }
 };

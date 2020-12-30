@@ -59,9 +59,7 @@
         <a-badge :color="stateInfo.color" :text="stateInfo.text" />
       </div>
       <div slot="action" slot-scope="row">
-        <a @click="compare(row)" :disabled="row.current || !row.lastVersion"
-          >代码对比</a
-        >
+        <a @click="compare(row)" :disabled="!row.lastVersion">代码对比</a>
         <template v-if="row.state === 'padding' && filter.mode === 'auditor'">
           <a-divider type="vertical" />
           <a @click="pass(row)">通过</a>
@@ -78,6 +76,12 @@
           <a-divider type="vertical" />
           <a @click="cancel(row)">取消</a>
         </template>
+        <template
+          v-if="row.state === 'success' && row.current && row.last !== 0"
+        >
+          <a-divider type="vertical" />
+          <a @click="rollback(row)">回滚</a>
+        </template>
       </div>
     </a-table>
     <code-compare ref="codeCompareRef" />
@@ -93,7 +97,8 @@ import {
   // getLastJobPublish,
   passJobPublish,
   retryJobPublish,
-  cancelJobPublish
+  cancelJobPublish,
+  rollbackPublish
 } from "@/api/job/publish";
 const stateOptions = [
   { value: "padding", label: "待审批" },
@@ -101,6 +106,7 @@ const stateOptions = [
   { value: "cancelled", label: "已取消" },
   { value: "rejected", label: "已拒绝" },
   { value: "error", label: "失败" },
+  { value: "rolledBack", label: "已回滚" },
   { value: "", label: "所有状态" }
 ];
 const columns = [
@@ -236,6 +242,12 @@ export default {
     cancel(pub) {
       cancelJobPublish(pub.id).then(() => {
         this.$message.success("取消成功!");
+        this.init();
+      });
+    },
+    rollback(pub) {
+      rollbackPublish(pub.id).then(() => {
+        this.$message.success("回滚成功!");
         this.init();
       });
     },
