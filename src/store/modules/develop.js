@@ -25,79 +25,19 @@ import {
   copyJob
 } from '@/api/develop'
 import Vue from 'vue'
+import configs from './develop_configs'
 export default {
   namespaced: true,
   state: {
-    configs: {
-      tabs: {
-        left: [
-          //   {
-          //   name: 'debug',
-          //   label: '任务调试',
-          //   icon: 'code'
-          // }, 
-          {
-            name: 'myJob',
-            label: '我的任务',
-            icon: 'my',
-          },
-          {
-            name: 'allJob',
-            label: '全部任务',
-            icon: 'all'
-          }],
-        right: [
-          {
-            name: 'job',
-            label: '信息配置',
-            icon: 'info'
-          },
-          {
-            name: 'dependency',
-            label: "任务依赖",
-            icon: 'dependency',
-            private: 'job'
-          },
-          {
-            name: 'jobRunningList',
-            label: '正在运行',
-            icon: 'dependency',
-            private: 'group'
-          },
-          {
-            name: 'jobErrorList',
-            label: '失败记录',
-            icon: 'dependency',
-            private: 'group'
-          }
-        ],
-        bottom: [{
-          name: 'log',
-          label: '运行日志',
-          icon: 'runlog'
-        },
-        {
-          name: 'opLog',
-          label: '操作记录',
-          icon: 'oplog'
-        }]
-      },
-      editorBottomTabs: [{
-        name: 'text',
-        label: '文本',
-      }, {
-        name: 'config',
-        label: '配置项'
-      }, {
-        name: 'preview',
-        label: '预览'
-      }]
-    },
+    // 静态的配置
+    configs,
+    // 树和tab用到的
     treeCaches: {
       debug: { expandedKeys: [], selectedKeys: [], selectedTabs: [] },
       allJob: { expandedKeys: [], selectedKeys: [], selectedTabs: [] },
       myJob: { expandedKeys: [], selectedKeys: [], selectedTabs: [] }
     },
+    // 布局配置
     layoutConfig: {
       tab: {
         configs: { left: [{ name: "myJob", width: 20 }], right: [], bottom: [] },
@@ -113,6 +53,7 @@ export default {
         hideEmptyFolder: true
       }
     },
+    // 各种数据（任务详细、组（文件夹）详细、日志记录、环境信息）
     jobTrees: {
       debug: [],
       allJob: [],
@@ -128,24 +69,24 @@ export default {
       const tabs = state.configs.tabs
       return {
         ...tabs,
+        // 右tab需要根据group/job显示不同列表
         right: tabs.right.filter(i => !i.private || i.private === (getters.isSelectedGroup ? 'group' : 'job'))
       }
     },
-    rightTabs: (state, getters) => getters.tabs.right,
     tab: state => state.layoutConfig.tab,
-    tabConfgs: (state, getters) => getters.tab.configs,
-    tabActive: (state, getters) => type => getters.tabConfgs[type].find(i => i.name === getters.tab.actives[type]),
+    tabActive: (state, getters) => type => getters.tab.configs[type].find(i => i.name === getters.tab.actives[type]),
+    leftTab: (state, getters) => getters.tab.actives['left'] || getters.tab.actives['left_backup'],
 
-    leftTab: (state, getters) => getters.tab.actives['left'],
-
+    // 根据左tab具体的树和tab用到的数据
     treeCache: (state, getters) => state.treeCaches[getters.leftTab],
+
+    // 选过之后打开的tab的列表
     selectedTabKeys: (state, getters) => getters.treeCache.selectedTabs,
 
+    // 树选中的key
     selectedKey: (state, getters) => getters.treeCache?.selectedKeys[0],
 
-    /**
-     * 树节点展开之后的所有节点（且根据left tab获得不同数据）
-     */
+    // 树节点展开之后的所有节点（且根据left tab获得不同数据）
     flatAllTreeNodes: (state) => type => {
       const jobsTree = state.jobTrees[type]
       const res = []
@@ -156,25 +97,25 @@ export default {
     },
     flatJobsTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => !i.dic),
     flatGroupTrees: (state, getters) => type => getters.flatAllTreeNodes(type).filter(i => i.dic),
-    /**
-     * 当前tab下的所有任务
-     */
+
+    // 当前tab下的所有任务
     allJobs: (state, getters) => getters.flatJobsTrees(getters.leftTab).map(i => i.origin),
-    /**
-     * 任务tab的nodes
-     */
+
+    // 任务tab的nodes
     selectedTabNodes: (state, getters) => getters.treeCache?.selectedTabs
       .map(i => getters.flatJobsTrees(getters.leftTab)
         .find(j => j.key === i)),
-    /**
-     * 选中状态中的node
-     */
+
+    // 选中状态中的node
     selectedTabNode: (state, getters) => {
       return getters.flatAllTreeNodes(getters.leftTab)
         .find(i => i.key === getters.selectedKey)
     },
+
+    // 选中的是任务还是组
     isSelectedGroup: (state, getters) => getters.selectedKey?.includes('group'),
 
+    // 选中任务显示的面包屑
     selectedTabNodeCrumbs: (state, getters) => {
       const arr = []
       const root = getters.selectedTabNode
@@ -228,12 +169,20 @@ export default {
       state.layoutConfig.logContainerWidth = value
       this.commit('develop/saveLocalLayout')
     },
+    /**
+     * 保存布局到本地
+     * @param {*} state 
+     */
     saveLocalLayout(state) {
-      console.log('save local[layout]')
+      console.log('保存布局信息到本地')
       writeToLocal(STORAGE_KEY_LAYOUT_INFO, state.layoutConfig)
     },
+    /**
+     * 保存树和tab数据（展开、选中）到本地
+     * @param {*} state 
+     */
     saveTreeCache(state) {
-      console.log('save local[treeCaches]')
+      console.log('保存tree、tab数据到本地')
       writeToLocal(STORAGE_KEY_TREE_INFO, state.treeCaches)
     },
   },
@@ -297,6 +246,11 @@ export default {
         }
       })
     },
+    /**
+     * 关注或者取关任务
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     focusJobOrNot({ state }, { id, focus, user }) {
       return focusJobOrNot(id, focus).then(() => {
         const users = state.jobList.find(i => i.id === id).focusUsers
@@ -310,6 +264,11 @@ export default {
         }
       })
     },
+    /**
+     * 设置任务有/无效
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     setJobValidOrNot({ state }, { id, valid }) {
       return setJobValidOrNot(id, valid).then(() => {
         state.jobList.find(i => i.id === id).valid = valid
@@ -451,6 +410,11 @@ export default {
         state.hostGroups = data
       })
     },
+    /**
+     * 设置tab，左右下的tab变动(选中、取消、切换）的时候都会调用
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     setTab({ state, getters, commit, dispatch }, { name, type }) {
       const tab = state.layoutConfig.tab
       const tabConfigs = tab.configs[type]
@@ -468,6 +432,8 @@ export default {
         commit('toggleOnlyCenter')
       }
       if (type == 'left') {
+        // 设置left_backup的目的是为了 当left tab关闭的时候依然能够显示center的内容
+        tab.actives['left_backup'] = isClose ? name : null
         dispatch('getJobByKey', { key: getters.selectedKey, check: true })
       }
       commit('saveLocalLayout')
@@ -508,10 +474,11 @@ export default {
       if (selected) {
         return
       }
+      // 因为group和job的tab列表不一样，所以切换会出现不存在
       // 如果切换时right tab不存在要设置为第一个tab
       const rightTab = getters.tab.actives['right']
-      if (rightTab && !getters.rightTabs.find(i => i.name === rightTab)) {
-        dispatch('setTab', { name: getters.rightTabs[0].name, type: 'right' })
+      if (rightTab && !getters.tabs.right.find(i => i.name === rightTab)) {
+        dispatch('setTab', { name: getters.tabs.right[0].name, type: 'right' })
       }
       commit('saveTreeCache')
     },
@@ -738,6 +705,11 @@ export default {
         dispatch('afterCreateJob', { id: jobId, parentKey })
       })
     },
+    /**
+     * 复制或者创建任务的时候需要选中并展开其父节点(文件夹)
+     * @param {*} param0 
+     * @param {*} param1 
+     */
     afterCreateJob({ dispatch }, { id, parentKey }) {
       dispatch('initJobs').then(() => {
         const newKey = `node_${id}`
