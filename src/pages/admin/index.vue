@@ -27,7 +27,7 @@ const tabs = [
     icon: "cluster",
     children: [
       { name: "machine", label: "机器" },
-      { name: "machineGroup", label: "机器组" }
+      { name: "emr", label: "EMR" }
     ]
   },
   {
@@ -35,7 +35,9 @@ const tabs = [
     label: "任务管理",
     children: [
       { name: "publish", label: "发布", icon: "publish" },
-      { name: "search", label: "搜索" }
+      { name: "search", label: "搜索" },
+      { name: "monitor", label: "监控" },
+      { name: "rerun", label: "重跑" }
     ]
   },
   { name: "runlog", label: "系统日志" }

@@ -83,9 +83,9 @@ const jobTypes = ["Spark", "Hive", "Shell"];
 const groupTypes = [
   {
     name: "big_dic",
-    title: "大目录",
+    title: "大目录"
   },
-  { name: "small_dic", title: "小目录" },
+  { name: "small_dic", title: "小目录" }
 ];
 export default {
   data() {
@@ -97,7 +97,7 @@ export default {
       groupType: "small_dic",
       name: "",
       data: {},
-      callback: null,
+      callback: null
     };
   },
   computed: {
@@ -120,7 +120,7 @@ export default {
       return this.title === "新建文件夹";
     },
     isCopy() {
-      return this.title === '复制'
+      return this.title === "复制";
     }
   },
   methods: {
@@ -146,21 +146,25 @@ export default {
         result = {
           directory: this.groupType === "big_dic" ? 0 : 1,
           name: this.name,
-          parentId: this.obj.id,
+          parentId: this.obj.id
         };
       } else if (this.isCreateJob) {
         result = {
           runType: this.jobType.toLowerCase(),
           name: this.name,
-          parentId: `group_${this.obj.id}`,
+          parentId: `group_${this.obj.id}`
         };
-      } else if(this.isCopy) {
+      } else if (this.isCopy) {
         result = {
           name: this.name
-        }
+        };
+      } else if (this.isRename) {
+        result = {
+          name: this.name
+        };
       }
       this.callback(this.data.order, result);
-      this.close()
+      this.close();
     },
     close() {
       this.visible = false;
@@ -168,8 +172,8 @@ export default {
       this.groupType = "small_dic";
       this.name = "";
       console.log("close", this.name);
-    },
-  },
+    }
+  }
 };
 </script>
 

@@ -102,7 +102,9 @@ export function updateJob(id, data) {
   job.dependencies = job.dependencyArr.join(',')
   job.cycle = job.dependencyPeriod
 
-  updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
+  if (job.adminUsers) {
+    updatePermission({ uIdS: JSON.stringify(job.adminUsers), id: job.id, type: 'JOB' })
+  }
 
   Object.keys(job).forEach(key => {
     if (!updateFields.includes(key)) {
@@ -144,7 +146,9 @@ export function updateGroup(id, data) {
     'selfConfigs',
     'resource']
 
-  updatePermission({ uIdS: JSON.stringify(data.adminUsers), id: groupId, type: 'GROUP' })
+  if (data.adminUsers) {
+    updatePermission({ uIdS: JSON.stringify(data.adminUsers), id: groupId, type: 'GROUP' })
+  }
 
   Object.keys(data).forEach(key => {
     if (!updateFields.includes(key)) {
@@ -204,7 +208,6 @@ export function getLog(logId, jobId) {
             .replace(/<b>HERA#<\/b>((.|\n)*?<br>)/g, '<div class="hera">$1</div>')
             .replace(/<b>CONSOLE#<\/b>((.|\n)*?<br>)/g, '<div class="console">$1</div>')
             .replace(/<font style="color:red">/g, '<font class="error">')
-        // .replace(/CONSOLE#/g, '【控制台】').replace(/HERA#/g, '【赫拉】 ')
       }
       res(data)
     }).catch(msg => {
