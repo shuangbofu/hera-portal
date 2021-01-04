@@ -16,7 +16,10 @@
         <conf-editor :data="job" v-if="job.configs" />
       </template>
       <template v-else>
-        <sql-preview :data="job" @preview="v => previewJobScript({actionId: v, jobId: job.id})"/>
+        <sql-preview
+          :data="job"
+          @preview="(v) => previewJobScript({ actionId: v, jobId: job.id })"
+        />
       </template>
     </div>
     <div class="footer">
@@ -38,7 +41,7 @@
 </template>
 
 <script>
-import SqlPreview from './sqlPreview'
+import SqlPreview from "./sqlPreview";
 import ConfEditor from "./confEditor";
 import MonacoEditor from "monaco-editor-vue";
 import commonMixin from "@/mixins/common";
@@ -52,16 +55,16 @@ export default {
     SqlPreview
   },
   watch: {
-    "job.script": function (newVal, oldVal) {
-      if (newVal !== oldVal) {
+    "job.script": function(newVal, oldVal) {
+      if (newVal.id === oldVal.id && newVal !== oldVal) {
         this.setJobScriptEdited({ jobId: this.job.id, script: newVal });
       }
     },
-    "job.selfConfigs": function (newVal, oldVal) {
+    "job.selfConfigs": function(newVal, oldVal) {
       if (newVal !== oldVal) {
         // this.setJobEdited({jobId: this.})
       }
-    },
+    }
   },
   mixins: [commonMixin],
   computed: {
@@ -78,8 +81,8 @@ export default {
     // },
     editorTheme() {
       return this.theme.mode === "light" ? "vs" : "vs-dark";
-    },
-  },
+    }
+  }
 };
 </script>
 

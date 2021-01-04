@@ -237,7 +237,7 @@ export default {
     updateJobScript({ dispatch, getters }, { id }) {
       const script = getters.currentJob.script
       const selfConfigs = getters.currentJob.selfConfigs
-      return dispatch('updateJob', { id, data: { script, selfConfigs }, refresh: false }).then(() => {
+      return dispatch('updateJob', { id, data: { script, selfConfigs }, refresh: true }).then(() => {
         return dispatch('setJobScriptEdited', { jobId: id, script: null })
       })
     },
@@ -376,7 +376,8 @@ export default {
             logRecord.list = data.rows
             const logItemId = data.rows[0]?.id
             logRecord.current = logItemId
-            logRecord.loadedAll = false
+            logRecord.loadedAll = rowLength < pageSize
+            logRecord.offset = offset
             if (logItemId) {
               dispatch('getLogContent', { logItemId, jobId })
             }
@@ -675,12 +676,12 @@ export default {
         const job = state.jobList.find(i => i.id === id)
         if (!job) {
           state.jobList.push(data)
-          leftTabs.forEach(type => {
-            dispatch('setNodeData', { type, data })
-          })
         } else {
           Object.assign(job, data)
         }
+        leftTabs.forEach(type => {
+          dispatch('setNodeData', { type, data })
+        })
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
         dispatch('getJobVersions', { jobId: id })
         dispatch('getJobPublishList', { jobId: id })
