@@ -97,7 +97,7 @@ export default {
       this.$refs.rightMenu.show(
         menus.concat([
           // "重命名",
-          "移动",
+          // "移动",
           "删除"
         ]),
         order => {

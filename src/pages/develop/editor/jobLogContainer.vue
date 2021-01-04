@@ -3,6 +3,11 @@
     <div class="button-list operation-bar">
       <template v-if="logRecord && logRecord.current">
         <my-icon
+          @click="refreshLogs"
+          :class="['icon', 'refresh']"
+          type="hera_icon_refresh"
+        />
+        <my-icon
           @click="
             cancelJob({ jobId: logRecord.jobId, logItemId: currentLogItem.id })
           "
@@ -151,11 +156,11 @@ export default {
       logs: [],
       currentLogItemId: null,
       interval: null,
-      visible: false,
+      visible: false
     };
   },
   components: {
-    SplitPane,
+    SplitPane
   },
   mixins: [commonMixin],
   watch: {
@@ -164,10 +169,10 @@ export default {
         this.getLogContent({ logItemId: newVal, jobId: this.logRecord?.jobId });
       }
     },
-    'currentLogItem.status'(newVal, oldVal) {
-      if((['success','failed'].includes(newVal)) && oldVal === 'running') {
-        console.log('final fetch log')
-        this.getLog(this.currentLogItem,this.logRecord.jobId)
+    "currentLogItem.status"(newVal, oldVal) {
+      if (["success", "failed"].includes(newVal) && oldVal === "running") {
+        console.log("final fetch log");
+        this.getLog(this.currentLogItem, this.logRecord.jobId);
       }
     }
   },
@@ -180,27 +185,32 @@ export default {
     },
     currentLogItem() {
       return (
-        this.logRecord?.list?.find((i) => i.id === this.realCurrentLogItemId) ||
+        this.logRecord?.list?.find(i => i.id === this.realCurrentLogItemId) ||
         {}
       );
-    },
+    }
   },
   created() {
     this.interval = setInterval(() => {
       const item = this.currentLogItem;
       const jobId = this.logRecord.jobId;
       if (item.endTime === "") {
-        const offset = this.logRecord.list.findIndex((i) => i.id === item.id);
+        const offset = this.logRecord.list.findIndex(i => i.id === item.id);
         console.log(offset);
-        this.$store.dispatch("develop/getJobLogList", {
-          pageSize: 1,
-          offset,
-          jobId,
-        }).then(() => {
-          if (item.status === "running" && this.currentLogItem.startTime !== "") {
-            this.getLog(item,jobId)
-          }
-        });
+        this.$store
+          .dispatch("develop/getJobLogList", {
+            pageSize: 1,
+            offset,
+            jobId
+          })
+          .then(() => {
+            if (
+              item.status === "running" &&
+              this.currentLogItem.startTime !== ""
+            ) {
+              this.getLog(item, jobId);
+            }
+          });
       }
     }, 2000);
   },
@@ -209,20 +219,37 @@ export default {
     this.interval = null;
   },
   methods: {
+    refreshLogs() {
+      this.currentLogItemId = this.logRecord.current;
+      this.$store
+        .dispatch("develop/getJobLogList", {
+          pageSize: this.logRecord.pageSize,
+          offset: 0,
+          jobId: this.logRecord.jobId
+        })
+        .then(() => {
+          this.logRecord.current = this.currentLogItemId;
+          if (this.currentLogItem) {
+            this.getLog(this.currentLogItem, this.logRecord.jobId);
+          }
+          this.currentLogItemId = null;
+          this.$message.success("刷新成功! ");
+        });
+    },
     getLog(item, jobId) {
       console.log("fetch log");
       this.$store
-      .dispatch("develop/getLogContent", {
-        jobId,
-        logItemId: item.id,
-      })
-      .then(() => {
-        const ref = this.$refs.logTextRef;
-        // 滚动到最底部
-        if(ref) {
-          ref.scrollTop = ref.scrollHeight;
-        }
-      });
+        .dispatch("develop/getLogContent", {
+          jobId,
+          logItemId: item.id
+        })
+        .then(() => {
+          const ref = this.$refs.logTextRef;
+          // 滚动到最底部
+          if (ref) {
+            ref.scrollTop = ref.scrollHeight;
+          }
+        });
     },
     resize(v) {
       this.setLogContainerWidth(v);
@@ -233,7 +260,7 @@ export default {
       this.$store.dispatch("develop/getJobLogList", {
         pageSize: this.logRecord.pageSize,
         offset,
-        jobId,
+        jobId
       });
     },
     // TODO 重复代码
@@ -248,8 +275,8 @@ export default {
         this.$message.success("复制成功！");
       }
       document.body.removeChild(textarea);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -272,6 +299,9 @@ export default {
 
       &.stop {
         color: @editor-red2-color;
+      }
+      &.refresh {
+        font-size: 17px;
       }
     }
   }
