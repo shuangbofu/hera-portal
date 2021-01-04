@@ -95,7 +95,11 @@ export default {
         menus.push("复制");
       }
       this.$refs.rightMenu.show(
-        menus.concat(["重命名", "移动", "删除"]),
+        menus.concat([
+          // "重命名",
+          "移动",
+          "删除"
+        ]),
         order => {
           this.$emit("menuClick", order, {
             ...dataRef.origin,
