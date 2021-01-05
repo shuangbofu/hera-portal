@@ -269,11 +269,15 @@ export default {
       this.infoData = this.infoDataBackup;
     },
     submit() {
+      const data = { ...this.infoData };
+      data.selfConfigs = null;
+      data.script = null;
+
       console.log(`develop/update${this.isGroup ? "Group" : "Job"}`);
       this.$store
         .dispatch(`develop/update${this.isGroup ? "Group" : "Job"}`, {
           id: this.infoData.id,
-          data: this.infoData,
+          data,
           refresh: true
         })
         .then(() => {
