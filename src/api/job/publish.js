@@ -38,6 +38,10 @@ export function retryJobPublish(id) {
   return axios.post(`/jobPublish/retry/${id}`)
 }
 
+export function forbidSave() {
+  return axios.post('/jobPublish/forbidSave')
+}
+
 function newPormise(promise, trans) {
   return new Promise((res, rej) => promise.then(data => res(trans(data))).catch(msg => rej(msg)))
 }

@@ -3,12 +3,14 @@
     <h-menu class="tabs" v-model="tabActive" :tabs="tabs" />
     <div class="main-content">
       <publish v-if="tabActive === 'publish'" />
+      <secret-key v-else-if="tabActive === 'secretKey'" />
       <template v-else> 待开发 </template>
     </div>
   </div>
 </template>
 
 <script>
+import SecretKey from "./secretKey.vue";
 import Publish from "./publish/index";
 import HMenu from "@/components/HMenu";
 const tabs = [
@@ -40,7 +42,8 @@ const tabs = [
       { name: "rerun", label: "重跑" }
     ]
   },
-  { name: "runlog", label: "系统日志" }
+  { name: "runlog", label: "系统日志" },
+  { name: "secretKey", label: "旧版链接" }
 ];
 
 function setDisabled(tabs, enableArray) {
@@ -55,7 +58,7 @@ function setDisabled(tabs, enableArray) {
   });
 }
 
-setDisabled(tabs, ["publish"]);
+setDisabled(tabs, ["publish", "secretKey"]);
 
 export default {
   data() {
@@ -65,6 +68,7 @@ export default {
     };
   },
   components: {
+    SecretKey,
     Publish,
     HMenu
   },

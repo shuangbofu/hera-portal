@@ -30,7 +30,9 @@ import {
   getJobPublishList,
 
   createJobPublish,
-  cancelJobPublish
+  cancelJobPublish,
+
+  forbidSave
 } from '@/api/job/publish'
 
 import Vue from 'vue'
@@ -71,7 +73,10 @@ export default {
     jobList: [],
     areas: [],
     hostGroups: [],
-    logRecords: []
+    logRecords: [],
+
+
+    forbidSave: false
   },
   getters: {
     tabs: (state, getters) => {
@@ -203,6 +208,11 @@ export default {
     restoreLocal({ state, getters, dispatch }) {
       dispatch('initAreas')
       dispatch('getHostGroups')
+
+      // 部分接口线上控制请求
+      forbidSave().then(data => {
+        state.forbidSave = data
+      })
       readFromLocal(STORAGE_KEY_LAYOUT_INFO, info => {
         state.layoutConfig = info
       })
@@ -248,12 +258,13 @@ export default {
      */
     updateJob({ dispatch, state }, { id, data, refresh }) {
       const job = { ...state.jobList.find(i => i.id === id) }
-      return updateJob(id, { ...job, ...data }).then(() => {
+      const promise = updateJob(id, { ...job, ...data }).then(() => {
         // 刷新更新后的数据
         if (refresh) {
-          dispatch('getJob', { id, check: false })
+          return dispatch('getJob', { id, check: false })
         }
       })
+      return promise
     },
     /**
      * 关注或者取关任务
@@ -672,7 +683,7 @@ export default {
           return new Promise((r) => { r() })
         }
       }
-      getScheduledJob(id).then(data => {
+      return getScheduledJob(id).then(data => {
         const job = state.jobList.find(i => i.id === id)
         if (!job) {
           state.jobList.push(data)

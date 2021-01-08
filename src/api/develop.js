@@ -79,6 +79,7 @@ export function getScheduledJob(id) {
 }
 
 export function updateJob(id, data) {
+  const urlSuffix = data.justInfo ? 'IgnoreScriptAndConfigs' : '';
   const job = data
 
   // 更新接口的字段如下：
@@ -111,7 +112,7 @@ export function updateJob(id, data) {
       delete job[key]
     }
   })
-  return post('/scheduleCenter/updateJobMessage.do', { ...data, id })
+  return post(`/scheduleCenter/updateJobMessage${urlSuffix}.do`, { ...data, id })
 }
 
 export function initScheduledJobs() {
@@ -140,6 +141,8 @@ export function getScheduledGroup(id) {
 }
 
 export function updateGroup(id, data) {
+  const urlSuffix = data.justInfo ? 'IgnoreConfigs' : '';
+
   const groupId = `group_${id}`
   const updateFields = ['name',
     'description',
@@ -155,7 +158,8 @@ export function updateGroup(id, data) {
       delete data[key]
     }
   })
-  return post('/scheduleCenter/updateGroupMessage.do', { groupId, ...data })
+
+  return post(`/scheduleCenter/updateGroupMessage${urlSuffix}.do`, { groupId, ...data })
 }
 
 export function createJobGroup(data) {

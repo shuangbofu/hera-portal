@@ -270,15 +270,14 @@ export default {
     },
     submit() {
       const data = { ...this.infoData };
-      data.selfConfigs = null;
-      data.script = null;
-
+      // 只更新info，除了脚本script和配置selfConfigs
+      data.justInfo = true;
       console.log(`develop/update${this.isGroup ? "Group" : "Job"}`);
       this.$store
         .dispatch(`develop/update${this.isGroup ? "Group" : "Job"}`, {
-          id: this.infoData.id,
+          id: data.id,
           data,
-          refresh: true
+          refresh: false
         })
         .then(() => {
           this.visible = false;

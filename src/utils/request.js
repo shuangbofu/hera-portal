@@ -1,5 +1,12 @@
 import axios from 'axios'
 import { message } from 'ant-design-vue'
+import store from '../store'
+
+const forbidRequests = [
+    'addJob.do', 'addGroup.do',
+    'updateJobMessage.do', 'updateGroupMessage.do',
+    'deleteJob.do'
+]
 
 const service = axios.create({
     baseURL: '/',
@@ -8,6 +15,15 @@ const service = axios.create({
 
 service.interceptors.request.use(
     config => {
+        const forbid = store.state.develop.forbidSave
+        if (forbid) {
+            const url = config.url
+            const isForbidUrl = forbidRequests.filter(i => url.includes(i)).length > 0
+            if (isForbidUrl) {
+                console.log(forbid, config)
+                throw new Error('禁止此请求，请前往预发操作')
+            }
+        }
         return config
     },
     error => {

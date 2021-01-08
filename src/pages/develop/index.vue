@@ -62,7 +62,7 @@ export default {
     ContentCenter,
     RightAttached,
     FooterAttached,
-    Tabs,
+    Tabs
   },
   created() {
     this.initJobs().then(() => {
@@ -70,7 +70,7 @@ export default {
     });
   },
   computed: {},
-  methods: {},
+  methods: {}
 };
 </script>
 

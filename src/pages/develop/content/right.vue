@@ -28,7 +28,7 @@
 import JobInfo from "../job/jobInfo";
 import AttachedHeader from "./attachedHeader";
 import ConfSetting from "../dialog/ConfSetting";
-import JobPublish from '../job/jobPublish'
+import JobPublish from "../job/jobPublish";
 import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],
@@ -41,19 +41,20 @@ export default {
   computed: {
     infoData() {
       return this.isSelectedGroup ? this.group : this.job;
-    },
+    }
   },
   methods: {
     openConfSetting() {
       this.$refs.confSettingRef.show(
         { infoData: this.infoData, isGroup: this.isSelectedGroup },
-        (res) => {
+        res => {
+          console.log(this.infoData, res);
           Object.assign(this.infoData, res);
           this.$message.success("更新成功！");
         }
       );
-    },
-  },
+    }
+  }
 };
 </script>
 

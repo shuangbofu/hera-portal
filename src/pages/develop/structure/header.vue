@@ -149,10 +149,13 @@ export default {
             });
           } else if (name === "play") {
             if (this.selectedTabNode?.origin.edited) {
-              this.$message.warn("有修改未保存!");
+              this.$message.warn("有修改未保存! ");
               return;
             }
             this.$refs.runOptionRef.show(this.job.versions, option => {
+              if (option.actionId) {
+                this.$message.error("请先生成版本再执行! ");
+              }
               this.$store.dispatch("develop/runJob", { ...option, jobId });
             });
           } else if (name === "publish") {
