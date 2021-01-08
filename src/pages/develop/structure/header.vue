@@ -57,26 +57,26 @@ const buttons = [
   { icon: "search", tip: "查找任务" },
   { icon: "refresh", divider: true, tip: "刷新" },
   { icon: "save", disabled: false, tip: "保存" },
-  { icon: 'infinite', disabled: true, tip: '生成版本'},
+  { icon: "infinite", disabled: true, tip: "生成版本" },
   { icon: "play", disabled: true, divider: true, tip: "运行" },
   {
     icon: "valid",
-    func: (res) => {
+    func: res => {
       return !res ? "yes" : "forbidden";
     },
     disabled: true,
-    tip: (res) => `${res ? "关闭" : "开启"}任务`,
+    tip: res => `${res ? "关闭" : "开启"}任务`
   },
   {
     icon: "focus",
-    func: (res) => `eye-${!res ? "open" : "close"}`,
+    func: res => `eye-${!res ? "open" : "close"}`,
     disabled: true,
-    tip: (res) => `${res ? "取消" : ""}关注任务`,
-    divider: true,
+    tip: res => `${res ? "取消" : ""}关注任务`,
+    divider: true
   },
   { icon: "compare", disabled: true, tip: "比较代码" },
   { icon: "history", disabled: true, tip: "历史代码" },
-  { icon: "rollback", disabled: true, tip: "回滚", divider: true },
+  { icon: "rollback", disabled: true, tip: "回滚", divider: true }
 ];
 import commonMixin from "@/mixins/common";
 export default {
@@ -96,8 +96,8 @@ export default {
 
       if (name === "refresh") {
         this.$store.dispatch("develop/initJobs").then(() => {
-          if(this.isSelectedGroup) {
-            this.$store.dispatch('develop/getGroup', this.group.id)
+          if (this.isSelectedGroup) {
+            this.$store.dispatch("develop/getGroup", this.group.id);
             this.$message.success("刷新成功！");
           } else {
             this.$message.success("刷新成功！");
@@ -108,7 +108,7 @@ export default {
         location.reload();
       } else if (name === "setting") {
         this.$refs.settingRef.show();
-      } else if(name === 'search') {
+      } else if (name === "search") {
         this.$message.warn("搜索暂不支持，待开发！");
       } else {
         if (this.isSelectedGroup) {
@@ -117,7 +117,7 @@ export default {
             this.$store
               .dispatch("develop/updateGroupConfigs", {
                 groupId: this.group.id,
-                selfConfigs: this.group.selfConfigs,
+                selfConfigs: this.group.selfConfigs
               })
               .then(() => {
                 this.$message.success("保存成功！");
@@ -127,19 +127,24 @@ export default {
           }
         } else {
           const jobId = this.job?.id;
-          if(name === 'infinite') {
+          if (name === "infinite") {
             generateVersion(jobId).then(() => {
-              this.$store.dispatch('develop/getJobVersions',{jobId}).then(() => {
-                this.$message.success('生成版本成功！')
-              })
-            })
+              this.$store
+                .dispatch("develop/getJobVersions", { jobId })
+                .then(() => {
+                  this.$message.success("生成版本成功！");
+                });
+            });
           } else if (name === "play") {
             if (this.selectedTabNode?.origin.edited) {
-              this.$message.warn("有修改未保存!");
+              this.$message.warn("有修改未保存! ");
               return;
             }
-            this.$refs.runOptionRef.show(this.job.versions, (data) => {
-              this.$store.dispatch("develop/runJob", { ...data, jobId });
+            this.$refs.runOptionRef.show(this.job.versions, option => {
+              if (option.actionId) {
+                this.$message.error("请先生成版本再执行! ");
+              }
+              this.$store.dispatch("develop/runJob", { ...option, jobId });
             });
           } else if (name === "save") {
             this.$store
@@ -147,12 +152,12 @@ export default {
               .then(() => {
                 this.$message.success("保存成功！");
               });
-          }  else if (name === "valid") {
+          } else if (name === "valid") {
             const valid = !this.job.valid;
             this.$store
               .dispatch("develop/setJobValidOrNot", {
                 id: jobId,
-                valid,
+                valid
               })
               .then(() => {
                 this.$message.success(`${valid ? "开启" : "关闭"}成功！`);
@@ -163,7 +168,7 @@ export default {
               .dispatch("develop/focusJobOrNot", {
                 id: jobId,
                 focus: focus,
-                user: this.getUser(),
+                user: this.getUser()
               })
               .then(() => {
                 this.$message.success(`${focus ? "" : "取消"}关注成功！`);
@@ -202,8 +207,8 @@ export default {
       return (localStorage.getItem("ssoName") || "")
         .replace("用户:", "")
         .trim();
-    },
-  },
+    }
+  }
 };
 </script>
 

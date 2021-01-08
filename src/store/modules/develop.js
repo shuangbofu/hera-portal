@@ -651,7 +651,6 @@ export default {
         })
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
         dispatch('getJobVersions', { jobId: id })
-        dispatch('getJobPublishList', { jobId: id })
       })
       // TODO 任务调度是不同的请求
     },
