@@ -14,20 +14,17 @@
         </div>
         <div class="content">
           <div style="margin-bottom: 10px">
-            <span style="margin-right: 10px">核心数: {{ info.cores }}</span>
+            <span style="margin-right: 10px">核心数：{{ info.cores }}</span>
             <span style="margin-right: 10px"
-              >总内存: {{ info.memTotal.toFixed(2) }}</span
+              >总内存：{{ info.memTotal.toFixed(2) }}</span
             >
-            <span style="margin-right: 10px">心跳: {{ info.date }}</span>
+            <span style="margin-right: 10px"
+              >cpu负载：{{ info.cpuLoadPerCore }}</span
+            >
+            <div>
+              <span style="margin-right: 10px">心跳：{{ info.date }}</span>
+            </div>
           </div>
-          cpu负载：
-          <a-progress
-            class="progress"
-            type="circle"
-            :percent="info.cpuLoadPreCorePrecent"
-            :width="60"
-            :strokeColor="getStrokeColor(info.cpuLoadPreCorePrecent)"
-          />
           内存使用率：
           <a-progress
             class="progress"
@@ -115,9 +112,6 @@ export default {
           if (index == -1 && type === "worker") {
             arr.push({
               type,
-              cpuLoadPreCorePrecent: Number(
-                (value.cpuLoadPerCore * 100).toFixed(2)
-              ),
               memRatePrecent: Number((value.memRate * 100).toFixed(2)),
               ...value
             });
