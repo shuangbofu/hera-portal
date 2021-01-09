@@ -48,7 +48,7 @@
               {{ tab.label }} ({{ info[tab.name].length }})
             </div>
           </div>
-          <div style="padding: 10px">
+          <div style="padding: 10px; text-align: center">
             <div
               style="margin-bottom: 2px"
               v-for="(item, index) in info[listActiveTabs[info.host]]"
@@ -59,6 +59,17 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="charts">
+      <template v-for="(chartOption, index) in chartOptions">
+        <v-chart
+          class="chart"
+          :key="index"
+          :ref="`chart-${index}`"
+          theme="test"
+          :options="chartOption"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -72,7 +83,7 @@ const tabs = [
   { label: "重跑任务", name: "rerunRunning" },
   { label: "超级恢复", name: "superRunning" }
 ];
-// import mockData from "./mockdata.json";
+import mockData from "./mockdata.json";
 function getStrokeColor(num) {
   if (num < 50) {
     return "#5cb87a";
@@ -83,13 +94,16 @@ function getStrokeColor(num) {
   }
 }
 import { mapState, mapMutations } from "vuex";
-import { getJobQueue } from "@/api/dashboard";
+// import { getJobQueue } from "@/api/dashboard";
+import { getJobInfoPie } from "./paint";
 export default {
   data() {
     return {
       jobQueueInfos: [],
       tabs,
-      listActiveTabs: {}
+      listActiveTabs: {},
+      interval: null,
+      chartOptions: []
     };
   },
   computed: {
@@ -97,32 +111,76 @@ export default {
   },
   created() {
     this.initQueueInfo();
+    // this.interval = setInterval(() => {
+    //   this.initQueueInfo();
+    // }, 5000);
+  },
+  mounted() {
+    this.createCharts();
+  },
+  destroyed() {
+    clearInterval(this.interval);
+    this.interval = null;
   },
   methods: {
+    createCharts() {
+      const allJobStatusData = [
+        { status: "failed", num: 2, curDate: null },
+        { status: "running", num: 3, curDate: null },
+        { status: "success", num: 2056, curDate: null }
+      ];
+      let option = getJobInfoPie(
+        allJobStatusData.map(i => {
+          return {
+            value: i.num || 0,
+            name: i.status
+          };
+        })
+      );
+      this.chartOptions.push(option);
+    },
     getStrokeColor,
     ...mapMutations("setting", ["setTheme"]),
     initQueueInfo() {
-      getJobQueue().then(data => {
-        let arr = [];
-        Object.keys(data).forEach(key => {
-          const type = key.split("-")[0];
-          const value = data[key];
-          const host = value.host;
-          const index = arr.findIndex(i => i.host === host);
-          if (index == -1 && type === "worker") {
-            arr.push({
-              type,
-              memRatePrecent: Number((value.memRate * 100).toFixed(2)),
-              ...value
-            });
-            this.listActiveTabs[host] = "running";
-          } else {
-            arr[index].isMaster = true;
-          }
-        });
-        this.jobQueueInfos = arr;
+      // getJobQueue().then(data => {
+      // let arr = [];
+      // Object.keys(data).forEach(key => {
+      //   const type = key.split("-")[0];
+      //   const value = data[key];
+      //   const host = value.host;
+      //   const index = arr.findIndex(i => i.host === host);
+      //   if (index == -1 && type === "worker") {
+      //     arr.push({
+      //       type,
+      //       memRatePrecent: Number((value.memRate * 100).toFixed(2)),
+      //       ...value
+      //     });
+      //     this.listActiveTabs[host] = "running";
+      //   } else {
+      //     arr[index].isMaster = true;
+      //   }
+      // });
+      // this.jobQueueInfos = arr;
+      // });
+      const data = mockData;
+      let arr = [];
+      Object.keys(data).forEach(key => {
+        const type = key.split("-")[0];
+        const value = data[key];
+        const host = value.host;
+        const index = arr.findIndex(i => i.host === host);
+        if (index == -1 && type === "worker") {
+          arr.push({
+            type,
+            memRatePrecent: Number((value.memRate * 100).toFixed(2)),
+            ...value
+          });
+          this.listActiveTabs[host] = "running";
+        } else {
+          arr[index].isMaster = true;
+        }
       });
-      // const data = mockData;
+      this.jobQueueInfos = arr;
     },
     change(host, value) {
       this.$set(this.listActiveTabs, host, value);
@@ -134,15 +192,20 @@ export default {
   }
 };
 </script>
-
+<style lang="less">
+.echarts {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+</style>
 <style lang="less" scoped>
 .container {
-  // padding: 20px;
   background-color: @base-bg-color;
   .infos {
-    // background-color: @editor-bg-color;
     display: flex;
     padding: 20px;
+    padding-bottom: 0;
     .info {
       border: 1px solid @editor-border-color;
       background-color: @base-bg-color;
@@ -151,6 +214,9 @@ export default {
         padding: 10px;
         .progress {
           margin-right: 10px;
+          .ant-progress-text {
+            font-size: 10px;
+          }
         }
       }
       .lists {
@@ -176,6 +242,18 @@ export default {
         padding: 4px 6px;
         background-color: @editor-bg-color;
       }
+    }
+  }
+  .charts {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    padding-top: 0;
+    .chart {
+      border: 1px solid @editor-border-color;
+      padding: 10px;
+      width: 400px;
+      height: 400px;
     }
   }
 }
