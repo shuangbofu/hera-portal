@@ -153,7 +153,7 @@ export default {
               return;
             }
             this.$refs.runOptionRef.show(this.job.versions, option => {
-              if (option.actionId) {
+              if (!option.actionId) {
                 this.$message.error("请先生成版本再执行! ");
               }
               this.$store.dispatch("develop/runJob", { ...option, jobId });
