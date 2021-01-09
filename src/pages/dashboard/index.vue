@@ -155,7 +155,7 @@ export default {
         width: "750px"
       });
     },
-    addChart(title, optionFunc, reqFuc, option, style) {
+    addChart(title, optionFunc, reqFuc, style) {
       reqFuc().then(data => {
         const option = optionFunc(data);
         option.title = { text: title };
