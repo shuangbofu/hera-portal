@@ -54,6 +54,7 @@
                     failed: "ERROR",
                     success: "SUCCESS",
                     running: "RUNNING",
+                    wait: "WAIT",
                   }[item.status]
                 }}</span>
               </div>
@@ -92,6 +93,7 @@
                       failed: "运行失败",
                       success: "运行成功",
                       running: "运行中",
+                      wait: "待执行",
                     }[currentLogItem.status]
                   }}</span>
                 </div>
