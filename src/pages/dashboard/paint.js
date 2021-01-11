@@ -57,7 +57,7 @@ function getDefaultPieOption() {
   }
 }
 
-const statusMappings = [{ name: 'running', label: '正在运行', color: '#f5c66f' }, { name: 'success', label: '运行成功', color: '#60A766' }, { name: 'failed', label: '运行失败', color: '#D6595D' }, { name: 'wait', label: '等待', color: '#C0C0C0' }, { name: 'wait_recovery', label: '等待恢复', color: '#2F76C2' }]
+const statusMappings = [{ name: 'running', label: '正在运行', color: '#f5c66f' }, { name: 'success', label: '运行成功', color: '#a5d28a' }, { name: 'failed', label: '运行失败', color: '#F56C6C' }, { name: 'wait', label: '等待', color: '#C0C0C0' }, { name: 'wait_recovery', label: '等待恢复', color: '#2F76C2' }]
 const mappings2 = [{ name: "jobTime", label: "今日" }, { name: "yesterdayTime", label: "昨日" }];
 const mappings3 = [{ name1: 'runFailed', name2: 'failed', label1: '运行失败次数', label2: '失败任务数' }, { name1: 'runSuccess', name2: 'success', label1: '运行成功次数', label2: '成功任务数' }]
 
@@ -140,7 +140,7 @@ export function getJobInfoLine(index, xData, ySeriesData) {
           position: 'top'
         }
       },
-      // itemStyle: { color: statusMappings.find(j => i[nameName].toLowerCase().includes(j.name))?.color },
+      itemStyle: { color: statusMappings.find(j => i[nameName].toLowerCase().includes(j.name))?.color },
     }
   }))
   option.tooltip = {
