@@ -287,6 +287,10 @@ export function updateResource(fileFrom) {
 
 
 
+export function fetchJobGraphdata(jobId, type, dayNum) {
+  return post('/scheduleCenter/getJobImpactOrProgress', { jobId, type, dayNum })
+}
+
 
 
 // common 
