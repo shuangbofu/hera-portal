@@ -55,7 +55,7 @@ export default {
         actives: { left: 'myJob', right: null, bottom: null },
       },
       onlyCenter: false,
-      editorBottom: 'text',
+      editorBottom: 'text_read',
       confEditorWidth: 50,
       logContainerWidth: 20,
       setting: {

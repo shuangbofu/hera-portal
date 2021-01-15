@@ -203,8 +203,7 @@ export function getLog(logId, jobId) {
       if (data?.log) {
         //eslint-disable-next-line
         data.log =
-          `<div style="font-weight: bold">
-          日志提示：
+          `<div style="font-weight: bold;display:flex;">日志提示：
            <span class="error"  style="margin-right: 10px">错误日志</span>
            <span class="hera" style="margin-right: 10px">赫拉日志</span>
            <span class="console" >控制台日志</span>
