@@ -58,7 +58,7 @@ export default {
       icon: 'oplog'
     }]
   },
-  editorBottomTabs: [{
+  editorBottomTabs: [{ name: 'text_read', label: '只读' }, {
     name: 'text',
     label: '文本',
   }, {

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="main">
       <MonacoEditor
-        v-if="layoutConfig.editorBottom === 'text'"
+        v-if="layoutConfig.editorBottom.includes('text')"
         class="editor"
         v-model="job.script"
         :theme="editorTheme"
@@ -10,12 +10,13 @@
         :options="{
           fontSize: 13,
           automaticLayout: true,
+          readOnly: layoutConfig.editorBottom.includes('read'),
         }"
       />
       <template v-else-if="layoutConfig.editorBottom === 'config'">
         <conf-editor :data="job" v-if="job.configs" />
       </template>
-      <template v-else>
+      <template v-else-if="layoutConfig.editorBottom === 'preview'">
         <sql-preview
           :data="job"
           @preview="(v) => previewJobScript({ actionId: v, jobId: job.id })"

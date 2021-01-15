@@ -35,7 +35,7 @@
               :key="index"
             >
               <span style="font-weight: 600; margin-right: 10px">{{
-                item.actionId.substring(0, item.actionId.length - 4)
+                item.actionId
               }}</span>
               {{ item.operator }}{{ item.triggerType }}
               <div :class="['status', item.status]">
@@ -246,11 +246,11 @@ export default {
           logItemId: item.id
         })
         .then(() => {
-          const ref = this.$refs.logTextRef;
-          // 滚动到最底部
-          if (ref) {
-            ref.scrollTop = ref.scrollHeight;
-          }
+          // const ref = this.$refs.logTextRef;
+          // // 滚动到最底部
+          // if (ref) {
+          //   ref.scrollTop = ref.scrollHeight;
+          // }
         });
     },
     resize(v) {
@@ -461,5 +461,8 @@ export default {
       "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
       sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   }
+}
+.log-text {
+  white-space: pre;
 }
 </style>
