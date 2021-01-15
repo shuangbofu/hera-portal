@@ -32,6 +32,11 @@
             v-model="filterValue"
             @click="resetFilterValue"
           />
+          <template v-else>
+            <div v-if="selectedOptions.length > 0">
+              {{ selectedOptions[0].label }}
+            </div>
+          </template>
         </div>
         <a-icon
           class="caret"
