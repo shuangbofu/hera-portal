@@ -11,15 +11,17 @@
     "ant-design-vue": "^1.6.5",
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
+    "d3": "^5.14.2",
+    "dagre-d3": "^0.6.4",
+    "echarts": "^4.9.0",
     "monaco-editor": "^0.17.1",
     "monaco-editor-vue": "1.0.9",
     "screenfull": "^5.0.2",
     "vue": "^2.6.11",
+    "vue-echarts": "^5.0.0-beta.0",
     "vue-router": "^3.2.0",
     "vue-splitpane": "^1.0.6",
-    "vuex": "^3.4.0",
-    "vue-echarts": "^5.0.0-beta.0",
-    "echarts": "^4.9.0"
+    "vuex": "^3.4.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

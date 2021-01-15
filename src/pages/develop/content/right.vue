@@ -8,6 +8,12 @@
           type="setting"
           @click="openConfSetting"
         />
+        <my-icon
+          v-if="rightTab.name === 'dependency'"
+          @click="openDependencyGraph"
+          type="hera_icon_fullscreen"
+          class="icon"
+        />
       </template>
       <div class="content">
         <job-info
@@ -16,11 +22,14 @@
           :data="infoData"
           :active="rightTab.name"
         />
-        <template v-else-if="rightTab.name === 'dependency'"> </template>
         <job-publish v-else-if="rightTab.name === 'publish'" :data="infoData" />
+        <template v-else-if="rightTab.name === 'dependency'">
+          <job-dependency :jobId="infoData.id" />
+        </template>
       </div>
     </attached-header>
     <conf-setting ref="confSettingRef" />
+    <job-dependency-dialog ref="jobDependencyDialogRef" />
   </div>
 </template>
 
@@ -30,13 +39,17 @@ import AttachedHeader from "./attachedHeader";
 import ConfSetting from "../dialog/ConfSetting";
 import JobPublish from "../job/jobPublish";
 import commonMixin from "@/mixins/common";
+import JobDependency from "../job/dependencyGraph";
+import JobDependencyDialog from "../dialog/dependencyGraph";
 export default {
   mixins: [commonMixin],
   components: {
     AttachedHeader,
     JobInfo,
     ConfSetting,
-    JobPublish
+    JobPublish,
+    JobDependency,
+    JobDependencyDialog
   },
   computed: {
     infoData() {
@@ -48,11 +61,13 @@ export default {
       this.$refs.confSettingRef.show(
         { infoData: this.infoData, isGroup: this.isSelectedGroup },
         res => {
-          console.log(this.infoData, res);
           Object.assign(this.infoData, res);
           this.$message.success("更新成功！");
         }
       );
+    },
+    openDependencyGraph() {
+      this.$refs.jobDependencyDialogRef.show(this.job.id);
     }
   }
 };
