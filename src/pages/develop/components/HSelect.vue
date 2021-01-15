@@ -25,7 +25,7 @@
         <div class="option" style="margin-left: 4px; display: flex">
           <a-input
             :placeholder="
-              selectedOptions.length > 0 && selectedOptions[0].label
+              selectedOptions.length > 0 ? selectedOptions[0].label : ''
             "
             v-if="filterable"
             size="small"
