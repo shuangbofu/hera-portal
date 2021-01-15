@@ -185,13 +185,15 @@ export default {
               this.$store.dispatch("develop/runJob", { ...option, jobId });
             });
           } else if (name === "publish") {
-            this.$refs.publishOptionRef.show(option => {
-              this.$store.dispatch("develop/createJobPublish", {
-                ...option,
-                jobId,
-                script: this.job.script,
-                configs: this.job.configs
-              });
+            this.$refs.publishOptionRef.show((option, close) => {
+              this.$store
+                .dispatch("develop/createJobPublish", {
+                  ...option,
+                  jobId,
+                  script: this.job.script,
+                  configs: this.job.configs
+                })
+                .then(() => close());
             });
           } else if (name === "save") {
             if (this.depSetting.compareBeforeSave) {

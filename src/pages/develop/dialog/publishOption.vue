@@ -52,6 +52,7 @@ export default {
     close() {
       this.option = {};
       this.visible = false;
+      console.log("close");
     },
     show(callback) {
       this.visible = true;
@@ -62,8 +63,7 @@ export default {
         this.$message.error("不能为空");
         return;
       }
-      this.callback(this.option);
-      this.close();
+      this.callback(this.option, this.close);
     }
   }
 };

@@ -342,8 +342,8 @@ export default {
       })
     },
     createJobPublish({ dispatch }, { jobId, description, configs, script, auditor }) {
-      createJobPublish({ jobId, description, configs, script, auditor }).then(() => {
-        dispatch('getJobPublishList', { jobId })
+      return createJobPublish({ jobId, description, configs, script, auditor }).then(() => {
+        return dispatch('getJobPublishList', { jobId })
       })
     },
     cancelJobPublish({ dispatch }, { pubId, jobId }) {
@@ -449,7 +449,7 @@ export default {
      * @param {*} param1 
      */
     getLogContent({ state }, { logItemId, jobId }) {
-      getLog(logItemId, jobId).then(data => {
+      return getLog(logItemId, jobId).then(data => {
         const logRecord = state.logRecords.find(i => i.jobId === jobId)
         if (logRecord) {
           const index = logRecord.list.findIndex(j => j.id === logItemId)
