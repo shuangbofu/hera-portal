@@ -3,7 +3,7 @@
     wrapClassName="setting-dialog"
     :visible="visible"
     @cancel="close"
-    width="25%"
+    width="250px"
     :closable="false"
     :mask="true"
     :destroyOnClose="true"
@@ -31,6 +31,11 @@
             不显示空文件夹
           </a-checkbox>
         </div>
+        <div class="form-line">
+          <a-checkbox v-model="setting.compareBeforeSave">
+            保存前进行代码比较
+          </a-checkbox>
+        </div>
       </div>
     </div>
   </a-modal>
@@ -46,13 +51,13 @@ export default {
       handler() {
         this.$store.commit("develop/saveLocalLayout");
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   computed: {
     setting() {
       return this.$store.getters["develop/depSetting"];
-    },
+    }
   },
   methods: {
     show() {
@@ -60,8 +65,8 @@ export default {
     },
     close() {
       this.visible = false;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -78,11 +83,10 @@ export default {
 </style>
 <style lang="less" scoped>
 .container {
-  height: 60vh;
-  background: @editor-bg-color;
+  background: @base-bg-color;
   position: relative;
   padding: 20px;
-  height: 40vh;
+  height: 20vh;
   user-select: none;
   overflow: auto;
   .content {
@@ -90,6 +94,7 @@ export default {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
+      font-size: 12px;
       .title {
         margin-right: 10px;
         width: 100px;

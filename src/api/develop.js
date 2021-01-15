@@ -290,7 +290,54 @@ export function fetchJobGraphdata(jobId, type, dayNum) {
   return post('/scheduleCenter/getJobImpactOrProgress', { jobId, type, dayNum })
 }
 
+export function getRecords({ offset, pageSize, jobId, type }) {
+  return axios.get(`/record/find?pageSize=${pageSize}&offset=${offset}&jobId=${jobId}&type=${type}`)
+}
 
+export function getRecordDetail({ id, logType, type }) {
+  return new Promise((res, rej) => {
+    return axios.get(`/record/now?logId=${id}&logType=${logType}&type=${type}`).then(data => res(fixRecordContent({ content: data.content, type }))).catch(msg => rej(msg))
+  })
+}
+
+export function getJobRecords({ offset, pageSize, jobId }) {
+  return new Promise((res, rej) => {
+    return getRecords({ offset, pageSize, jobId, type: 'job' }).then(data => {
+      data.rows.forEach(row => fixRecordContent(row))
+      res(data)
+    }).catch(msg => rej(msg))
+  })
+}
+
+function fixRecordContent(data) {
+  const content = data.content
+  const type = data.type
+  if (type === '任务配置') {
+    if (isJson(content)) {
+      const json = JSON.parse(content)
+      delete json['roll.back.times']
+      delete json['roll.back.wait.time']
+      delete json['run.priority.level']
+      data.content = obj2Str(json)
+    }
+  } else if (type === '任务开启/关闭状态') {
+    data.content = Number(content) > 0 ? '开启' : '关闭'
+  }
+  return data
+}
+
+export function getJobRecordDetail({ id, type }) {
+  return getRecordDetail({ id, logType: 'job', type })
+}
+
+function isJson(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
 
 // common 
 
