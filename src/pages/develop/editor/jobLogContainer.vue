@@ -26,7 +26,10 @@
           <div class="header"></div>
           <div class="content log-list">
             <div
-              @click="logRecord.current = item.id"
+              @click="
+                logRecord.current = item.id;
+                countdown(item.id);
+              "
               :class="[
                 'log-item',
                 realCurrentLogItemId === item.id ? 'active' : '',
@@ -152,13 +155,15 @@
 <script>
 import SplitPane from "@/components/splitPane";
 import commonMixin from "@/mixins/common";
+import { forceSetStopped } from "@/api/job/test";
 export default {
   data() {
     return {
       logs: [],
       currentLogItemId: null,
       interval: null,
-      visible: false
+      visible: false,
+      countdownMap: {}
     };
   },
   components: {
@@ -221,6 +226,28 @@ export default {
     this.interval = null;
   },
   methods: {
+    countdown(id) {
+      const now = new Date().getTime();
+      if (!this.countdownMap[id]) {
+        this.countdownMap[id] = [];
+      }
+      const arr = this.countdownMap[id];
+      if (now - arr[arr.length - 1] < 1000 || arr.length === 0) {
+        arr.push(now);
+      } else {
+        arr.length = 0;
+      }
+      const leftCount = 15 - arr.length;
+      if (leftCount <= 10 && leftCount > 0) {
+        this.$message.warn(`点击${leftCount}下后`);
+      }
+      if (leftCount === 0) {
+        arr.length = 0;
+        forceSetStopped(id).then(() => {
+          this.$message.success("置为失败! ");
+        });
+      }
+    },
     refreshLogs() {
       this.currentLogItemId = this.logRecord.current;
       this.$store

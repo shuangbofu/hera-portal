@@ -22,7 +22,10 @@ import {
   deleteJobOrGroup,
   previewJobScript,
 
-  copyJob
+  copyJob,
+
+  getJobRecords
+
 } from '@/api/develop'
 
 import {
@@ -61,7 +64,8 @@ export default {
       setting: {
         showId: true,
         showTabs: true,
-        hideEmptyFolder: true
+        hideEmptyFolder: true,
+        compareBeforeSave: true
       }
     },
     // 各种数据（任务详细、组（文件夹）详细、日志记录、环境信息）
@@ -76,7 +80,8 @@ export default {
     logRecords: [],
 
 
-    forbidSave: false
+    forbidSave: false,
+    jobOpRecords: []
   },
   getters: {
     tabs: (state, getters) => {
@@ -158,6 +163,18 @@ export default {
         return {}
       }
       return state.logRecords.find(i => i.jobId === id)
+    },
+
+
+    jobOpRecord: (state, getters) => {
+      if (getters.isSelectedGroup) {
+        return {}
+      }
+      const id = getters.selectedTabNode?.origin?.id
+      if (!id) {
+        return {}
+      }
+      return state.jobOpRecords.find(i => i.jobId === id)
     },
 
     depSetting: state => state.layoutConfig.setting
@@ -324,8 +341,8 @@ export default {
         return dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId })
       })
     },
-    createJobPublish({ dispatch }, { jobId, description, configs, script }) {
-      createJobPublish({ jobId, description, configs, script }).then(() => {
+    createJobPublish({ dispatch }, { jobId, description, configs, script, auditor }) {
+      createJobPublish({ jobId, description, configs, script, auditor }).then(() => {
         dispatch('getJobPublishList', { jobId })
       })
     },
@@ -356,6 +373,29 @@ export default {
     getJobVersions({ state }, { jobId }) {
       return getJobVersions(jobId).then(data => {
         state.jobList.find(i => i.id === jobId).versions = data
+      })
+    },
+    getJobRecords({ state }, { pageSize, offset, jobId }) {
+      return getJobRecords({ pageSize, offset, jobId }).then(data => {
+        const exist = state.jobOpRecords.findIndex(i => i.jobId === jobId) !== -1
+        if (!exist) {
+          state.jobOpRecords.push({
+            offset,
+            pageSize,
+            jobId,
+            list: data.rows,
+            loadedAll: false
+          })
+        } else {
+          const jobOpRecord = state.jobOpRecords.find(i => i.jobId === jobId)
+          if (offset > jobOpRecord.offset) {
+            jobOpRecord.list = jobOpRecord.list.concat(data.rows)
+          } else {
+            jobOpRecord.list = data.rows
+          }
+          jobOpRecord.offset = offset
+          jobOpRecord.loadedAll = data.rows.length < pageSize
+        }
       })
     },
     /**
@@ -696,6 +736,7 @@ export default {
         dispatch('getJobLogList', { pageSize: 10, offset: 0, jobId: id })
         dispatch('getJobVersions', { jobId: id })
         dispatch('getJobPublishList', { jobId: id })
+        dispatch('getJobRecords', { pageSize: 10, offset: 0, jobId: id })
       })
       // TODO 任务调度是不同的请求
     },

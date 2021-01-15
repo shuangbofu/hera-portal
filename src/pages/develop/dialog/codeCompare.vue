@@ -12,26 +12,16 @@
       v-if="now && origin"
     >
       <div style="height: 80vh; position: relative; overflow: hidden">
-        <div class="description-list">
-          <span class="description">
-            {{ origin.description }}
-          </span>
-          <span class="description">
-            {{ now.description }}
-          </span>
-        </div>
-        <MonacoEditor
+        <code-compare
           v-if="tabActive"
-          v-model="now[tabActive]"
-          :original="origin[tabActive]"
-          :theme="theme"
-          :language="tabActive === 'script' ? lang : 'ini'"
-          :diff-editor="true"
-          :options="{
-            fontSize: 13,
-            automaticLayout: true,
-            readOnly: true,
+          style="height: calc(100% - 40px)"
+          :origin="{
+            description: origin.description,
+            content: origin[tabActive],
           }"
+          :now="{ description: now.description, content: now[tabActive] }"
+          :lang="tabActive === 'script' ? lang : 'ini'"
+          :theme="theme"
         />
         <div class="tabs">
           <div
@@ -43,13 +33,16 @@
             {{ tab.label }}
           </div>
         </div>
+        <div style="height: 20px; float: right">
+          <slot></slot>
+        </div>
       </div>
     </a-modal>
   </div>
 </template>
 
 <script>
-import MonacoEditor from "monaco-editor-vue";
+import CodeCompare from "../../components/codeCompare";
 const tabs = [
   { value: "script", label: "文本" },
   { value: "selfConfigs", label: "配置项" }
@@ -66,7 +59,7 @@ export default {
     };
   },
   components: {
-    MonacoEditor
+    CodeCompare
   },
   computed: {
     theme() {
@@ -101,24 +94,6 @@ export default {
 .dialog {
   .ant-modal-body {
     padding: 0;
-  }
-  .title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px;
-    border-bottom: 1px solid @editor-border-color;
-    background: @editor-bg-color;
-  }
-  .description-list {
-    background: @editor-bg-color;
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-bottom: 1px solid @editor-border-color;
-    .description {
-      flex: 1 0 0;
-    }
   }
   .tabs {
     position: absolute;

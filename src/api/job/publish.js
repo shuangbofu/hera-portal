@@ -18,8 +18,8 @@ export function getJobPublishList(jobId) {
   return newPormise(axios.get(`/jobPublish/list?jobId=${jobId}`), data => addStateInfo(data))
 }
 
-export function createJobPublish({ jobId, description, configs, script }) {
-  return axios.post('/jobPublish', { jobId, description, configs, script })
+export function createJobPublish({ jobId, description, configs, script, auditor }) {
+  return axios.post('/jobPublish', { jobId, description, configs, script, auditor })
 }
 
 export function cancelJobPublish(id) {

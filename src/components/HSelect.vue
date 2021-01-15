@@ -14,19 +14,29 @@
             style="font-size: 10px"
           />
         </div>
-        <a-input v-if="filterable" size="small" v-model="filterValue" />
+        <a-input
+          v-if="filterable"
+          size="small"
+          v-model="filterValue"
+          @click="resetFilterValue"
+        />
       </div>
-      <div v-else>
+      <div v-else style="display: flex; justify-content: space-between">
+        <div class="option" style="margin-left: 4px; display: flex">
+          <a-input
+            :placeholder="
+              selectedOptions.length > 0 && selectedOptions[0].label
+            "
+            v-if="filterable"
+            size="small"
+            v-model="filterValue"
+            @click="resetFilterValue"
+          />
+        </div>
         <a-icon
           class="caret"
           :type="'caret-' + (optionVisible ? 'up' : 'down')"
-          style="float: right"
         />
-        <div class="option" style="margin-left: 4px">
-          <template v-if="selectedOptions.length > 0">{{
-            selectedOptions[0].label
-          }}</template>
-        </div>
       </div>
     </div>
     <div style="position: relative">
@@ -54,19 +64,19 @@ export default {
   data() {
     return {
       optionVisible: false,
-      filterValue: ''
+      filterValue: ""
     };
   },
   model: {
     prop: "value",
-    event: "change",
+    event: "change"
   },
   props: {
     value: [Boolean, Number, String, Array],
     options: Array,
     multiple: {
       require: false,
-      type: Boolean,
+      type: Boolean
     },
     filterable: {
       require: false,
@@ -77,22 +87,24 @@ export default {
   computed: {
     selectedOptions() {
       const values = this.valueIsArray ? this.value : [this.value];
-      return this.realOptions.filter((option) => values.includes(option.value));
+      return this.realOptions.filter(option => values.includes(option.value));
     },
     valueIsArray() {
       return Array.isArray(this.value);
     },
     realOptions() {
-      return this.options.map((i) => {
+      return this.options.map(i => {
         return typeof i === "object" ? i : { value: i, label: i };
       });
     },
     filterOptions() {
-      const value = this.filterValue
-      if(value.trim().length === 0) {
-        return this.realOptions
+      const value = this.filterValue;
+      if (value.trim().length === 0) {
+        return this.realOptions;
       }
-      return this.realOptions.filter(i=>i.label.includes(value) || i.value.toString().includes(value))
+      return this.realOptions.filter(
+        i => i.label.includes(value) || i.value.toString().includes(value)
+      );
     }
   },
   created() {
@@ -102,6 +114,11 @@ export default {
     window.removeEventListener("click", this.clickOther);
   },
   methods: {
+    resetFilterValue() {
+      if (this.selectedOptions.length > 0 && this.filterValue) {
+        this.filterValue = "";
+      }
+    },
     isActive(option) {
       const value = this.value;
       if (this.valueIsArray) {
@@ -117,7 +134,7 @@ export default {
       let res = option.value;
       if (this.multiple) {
         const arr = [...this.value];
-        const index = arr.findIndex((i) => i === option.value);
+        const index = arr.findIndex(i => i === option.value);
         if (index === -1) {
           arr.push(option.value);
         } else {
@@ -129,6 +146,7 @@ export default {
       if (!this.multiple) {
         this.optionVisible = false;
       }
+      this.filterValue = "";
     },
     clickOther(e) {
       const ele = this.$el.querySelector(".select-options");
@@ -142,8 +160,8 @@ export default {
           this.optionVisible = false;
         }
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -219,12 +237,4 @@ export default {
     }
   }
 }
-// .clearfix::after {
-//   visibility: hidden;
-//   display: block;
-//   font-size: 0;
-//   content: " ";
-//   clear: both;
-//   height: 0;
-// }
 </style>

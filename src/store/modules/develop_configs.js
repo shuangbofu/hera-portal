@@ -60,7 +60,7 @@ export default {
   },
   editorBottomTabs: [{ name: 'text_read', label: '只读' }, {
     name: 'text',
-    label: '文本',
+    label: '编辑',
   }, {
     name: 'config',
     label: '配置项'

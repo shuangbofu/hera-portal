@@ -15,6 +15,8 @@ export default {
       'editorBottomTabs',
       'logRecord',
 
+      'jobOpRecord',
+
       'depSetting'
     ]),
     onlyCenter() {

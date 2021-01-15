@@ -18,14 +18,36 @@
       @pressEnter="submit"
     >
     </a-textarea>
+    <h-select
+      :filterable="true"
+      v-model="option.auditor"
+      :options="
+        users.map((i) => {
+          return { label: i.name, value: i.id };
+        })
+      "
+    />
   </a-modal>
 </template>
 
 <script>
+import { getAllUsers } from "@/api/other";
+import HSelect from "@/components/HSelect";
 export default {
   data() {
-    return { callback: null, visible: false, option: { description: "" } };
+    return {
+      callback: null,
+      visible: false,
+      option: { description: "" },
+      users: []
+    };
   },
+  created() {
+    getAllUsers().then(data => {
+      this.users = data;
+    });
+  },
+  components: { HSelect },
   methods: {
     close() {
       this.option = {};

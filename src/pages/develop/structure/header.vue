@@ -45,6 +45,23 @@
     <publish-option-dialog ref="publishOptionRef" />
     <upload-option-dialog ref="uploadOptionRef" />
     <setting ref="settingRef" />
+    <code-compare ref="codeCompareRef">
+      <div style="line-height: 50px">
+        <a
+          v-show="showButton"
+          style="margin-right: 10px; font-size: 13px"
+          size="small"
+          @click="
+            () => {
+              save(job.id).then(() => {
+                $refs.codeCompareRef.close();
+              });
+            }
+          "
+          >确定修改</a
+        >
+      </div>
+    </code-compare>
   </div>
 </template>
 
@@ -55,6 +72,7 @@ import RunOptionDialog from "../dialog/runOption";
 import PublishOptionDialog from "../dialog/publishOption";
 import UploadOptionDialog from "../dialog/uploadOption";
 import Setting from "../dialog/Setting";
+import CodeCompare from "../dialog/codeCompare";
 const buttons = [
   { icon: "setting", tip: "设置" },
   { icon: "clean", tip: "清理浏览器缓存", divider: true },
@@ -88,11 +106,12 @@ import commonMixin from "@/mixins/common";
 export default {
   mixins: [commonMixin],
   data() {
-    return { buttons };
+    return { buttons, showButton: false };
   },
   components: {
     RunOptionDialog,
     Setting,
+    CodeCompare,
     PublishOptionDialog,
     UploadOptionDialog
   },
@@ -100,6 +119,13 @@ export default {
     full() {
       screenfull.toggle();
       this.$store.commit("setting/toggleFullScreen");
+    },
+    save(jobId) {
+      return this.$store
+        .dispatch("develop/updateJobScript", { id: jobId })
+        .then(() => {
+          this.$message.success("保存成功！");
+        });
     },
     buttonClick(button) {
       const name = button.icon;
@@ -125,7 +151,6 @@ export default {
       } else {
         if (this.isSelectedGroup) {
           if (name === "save") {
-            console.log("保存‘");
             this.$store
               .dispatch("develop/updateGroupConfigs", {
                 groupId: this.group.id,
@@ -169,11 +194,12 @@ export default {
               });
             });
           } else if (name === "save") {
-            this.$store
-              .dispatch("develop/updateJobScript", { id: jobId })
-              .then(() => {
-                this.$message.success("保存成功！");
-              });
+            if (this.depSetting.compareBeforeSave) {
+              this.buttonClick({ icon: "compare" });
+              this.showButton = true;
+            } else {
+              this.save(jobId);
+            }
           } else if (name === "valid") {
             const valid = !this.job.valid;
             this.$store
@@ -195,6 +221,23 @@ export default {
               .then(() => {
                 this.$message.success(`${focus ? "" : "取消"}关注成功！`);
               });
+          } else if (name === "compare") {
+            // if (!this.selectedTabNode?.origin.edited) {
+            //   this.$message.warn("没有修改");
+            //   return;
+            // }
+            this.showButton = false;
+            const left = {
+              selfConfigs: this.selectedTabNode.origin.selfConfigs,
+              script: this.selectedTabNode.origin.script,
+              description: "修改前"
+            };
+            const right = {
+              selfConfigs: this.job.selfConfigs,
+              script: this.job.script,
+              description: "修改后"
+            };
+            this.$refs.codeCompareRef.show(this.job.lang, left, right);
           } else {
             this.$message.warn(this.buttonTip(button) + "暂不支持，待开发！");
           }
