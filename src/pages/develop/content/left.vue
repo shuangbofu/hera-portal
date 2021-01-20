@@ -174,15 +174,21 @@ export default {
       // 记录滤之后结点的展开/闭合
       const excludes = this.filterObj.excludeNodes;
       const expandedkey = node.dataRef.key;
+      const res = [...originKeys];
       if (!expanded) {
         excludes.push(expandedkey);
+        const idx = res.findIndex(i => expandedkey === i);
+        if (idx !== -1) {
+          res.splice(idx, 1);
+        }
       } else {
         const index = excludes.findIndex(i => expandedkey === i);
         if (index !== -1) {
           excludes.splice(index, 1);
         }
+        res.push(expandedkey);
       }
-      this.setExpanedTreeNodes(originKeys);
+      this.setExpanedTreeNodes(res);
     },
     startFilter() {
       this.filterObj.value = this.filterObj.text;

@@ -68,9 +68,19 @@ export default {
     this.initJobs().then(() => {
       this.restoreLocal();
     });
+    this.clear();
   },
   computed: {},
-  methods: {}
+  methods: {
+    clear() {
+      // 强制刷新，一次性的。
+      const refreshed = localStorage.getItem("refreshed");
+      if (!refreshed) {
+        this.$store.commit("develop/clearAllCache");
+        localStorage.setItem("refreshed", 1);
+      }
+    }
+  }
 };
 </script>
 
