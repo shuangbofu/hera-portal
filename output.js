@@ -1,5 +1,2 @@
-const path = './static/dist/static/js'
-
-export default {
-  path
-}
+const path = './static/dist/static'
+module.exports = path
