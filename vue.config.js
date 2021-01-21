@@ -3,6 +3,7 @@ const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const { getThemeColors, modifyVars } = require('./src/utils/themeUtil')
 const { resolveCss } = require('./src/utils/theme-color-replacer-extend')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+import { outputPath } from './output'
 module.exports = {
   devServer: {
     port: 3098,
@@ -52,7 +53,10 @@ module.exports = {
         })
     }
     config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
-      { languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'] }
+      {
+        languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'],
+        output: `${outputPath}/js`
+      }
     ])
     config.plugin('html').tap(args => {
       args[0].title = '赫拉离线调度'
@@ -118,6 +122,6 @@ module.exports = {
     },
   },
 
-  assetsDir: 'static/dist/static',
+  assetsDir: `${outputPath}`,
   productionSourceMap: false
 }
