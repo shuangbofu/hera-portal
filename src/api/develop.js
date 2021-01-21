@@ -78,6 +78,14 @@ export function getScheduledJob(id) {
   })
 }
 
+export function getNewstJobContent(id) {
+  return new Promise((res, rej) => {
+    return getScheduledJob(id).then(data => {
+      return res({ script: data.script, selfConfigs: data.selfConfigs })
+    }).catch(msg => rej(msg))
+  })
+}
+
 export function updateJob(id, data) {
   const job = data
 
