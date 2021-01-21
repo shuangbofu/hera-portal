@@ -26,6 +26,9 @@ export function cancelJobPublish(id) {
   return axios.post('/jobPublish/cancel', { description: '', id })
 }
 
+export function rejectJobPublish(id) {
+  return axios.post('/jobPublish/reject', { description: '', id })
+}
 export function passJobPublish(id) {
   return axios.post(`/jobPublish/pass/${id}`)
 }
