@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { generateVersion } from "@/api/develop";
+import { generateVersion, getNewstJobContent } from "@/api/develop";
 import screenfull from "screenfull";
 import RunOptionDialog from "../dialog/runOption";
 import PublishOptionDialog from "../dialog/publishOption";
@@ -197,8 +197,13 @@ export default {
             });
           } else if (name === "save") {
             if (this.depSetting.compareBeforeSave) {
-              this.buttonClick({ icon: "compare" });
-              this.showButton = true;
+              getNewstJobContent(jobId).then(data => {
+                this.compareCode({
+                  ...data,
+                  description: "此时服务端最新代码"
+                });
+                this.showButton = true;
+              });
             } else {
               this.save(jobId);
             }
@@ -234,17 +239,20 @@ export default {
               script: this.selectedTabNode.origin.script,
               description: "修改前"
             };
-            const right = {
-              selfConfigs: this.job.selfConfigs,
-              script: this.job.script,
-              description: "修改后"
-            };
-            this.$refs.codeCompareRef.show(this.job.lang, left, right);
+            this.compareCode(left);
           } else {
             this.$message.warn(this.buttonTip(button) + "暂不支持，待开发！");
           }
         }
       }
+    },
+    compareCode(left) {
+      const right = {
+        selfConfigs: this.job.selfConfigs,
+        script: this.job.script,
+        description: "修改后"
+      };
+      this.$refs.codeCompareRef.show(this.job.lang, left, right);
     },
     buttonIcon(button) {
       if (!button.func) {
