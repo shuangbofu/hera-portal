@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <attached-header type="bottom">
-      <job-log-container v-show="bottomTab.name === 'log'" />
-      <job-op-record-container v-show="bottomTab.name === 'opLog'" />
+      <job-log-container v-if="bottomTab.name === 'log'" />
+      <job-op-record-container v-if="bottomTab.name === 'opLog'" />
     </attached-header>
   </div>
 </template>
