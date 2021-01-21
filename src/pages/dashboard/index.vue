@@ -182,7 +182,7 @@ export default {
               memRatePrecent: Number((value.memRate * 100).toFixed(2)),
               ...value
             });
-            this.listActiveTabs[host] = "running";
+            this.listActiveTabs[host] = this.listActiveTabs[host] ||  "running";
           } else {
             arr[index].isMaster = true;
           }

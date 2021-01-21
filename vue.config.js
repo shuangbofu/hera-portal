@@ -3,6 +3,7 @@ const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const { getThemeColors, modifyVars } = require('./src/utils/themeUtil')
 const { resolveCss } = require('./src/utils/theme-color-replacer-extend')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+const outputPath = require('./output')
 module.exports = {
   devServer: {
     port: 3098,
@@ -54,7 +55,7 @@ module.exports = {
     config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
       {
         languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'],
-        output: './static/dist/static/js'
+        output: `${outputPath}/js`
       }
     ])
     config.plugin('html').tap(args => {
@@ -121,6 +122,6 @@ module.exports = {
     },
   },
 
-  assetsDir: './static/dist/static',
+  assetsDir: `${outputPath}`,
   productionSourceMap: false
 }
