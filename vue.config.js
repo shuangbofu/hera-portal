@@ -52,7 +52,10 @@ module.exports = {
         })
     }
     config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
-      { languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'] }
+      {
+        languages: ['json', 'javascript', 'html', 'xml', 'sql', 'shell', 'python', 'ini'],
+        output: './static/dist/static/js'
+      }
     ])
     config.plugin('html').tap(args => {
       args[0].title = '赫拉离线调度'
@@ -118,6 +121,6 @@ module.exports = {
     },
   },
 
-  assetsDir: 'static/dist/static',
+  assetsDir: './static/dist/static',
   productionSourceMap: false
 }

@@ -98,7 +98,8 @@ import {
   passJobPublish,
   retryJobPublish,
   cancelJobPublish,
-  rollbackPublish
+  rollbackPublish,
+  rejectJobPublish
 } from "@/api/job/publish";
 const stateOptions = [
   { value: "padding", label: "待审批" },
@@ -242,6 +243,12 @@ export default {
     cancel(pub) {
       cancelJobPublish(pub.id).then(() => {
         this.$message.success("取消成功!");
+        this.init();
+      });
+    },
+    reject(pub) {
+      rejectJobPublish(pub.id).then(() => {
+        this.$message.success("拒绝成功!");
         this.init();
       });
     },

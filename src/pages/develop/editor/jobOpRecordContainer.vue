@@ -59,6 +59,7 @@
           class="compare-container"
           :origin="compareObj.origin"
           :now="compareObj.now"
+          :theme="theme"
           :lang="job.lang"
         />
       </a-modal>
@@ -83,6 +84,13 @@ export default {
   mixins: [commonMixin],
   data() {
     return { visible: false, compareObj: null };
+  },
+  computed: {
+    theme() {
+      return this.$store.state.setting.theme.mode === "light"
+        ? "vs"
+        : "vs-dark";
+    }
   },
   components: { CodeCompare },
   methods: {
