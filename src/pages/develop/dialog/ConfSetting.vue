@@ -72,6 +72,14 @@
         <div class="divider-box" title="任务配置">
           <div class="content">
             <div class="form-line">
+              <div class="title">任务类型：</div>
+              <h-select
+                style="width: 240px"
+                v-model="job.runType"
+                :options="['Spark', 'Hive', 'Shell', 'Python']"
+              />
+            </div>
+            <div class="form-line">
               <div class="title">调度类型：</div>
               <h-select
                 style="width: 240px"
@@ -91,7 +99,7 @@
                 v-model="job.dependencyArr"
                 :options="
                   allJobs.map((i) => {
-                    return { value: i.id, label: i.name };
+                    return { value: i.id, label: `${i.jobName}(${i.jobId})` };
                   })
                 "
               />

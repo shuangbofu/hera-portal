@@ -11,7 +11,7 @@ export function getScheduledJob(id) {
       const adminUsers = str2Arr(data.uidS)
       const valid = data.auto === '开启'
       const dependencyArr = str2Arr(data.dependencies, ',').map(i => Number(i))
-      const repeat = data.reapeatRun > 0
+      const repeat = data.repeatRun > 0
       const retryTimes = Number(data.configs['roll.back.times'] || 0)
       const retryWaitTime = Number(data.configs['roll.back.wait.time'] || 1)
       const priorityLevel = Number(data.configs['run.priority.level'] || 3)

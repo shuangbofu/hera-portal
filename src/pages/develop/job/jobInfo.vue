@@ -138,7 +138,7 @@ export default {
     return {
       collapseActive: [1, 2, 3],
       v: null,
-      confirmLoading: false,
+      confirmLoading: false
     };
   },
   components: {
@@ -147,10 +147,10 @@ export default {
   computed: {
     areas() {
       return this.$store.state.develop.areas
-        .filter((i) => this.data.areaIds.includes(i.id))
-        .map((i) => i.name)
+        .filter(i => this.data.areaIds.includes(i.id))
+        .map(i => i.name)
         .join(",");
-    },
+    }
   },
   methods: {
     handleClick(v, e) {
@@ -160,14 +160,14 @@ export default {
     handleOk() {
       console.log("ok");
       this.v = null;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="less" scoped>
 .container {
-  // margin: 0 5%;
+  user-select: text;
 }
 </style>
 <style lang="less">
