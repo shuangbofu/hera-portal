@@ -41,6 +41,9 @@
                 item.actionId
               }}</span>
               {{ item.operator }}{{ item.triggerType }}
+              <span style="margin-left: 10px">{{ item.illustrate }}</span>
+              <span style="margin-left: 10px">{{ item.operator }}</span>
+              <span style="margin-left: 10px">{{ item.durations }}</span>
               <div :class="['status', item.status]">
                 <my-icon
                   class="icon"
